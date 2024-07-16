@@ -62,19 +62,21 @@ const styles = StyleSheet.create({
   },
   signupButton: {
     alignItems: 'center',
-    backgroundColor: '#1eceda',
+    backgroundColor: '#1bbcc7',
     marginVertical: 7,
     marginHorizontal: 40,
     paddingVertical: 10,
     borderRadius: 20,
+    elevation: 3,
   },
   loginButton: {
     alignItems: 'center',
-    backgroundColor: '#aaaacc',
+    backgroundColor: '#9595b3',
     marginVertical: 7,
     marginHorizontal: 40,
     paddingVertical: 10,
     borderRadius: 20,
+    elevation: 3,
   },
   logo: {
     height: 125,

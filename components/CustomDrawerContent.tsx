@@ -11,11 +11,9 @@ export default function CustomDrawerContent(props: any) {
         <View style={{ flex: 1}}>
             <DrawerContentScrollView {...props}
                 scrollEnabled={false}
-                contentContainerStyle={{backgroundColor: '#ff7711'}}
             >
                 <ThemedText type="drawerHeader">Hello User Name</ThemedText>
                 <View style={{
-                        backgroundColor: '#ffb925',
                         paddingTop: 20,
                     }}
                 >

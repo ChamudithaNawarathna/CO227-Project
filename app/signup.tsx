@@ -1,21 +1,32 @@
-import { Image, StyleSheet, Pressable, Keyboard, ImageBackground, SwitchComponent } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Pressable,
+  Keyboard,
+  ImageBackground,
+} from "react-native";
 import { Link, router } from "expo-router";
-import { FormEvent, useState , useRef, useEffect } from "react";
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
-import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import { useState, useEffect } from "react";
+import Animated, { useAnimatedRef } from "react-native-reanimated";
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { View } from "react-native-reanimated/lib/typescript/Animated";
-import { opacity } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
-import { PassengerFormPage1 , PassengerFormPage2 } from "@/components/FormComponents/PassengrForm";
-import { EmployeeFormPage1 , EmployeeFormPage2 , EmployeeFormPage3 } from "@/components/FormComponents/EmployeeForm";
-import { OwnerFormPage1 , OwnerFormPage2 , OwnerFormPage3} from "@/components/FormComponents/OwnerForm";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import {
+  PassengerFormPage1,
+  PassengerFormPage2,
+} from "@/components/FormComponents/PassengrForm";
+import {
+  EmployeeFormPage1,
+  EmployeeFormPage2,
+  EmployeeFormPage3,
+} from "@/components/FormComponents/EmployeeForm";
+import {
+  OwnerFormPage1,
+  OwnerFormPage2,
+  OwnerFormPage3,
+} from "@/components/FormComponents/OwnerForm";
 import FontAwesome from "@expo/vector-icons/build/FontAwesome";
 import { Switch } from "react-native-switch";
-import { AnimatedScrollView } from "react-native-reanimated/lib/typescript/reanimated2/component/ScrollView";
 
 var formPageCount = 3; // Excluding the common "Sign up as a passenger, employee or owner" form page
 const formPageWidth = 300;
@@ -24,22 +35,22 @@ var employee = false;
 var owner = false;
 
 export default function SignUp() {
-  const [fname, setFName] = useState('');
-  const [lname, setLName] = useState('');
-  const [phoneNo, setPhoneNo] = useState('');
-  const [nic, setNIC] = useState('');
+  const [fname, setFName] = useState("");
+  const [lname, setLName] = useState("");
+  const [phoneNo, setPhoneNo] = useState("");
+  const [nic, setNIC] = useState("");
 
-  const [accountNo, setAccountNo] = useState('');
-  const [accHolderName, setAccHolderName] = useState('');
-  const [bankName, setBankName] = useState('');
-  const [branchName, setBranchName] = useState('');
+  const [accountNo, setAccountNo] = useState("");
+  const [accHolderName, setAccHolderName] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [branchName, setBranchName] = useState("");
 
-  const [nameOnLicense, setNameOnLicense] = useState('');
-  const [ntcLicenseNo, setNTCLicenseNo] = useState('');
-  const [driverLicenseNo, setDriverLicenseNo] = useState('');
-  const [occupation, setOccupation] = useState('');
+  const [nameOnLicense, setNameOnLicense] = useState("");
+  const [ntcLicenseNo, setNTCLicenseNo] = useState("");
+  const [driverLicenseNo, setDriverLicenseNo] = useState("");
+  const [occupation, setOccupation] = useState("");
 
-  const [otp, setOTP] = useState('');
+  const [otp, setOTP] = useState("");
   const [agree, setAgree] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
 
@@ -78,80 +89,113 @@ export default function SignUp() {
   //   }
   // };
 
-// Submitting form /////////////////////////////////////////////////////////////////////////////////
+  // Submitting form /////////////////////////////////////////////////////////////////////////////////
 
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [currentPos, setCurrentPos] = useState(0);
   const [backVisible, setBackVisible] = useState(false);
   const [nextVisible, setNextVisible] = useState(false);
 
-  function scrollFroward () {
+  function scrollFroward() {
     if (scrollRef.current) {
-      let newPos = (currentPos < formPageCount*formPageWidth) ? currentPos + formPageWidth : formPageCount*formPageWidth;
+      let newPos =
+        currentPos < formPageCount * formPageWidth
+          ? currentPos + formPageWidth
+          : formPageCount * formPageWidth;
       scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
       setCurrentPos(newPos);
     }
-  };
+  }
 
-  function scrollBack () {
+  function scrollBack() {
     if (scrollRef.current) {
-      let newPos = (currentPos > 0) ? currentPos - formPageWidth : 0;
+      let newPos = currentPos > 0 ? currentPos - formPageWidth : 0;
       scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
       setCurrentPos(newPos);
     }
-  };
+  }
 
-  function passengerSignUp () {
-    setFName(''); setLName(''); setPhoneNo(''); setNIC(''); 
-    setAccountNo(''); setAccHolderName(''); setBankName(''); setBranchName(''); 
-    setNameOnLicense(''); setNTCLicenseNo(''); setDriverLicenseNo(''); setOccupation(''); setOTP('');
+  function passengerSignUp() {
+    setFName("");
+    setLName("");
+    setPhoneNo("");
+    setNIC("");
+    setAccountNo("");
+    setAccHolderName("");
+    setBankName("");
+    setBranchName("");
+    setNameOnLicense("");
+    setNTCLicenseNo("");
+    setDriverLicenseNo("");
+    setOccupation("");
+    setOTP("");
     passenger = true;
     employee = false;
     owner = false;
     formPageCount = 3;
     scrollFroward();
-  };
+  }
 
-  function employeeSignUp () {
-    setFName(''); setLName(''); setPhoneNo(''); setNIC(''); 
-    setAccountNo(''); setAccHolderName(''); setBankName(''); setBranchName(''); 
-    setNameOnLicense(''); setNTCLicenseNo(''); setDriverLicenseNo(''); setOccupation(''); setOTP('');
+  function employeeSignUp() {
+    setFName("");
+    setLName("");
+    setPhoneNo("");
+    setNIC("");
+    setAccountNo("");
+    setAccHolderName("");
+    setBankName("");
+    setBranchName("");
+    setNameOnLicense("");
+    setNTCLicenseNo("");
+    setDriverLicenseNo("");
+    setOccupation("");
+    setOTP("");
     passenger = false;
     employee = true;
     owner = false;
     formPageCount = 4;
     scrollFroward();
-  };
+  }
 
-  function ownerSignUp () {
-    setFName(''); setLName(''); setPhoneNo(''); setNIC(''); 
-    setAccountNo(''); setAccHolderName(''); setBankName(''); setBranchName(''); 
-    setNameOnLicense(''); setNTCLicenseNo(''); setDriverLicenseNo(''); setOccupation(''); setOTP('');
+  function ownerSignUp() {
+    setFName("");
+    setLName("");
+    setPhoneNo("");
+    setNIC("");
+    setAccountNo("");
+    setAccHolderName("");
+    setBankName("");
+    setBranchName("");
+    setNameOnLicense("");
+    setNTCLicenseNo("");
+    setDriverLicenseNo("");
+    setOccupation("");
+    setOTP("");
     passenger = false;
     employee = false;
     owner = true;
     formPageCount = 4;
     scrollFroward();
-  };
+  }
 
-  function submitForm () {
-    router.replace('/(drawer)/home/tabone');
-  };
+  function submitForm() {
+    router.replace("/(drawer)/home/tabone");
+  }
 
-  function acceptTerms () {
+  function acceptTerms() {
     setAgree(!agree);
-  };
+  }
 
-  function openTermsAndConditions () {
+  function openTermsAndConditions() {
     // open model
-  };
+  }
 
-  function openPrivacyPolicy () {
+  function openPrivacyPolicy() {
     // open model
-  };
+  }
 
   // Hide form navigation button at first and last page
-  useEffect (() => {
+  useEffect(() => {
     if (currentPos == 0) {
       setBackVisible(false);
       setNextVisible(false);
@@ -172,83 +216,328 @@ export default function SignUp() {
 
   return (
     <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
-      <ImageBackground source={require('@/assets/images/main_bg.png')} style={styles.backgroundImage} >
-
+      <ImageBackground
+        source={require("@/assets/images/main_bg.png")}
+        style={styles.backgroundImage}
+      >
         <ThemedView style={styles.titleContainer}>
-          <ThemedText type="header1" lightColor="#33aefc" darkColor="#33aefc">Sign Up</ThemedText>
+          <ThemedText type="header1" lightColor="#33aefc" darkColor="#33aefc">
+            Sign Up
+          </ThemedText>
         </ThemedView>
 
-        <ThemedView style={styles.formBody}> 
-          <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16} horizontal={true} style={{width: formPageWidth}} contentContainerStyle={styles.formPageContainer} showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} pointerEvents={'box-none'}>
-            
-            {/****************************************************** Sign up as a passenger, employee or owner form page ****************************************************************/}
+        <ThemedView style={styles.formBody}>
+          <Animated.ScrollView
+            ref={scrollRef}
+            scrollEventThrottle={16}
+            horizontal={true}
+            style={{ width: formPageWidth }}
+            contentContainerStyle={styles.formPageContainer}
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            pointerEvents={"box-none"}
+          >
+            {/******** Sign up as a passenger, employee or owner form page ******************/}
             <Animated.View style={styles.formPage}>
-              <Image source={require('@/assets/images/People waiting for bus at bus stop.png')} style={styles.image}/>
+              <Image
+                source={require("@/assets/images/People waiting for bus at bus stop.png")}
+                style={styles.image}
+              />
               <ThemedView style={styles.signInTypeContainer}>
-                <Pressable style={[styles.signInTypeButton, {backgroundColor: '#a9afff'}]} onTouchStart={() => {}} onPress={passengerSignUp} pointerEvents={'auto'}><ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">Sign up as a passenger</ThemedText></Pressable>
-                <Pressable style={[styles.signInTypeButton, {backgroundColor: '#8fafff'}]} onPress={employeeSignUp} pointerEvents={'auto'}><ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">Sign up as an employee</ThemedText></Pressable>
-                <Pressable style={[styles.signInTypeButton, {backgroundColor: '#6fafff'}]} onPress={ownerSignUp} pointerEvents={'auto'}><ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">Sign up as a bus owner</ThemedText></Pressable>
+                <Pressable
+                  style={[
+                    styles.signInTypeButton,
+                    { backgroundColor: "#a9afff" },
+                  ]}
+                  onTouchStart={() => {}}
+                  onPress={passengerSignUp}
+                  pointerEvents={"auto"}
+                >
+                  <ThemedText
+                    type="subtitle"
+                    lightColor="#fff"
+                    darkColor="#fff"
+                  >
+                    Sign up as a passenger
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.signInTypeButton,
+                    { backgroundColor: "#8fafff" },
+                  ]}
+                  onPress={employeeSignUp}
+                  pointerEvents={"auto"}
+                >
+                  <ThemedText
+                    type="subtitle"
+                    lightColor="#fff"
+                    darkColor="#fff"
+                  >
+                    Sign up as an employee
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  style={[
+                    styles.signInTypeButton,
+                    { backgroundColor: "#6fafff" },
+                  ]}
+                  onPress={ownerSignUp}
+                  pointerEvents={"auto"}
+                >
+                  <ThemedText
+                    type="subtitle"
+                    lightColor="#fff"
+                    darkColor="#fff"
+                  >
+                    Sign up as a bus owner
+                  </ThemedText>
+                </Pressable>
               </ThemedView>
             </Animated.View>
 
-            {/******************************************************************* Passenger form pages **********************************************************************************/}
-            {passenger && <Animated.View style={styles.formPage}>
-              <PassengerFormPage1 fname={fname} setFName={setFName} lname={lname} setLName={setLName} phoneNo={phoneNo} setPhoneNo={setPhoneNo} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos}/>
-            </Animated.View> }
-            {passenger &&  <Animated.View style={styles.formPage}>
-              <PassengerFormPage2 otp={otp} setOTP={setOTP} nextAction={scrollFroward} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos} />
-            </Animated.View> }
+            {/********************* Passenger form pages ************************************/}
+            {passenger && (
+              <Animated.View style={styles.formPage}>
+                <PassengerFormPage1
+                  fname={fname}
+                  setFName={setFName}
+                  lname={lname}
+                  setLName={setLName}
+                  phoneNo={phoneNo}
+                  setPhoneNo={setPhoneNo}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
+            {passenger && (
+              <Animated.View style={styles.formPage}>
+                <PassengerFormPage2
+                  otp={otp}
+                  setOTP={setOTP}
+                  nextAction={scrollFroward}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
 
-            {/******************************************************************** Employee form pages ************************************************************************************/}
-            {employee && <Animated.View style={styles.formPage}>
-              <EmployeeFormPage1 fname={fname} setFName={setFName} lname={lname} setLName={setLName} phoneNo={phoneNo} setPhoneNo={setPhoneNo} nic={nic} setNIC={setNIC} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos}/>
-            </Animated.View> }
-            {employee && <Animated.View style={styles.formPage}>
-              <EmployeeFormPage2 nameOnLicense={nameOnLicense} setNameOnLicense={setNameOnLicense} ntcLicenseNo={ntcLicenseNo} setNTCLicenseNo={setNTCLicenseNo} driverLicenseNo={driverLicenseNo} setDriverLicenseNo={setDriverLicenseNo} occupation={occupation} setOccupation={setOccupation} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos}/>
-            </Animated.View> }
-            {employee && <Animated.View style={styles.formPage}>
-              <EmployeeFormPage3 otp={otp} setOTP={setOTP} nextAction={scrollFroward} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos} />
-            </Animated.View> }
+            {/********************** Employee form pages **************************************/}
+            {employee && (
+              <Animated.View style={styles.formPage}>
+                <EmployeeFormPage1
+                  fname={fname}
+                  setFName={setFName}
+                  lname={lname}
+                  setLName={setLName}
+                  phoneNo={phoneNo}
+                  setPhoneNo={setPhoneNo}
+                  nic={nic}
+                  setNIC={setNIC}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
+            {employee && (
+              <Animated.View style={styles.formPage}>
+                <EmployeeFormPage2
+                  nameOnLicense={nameOnLicense}
+                  setNameOnLicense={setNameOnLicense}
+                  ntcLicenseNo={ntcLicenseNo}
+                  setNTCLicenseNo={setNTCLicenseNo}
+                  driverLicenseNo={driverLicenseNo}
+                  setDriverLicenseNo={setDriverLicenseNo}
+                  occupation={occupation}
+                  setOccupation={setOccupation}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
+            {employee && (
+              <Animated.View style={styles.formPage}>
+                <EmployeeFormPage3
+                  otp={otp}
+                  setOTP={setOTP}
+                  nextAction={scrollFroward}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
 
-            {/*********************************************************************** Owner form pages ***********************************************************************************/}
-            {owner && <Animated.View style={styles.formPage}>
-              <OwnerFormPage1 fname={fname} setFName={setFName} lname={lname} setLName={setLName} phoneNo={phoneNo} setPhoneNo={setPhoneNo} nic={nic} setNIC={setNIC} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos}/>
-            </Animated.View> }
-            {owner && <Animated.View style={styles.formPage}>
-              <OwnerFormPage2 accountNo={accountNo} setAccountNo={setAccountNo} accHolderName={accHolderName} setAccHolderName={setAccHolderName} bankName={bankName} setBankName={setBankName} branchName={branchName} setBranchName={setBranchName} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos}/>
-            </Animated.View> }
-            {owner && <Animated.View style={styles.formPage}>
-              <OwnerFormPage3 otp={otp} setOTP={setOTP} nextAction={scrollFroward} setNextVisible={setNextVisible} setBackVisible={setBackVisible} currentPos={currentPos} />
-            </Animated.View> }
+            {/************************* Owner form pages *************************************/}
+            {owner && (
+              <Animated.View style={styles.formPage}>
+                <OwnerFormPage1
+                  fname={fname}
+                  setFName={setFName}
+                  lname={lname}
+                  setLName={setLName}
+                  phoneNo={phoneNo}
+                  setPhoneNo={setPhoneNo}
+                  nic={nic}
+                  setNIC={setNIC}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
+            {owner && (
+              <Animated.View style={styles.formPage}>
+                <OwnerFormPage2
+                  accountNo={accountNo}
+                  setAccountNo={setAccountNo}
+                  accHolderName={accHolderName}
+                  setAccHolderName={setAccHolderName}
+                  bankName={bankName}
+                  setBankName={setBankName}
+                  branchName={branchName}
+                  setBranchName={setBranchName}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
+            {owner && (
+              <Animated.View style={styles.formPage}>
+                <OwnerFormPage3
+                  otp={otp}
+                  setOTP={setOTP}
+                  nextAction={scrollFroward}
+                  setNextVisible={setNextVisible}
+                  setBackVisible={setBackVisible}
+                  currentPos={currentPos}
+                />
+              </Animated.View>
+            )}
 
-            {/******************************************************************** Terms and Conditions form pages ************************************************************************/}
+            {/********************** Terms and Conditions form pages **************************/}
             <Animated.View style={styles.formPage}>
-              <ThemedView style={{marginTop: 80, backgroundColor: 'transparent'}}>
-                <Pressable style={styles.modelButton} onPress={openTermsAndConditions}><ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">Read Terms and Conditions</ThemedText></Pressable>
-                <Pressable style={styles.modelButton} onPress={openPrivacyPolicy}><ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">Read Privacy Policies</ThemedText></Pressable>
+              <ThemedView
+                style={{ marginTop: 80, backgroundColor: "transparent" }}
+              >
+                <Pressable
+                  style={styles.modelButton}
+                  onPress={openTermsAndConditions}
+                >
+                  <ThemedText
+                    type="subtitle"
+                    lightColor="#fff"
+                    darkColor="#fff"
+                  >
+                    Read Terms and Conditions
+                  </ThemedText>
+                </Pressable>
+                <Pressable
+                  style={styles.modelButton}
+                  onPress={openPrivacyPolicy}
+                >
+                  <ThemedText
+                    type="subtitle"
+                    lightColor="#fff"
+                    darkColor="#fff"
+                  >
+                    Read Privacy Policies
+                  </ThemedText>
+                </Pressable>
               </ThemedView>
-              <ThemedView style={{flexDirection: 'row', marginVertical: 30, gap: 15, marginHorizontal: 40, backgroundColor: 'transparent'}}>
-                <ThemedText>I agree to the Privacy Policy and Terms and Conditions </ThemedText>
-                <Switch value={agree} onValueChange={acceptTerms} activeText='' inActiveText='' backgroundActive='#11aadd' backgroundInactive='#aaa' circleActiveColor='#fff' circleInActiveColor='#fff' circleBorderActiveColor='#11aadd'  circleBorderInactiveColor='#aaa' />
+              <ThemedView
+                style={{
+                  flexDirection: "row",
+                  marginVertical: 30,
+                  gap: 15,
+                  marginHorizontal: 40,
+                  backgroundColor: "transparent",
+                }}
+              >
+                <ThemedText>
+                  I agree to the Privacy Policy and Terms and Conditions{" "}
+                </ThemedText>
+                <Switch
+                  value={agree}
+                  onValueChange={acceptTerms}
+                  activeText=""
+                  inActiveText=""
+                  backgroundActive="#11aadd"
+                  backgroundInactive="#aaa"
+                  circleActiveColor="#fff"
+                  circleInActiveColor="#fff"
+                  circleBorderActiveColor="#11aadd"
+                  circleBorderInactiveColor="#aaa"
+                />
               </ThemedView>
             </Animated.View>
-
           </Animated.ScrollView>
         </ThemedView>
 
-        {/************************************************************************* Form Navigation Buttons (Next & Back) ******************************************************************/}
+        {/*************************** Form Navigation Buttons (Next & Back) ********************/}
         <ThemedView style={styles.formNavContainer}>
-          {backVisible && <Pressable style={styles.formBackButton} onPress={scrollBack}><ThemedText type="subtitle" lightColor="#1cba" darkColor="#11aadd"><FontAwesome name='chevron-left' size={20}/> Back </ThemedText></Pressable>}
-          {nextVisible && <Pressable style={styles.formNextButton} onPress={scrollFroward}><ThemedText type="subtitle" lightColor="#a1aadd" darkColor="#a1aadd"> Next <FontAwesome name='chevron-right' size={20}/></ThemedText></Pressable>}
+          {backVisible && (
+            <Pressable style={styles.formBackButton} onPress={scrollBack}>
+              <ThemedText
+                type="subtitle"
+                lightColor="#1cba"
+                darkColor="#11aadd"
+              >
+                <FontAwesome name="chevron-left" size={20} /> Back{" "}
+              </ThemedText>
+            </Pressable>
+          )}
+          {nextVisible && (
+            <Pressable style={styles.formNextButton} onPress={scrollFroward}>
+              <ThemedText
+                type="subtitle"
+                lightColor="#a1aadd"
+                darkColor="#a1aadd"
+              >
+                {" "}
+                Next <FontAwesome name="chevron-right" size={20} />
+              </ThemedText>
+            </Pressable>
+          )}
         </ThemedView>
 
-        {/*********************************************************************************** Submit button ********************************************************************************/}
-        {showSubmit && <ThemedView style={styles.footer}>
-          <Pressable style={[styles.submitButton, agree && {backgroundColor: '#1eceda'}]} disabled={!agree} onPress={submitForm}><ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">Sign Up</ThemedText></Pressable>
-        </ThemedView>}
-        {currentPos == 0 && <ThemedView style={{alignSelf: 'center', backgroundColor: 'transparent'}}>
-          <ThemedText lightColor="#aaa" darkColor="#aaa">Already have an account? <Link href={'/login'}><ThemedText lightColor="#28b1de" darkColor="#2eccff">Log In</ThemedText></Link></ThemedText>
-        </ThemedView>}
+        {/************************************* Submit button **********************************/}
+        {showSubmit && (
+          <ThemedView style={styles.footer}>
+            <Pressable
+              style={[
+                styles.submitButton,
+                agree && { backgroundColor: "#1eceda" },
+              ]}
+              disabled={!agree}
+              onPress={submitForm}
+            >
+              <ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">
+                Sign Up
+              </ThemedText>
+            </Pressable>
+          </ThemedView>
+        )}
+        {currentPos == 0 && (
+          <ThemedView
+            style={{ alignSelf: "center", backgroundColor: "transparent" }}
+          >
+            <ThemedText lightColor="#aaa" darkColor="#aaa">
+              Already have an account?{" "}
+              <Link href={"/login"}>
+                <ThemedText lightColor="#28b1de" darkColor="#2eccff">
+                  Log In
+                </ThemedText>
+              </Link>
+            </ThemedText>
+          </ThemedView>
+        )}
       </ImageBackground>
     </ThemedView>
   );
@@ -261,76 +550,76 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   image: {
-    width: '100%',
-    height: '32%',
-    marginTop: '25%',
+    width: "100%",
+    height: "32%",
+    marginTop: "25%",
   },
   formPageContainer: {
-    alignContent: 'center',
+    alignContent: "center",
   },
   signInTypeContainer: {
-    backgroundColor: 'transparent',
-    alignSelf: 'center',
+    backgroundColor: "transparent",
+    alignSelf: "center",
   },
   signInTypeButton: {
     borderWidth: 0,
-    color: '#fff',
+    color: "#fff",
     borderRadius: 50,
     paddingVertical: 10,
     paddingHorizontal: 40,
     marginVertical: 5,
-    backgroundColor: '#169af5',
-    alignItems: 'center',
+    backgroundColor: "#169af5",
+    alignItems: "center",
     elevation: 3,
   },
   formPage: {
     width: formPageWidth,
-    alignItems: 'center',
-    backgroundColor: 'transparent',
+    alignItems: "center",
+    backgroundColor: "transparent",
     //backgroundColor: '#000000',
     padding: 0,
   },
   formBackButton: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   formNextButton: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   formBody: {
-    backgroundColor: 'transparent',
-    height: '55%',
+    backgroundColor: "transparent",
+    height: "55%",
     //backgroundColor: "#fff",
     //color: "#a6f",
     margin: 10,
     borderRadius: 10,
     padding: 10,
-    alignSelf:'center',
+    alignSelf: "center",
   },
   tncBody: {
     width: formPageWidth,
-    alignItems: 'center',
+    alignItems: "center",
     //backgroundColor: 'transparent',
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 0,
   },
   titleContainer: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     padding: 10,
     marginTop: 90,
   },
   footer: {
-    backgroundColor: 'transparent',
-    position: 'absolute',
+    backgroundColor: "transparent",
+    position: "absolute",
     bottom: 150,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   submitButton: {
-    alignItems: 'center',
-    backgroundColor: 'gray',
+    alignItems: "center",
+    backgroundColor: "gray",
     marginVertical: 7,
     paddingHorizontal: 60,
     paddingVertical: 10,
@@ -338,23 +627,23 @@ const styles = StyleSheet.create({
   },
   modelButton: {
     borderWidth: 0,
-    color: '#fff',
+    color: "#fff",
     borderRadius: 50,
     padding: 10,
     marginBottom: 20,
-    backgroundColor: '#aaaacc',
-    alignItems: 'center',
+    backgroundColor: "#aaaacc",
+    alignItems: "center",
   },
   formNavContainer: {
     width: formPageWidth,
-    flexDirection: 'row',
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "space-around",
   },
   buttonBody: {
-    alignItems: 'center',
-    backgroundColor: '#ff8b2e',
+    alignItems: "center",
+    backgroundColor: "#ff8b2e",
     marginVertical: 10,
     marginHorizontal: 20,
     paddingVertical: 5,
