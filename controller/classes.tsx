@@ -1,6 +1,6 @@
 import { Float } from "react-native/Libraries/Types/CodegenTypes";
 
-export class Reservation {
+export class Ticket {
   id: number;
   status: string;
   seat: number;
@@ -8,16 +8,16 @@ export class Reservation {
   busclass: string;
   routeNo: string;
   bookedTime: String;
-  date: string;
-  distance: number;
-  priceForOne: Float;
-  ticketCount: number;
+  duration: string;
+  price: Float;
   departure: string;
+  departureDate: string;
   departureTime: string;
   terminal: string;
+  terminalDate: string;
   terminalTime: string;
-  start: string;
-  destination: string;
+  startLocation: string;
+  endLocation: string;
   deportHotline: string;
 
   constructor(
@@ -26,26 +26,41 @@ export class Reservation {
     seat: number = 5,
     title: string = 'SLTB',
     busclass: string = 'Normal',
-    routeNo: string = '43/2',
+    routeNo: string = '222',
     bookedTime: string = new Date().toLocaleString("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
     }),
-    date: string = new Date().toLocaleString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-    }),
-    distance: number = 140,
-    priceForOne: Float = 700.00,
-    ticketCount: number = 1,
+    duration: string = '2h 40m',
+    price: Float = 700.00,
     departure: string = 'Colombo',
-    departureTime: string = '11/10/2016, 11:49:36 AM',
+    departureDate: string = new Date().toLocaleString("en-GB", {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+    departureTime: string = new Date().toLocaleString("en-GB", {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).replace(/\s(am|pm)/i, (match) => match.toUpperCase()),
     terminal: string = 'Kandy',
-    terminalTime: string = '11/10/2016, 1:49:36 PM',
-    start: string = 'Colombo',
-    destination: string = 'Peradeniya',
+    terminalDate: string = new Date().toLocaleString("en-GB", {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }),
+    terminalTime: string = new Date().toLocaleString("en-GB", {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).replace(/\s(am|pm)/i, (match) => match.toUpperCase()),
+    startLocation: string = 'Colombo',
+    endLocation: string = 'Peradeniya',
     deportHotline: string = '0710000000',
   ) {
     this.id = id;
@@ -55,16 +70,16 @@ export class Reservation {
     this.busclass = busclass;
     this.routeNo = routeNo;
     this.bookedTime = bookedTime;
-    this.date = date;
-    this.distance = distance;
-    this.priceForOne = priceForOne;
-    this.ticketCount = ticketCount;
+    this.duration = duration;
+    this.price = price;
     this.departure = departure;
+    this.departureDate = departureDate;
     this.departureTime = departureTime;
     this.terminal = terminal;
+    this.terminalDate = terminalDate;
     this.terminalTime = terminalTime;
-    this.start = start;
-    this.destination = destination;
+    this.startLocation = startLocation;
+    this.endLocation = endLocation;
     this.deportHotline = deportHotline;
   }
 }

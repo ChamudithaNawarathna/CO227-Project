@@ -1,79 +1,51 @@
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faUser , faArrowRight, faChevronRight, faC } from '@fortawesome/free-solid-svg-icons';
-import { router } from "expo-router";
-import { Pressable, StyleSheet, Text, useColorScheme } from "react-native";
-import { Reservation } from "@/controller/classes";
-import { Ticket } from "@/components/TicketComponents/Ticket";
+import { Image, StyleSheet, Pressable } from "react-native";
+import { Link } from "expo-router";
 
-const res = new Reservation();
+import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { TextInput } from "react-native-gesture-handler";
 
 export default function TabTwo() {
-  const theme = useColorScheme() ?? 'light';
-  const iconColor = theme === 'dark' ? '#eee' : '#777';
-  const iconSize = 15;
-  const ticketsAvailable = true;
-  const moreTickets = true;
-
   return (
-    <ThemedView style={styles.mainBody}>
-      <ThemedText type={'s4'} style={styles.cardHeader}>Available Tickets</ThemedText>
-      <ThemedView style={[styles.cardBody,{backgroundColor: theme === 'dark' ? '#555' : '#fff'}]}>
-        {ticketsAvailable && <Ticket res={res}/>}
-        {!ticketsAvailable && moreTickets && <ThemedText style={{alignSelf: 'center'}}>No tickets are available</ThemedText>}
-        {moreTickets && (
-          <Pressable style={styles.cardBottomButton} onPress={() => router.replace("/index")}>
-            <ThemedText lightColor={iconColor} darkColor={iconColor}>
-              See all tickets
-            </ThemedText>
-            <FontAwesomeIcon icon={faChevronRight} size={iconSize} color={iconColor} />
-          </Pressable>
-        )}
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerImage={
+        <Image
+          source={require('@/assets/images/partial-react-logo.png')}
+          style={styles.reactLogo}
+        />
+      }
+    >
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText type="title">Welcome!</ThemedText>
+        <TextInput
+          style={{
+
+          }}
+        >
+
+        </TextInput>
       </ThemedView>
-    </ThemedView>
+    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  mainBody: {
-    paddingTop: 30,
-    flex: 1,
-    flexDirection:'column',
-  },
-  cardBody: {
-    borderWidth: 0,
-    borderRadius: 10,
-    marginVertical: 5,
-    marginHorizontal: 10,
-    padding: 10,
-    elevation: 3,
-  },
-  cardHeader: {
-    marginVertical: 5,
-    marginHorizontal: 15,
-    backgroundColor: 'transparent',
-  },
-  cardBottomButton: {
+  titleContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center'
+    alignItems: 'center',
+    gap: 8,
   },
-  ticketBody: {
-    borderWidth: 0,
-    borderRadius: 10,
-    margin: 5,
-    padding: 10,
-    backgroundColor: '#1cd7',
+  stepContainer: {
+    gap: 8,
+    marginBottom: 8,
   },
-  drawerHeader: {
-      flexDirection: 'row',
-      backgroundColor: 'transparent',
-      gap: 10,
-  },
-  logo: {
-      height: 60,
-      width: 60,
-      borderRadius: 15,
+  reactLogo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
   },
 });
