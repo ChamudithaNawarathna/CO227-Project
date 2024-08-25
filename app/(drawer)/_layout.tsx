@@ -53,8 +53,8 @@ export default function DrawerLayout() {
               <Image
                 source={
                   theme === "dark"
-                    ? require("@/assets/images/logo_darkmode.png")
-                    : require("@/assets/images/logo_darkmode.png")
+                    ? require("@/assets/logos/logo_darkmode.png")
+                    : require("@/assets/logos/logo_darkmode.png")
                 }
                 style={styles.logo}
               />
@@ -62,18 +62,30 @@ export default function DrawerLayout() {
           ),
           headerTitleAlign: "center",
           headerBackground: ({}) => (
-            <ThemedView style={{ flex: 1, backgroundColor: theme === "dark" ? "#5df" : "#5df" }} />
+            <ThemedView
+              style={{
+                flex: 1,
+                backgroundColor: theme === "dark" ? "#5fb5e5" : "#5fb5e5",
+              }}
+            />
           ),
           headerLeft: () => (
             <Pressable
-                  style={{
-                    backgroundColor: 'transparent',
-                    borderWidth: 0,
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
-                  }}
-                  onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-                ><FontAwesomeIcon icon={faBars} size={24} color={theme === "dark" ? "#fff" : "#fff"} /></Pressable>),
+              style={{
+                backgroundColor: "transparent",
+                borderWidth: 0,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+              }}
+              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+            >
+              <FontAwesomeIcon
+                icon={faBars}
+                size={24}
+                color={theme === "dark" ? "#fff" : "#fff"}
+              />
+            </Pressable>
+          ),
         }}
       >
         <Drawer.Screen
@@ -81,11 +93,7 @@ export default function DrawerLayout() {
           options={{
             drawerLabel: "Home",
             drawerIcon: ({ color }) => (
-              <FontAwesomeIcon
-                icon={faHome}
-                size={iconSize}
-                color={color}
-              />
+              <FontAwesomeIcon icon={faHome} size={iconSize} color={color} />
             ),
           }}
         />
@@ -95,14 +103,10 @@ export default function DrawerLayout() {
           options={{
             drawerLabel: "Profile",
             drawerIcon: ({ color }) => (
-              <FontAwesomeIcon
-                icon={faUser}
-                size={iconSize}
-                color={color}
-              />
+              <FontAwesomeIcon icon={faUser} size={iconSize} color={color} />
             ),
             headerTitle: "Profile",
-            headerTintColor: '#fff', // Change this to your desired header text color
+            headerTintColor: "#fff", // Change this to your desired header text color
           }}
         />
         <Drawer.Screen
@@ -110,11 +114,7 @@ export default function DrawerLayout() {
           options={{
             drawerLabel: "Timetables",
             drawerIcon: ({ color }) => (
-              <FontAwesomeIcon
-                icon={faTable}
-                size={iconSize}
-                color={color}
-              />
+              <FontAwesomeIcon icon={faTable} size={iconSize} color={color} />
             ),
             headerTitle: "Timetables",
           }}
@@ -162,11 +162,7 @@ export default function DrawerLayout() {
           options={{
             drawerLabel: "Buses",
             drawerIcon: ({ color }) => (
-              <FontAwesomeIcon
-                icon={faBusAlt}
-                size={iconSize}
-                color={color}
-              />
+              <FontAwesomeIcon icon={faBusAlt} size={iconSize} color={color} />
             ),
             headerTitle: "Buses",
           }}

@@ -69,7 +69,7 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
   ) => {
     const theme = useColorScheme() ?? "light";
     return (
-      <ThemedView style={styles.InputFieldContainer}>
+      <View>
         <ThemedText lightColor="#777" darkColor="#eee">
           {title}
         </ThemedText>
@@ -95,7 +95,7 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
         <ThemedText style={[styles.formError, error && { color: "red" }]}>
           {errorMessage}
         </ThemedText>
-      </ThemedView>
+      </View>
     );
   }
 );
@@ -121,7 +121,7 @@ export const FormDropdown = ({
 }: DropdownProps) => {
   const theme = useColorScheme() ?? "light";
   return (
-    <ThemedView style={styles.InputFieldContainer}>
+    <View>
       <ThemedText lightColor="#777" darkColor="#777">
         {title}
       </ThemedText>
@@ -145,7 +145,7 @@ export const FormDropdown = ({
           }}
         />
       </ThemedView>
-    </ThemedView>
+    </View>
   );
 };
 
@@ -199,7 +199,7 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
     };
 
     return (
-      <ThemedView style={{ zIndex: layer, position: "relative" }}>
+      <View style={{ zIndex: layer, position: "relative" }}>
         <View
           style={[
             styles.searchInputContainer,
@@ -249,7 +249,7 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
             </ThemedView>
           )}
         />
-      </ThemedView>
+      </View>
     );
   }
 );
@@ -278,7 +278,7 @@ export function DateTimeInput({
   };
 
   return (
-    <ThemedView>
+    <View>
       <View
         style={[
           styles.searchInputContainer,
@@ -305,14 +305,11 @@ export function DateTimeInput({
           </ThemedText>
         </Pressable>
       </View>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  InputFieldContainer: {
-    backgroundColor: "transparent",
-  },
   inputField: {
     width: 300,
     color: "#333",

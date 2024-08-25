@@ -5,7 +5,13 @@ import {
 } from "@react-navigation/drawer";
 import { Href, useRouter } from "expo-router";
 import { getBackgroundColorAsync } from "expo-system-ui";
-import { Pressable, useColorScheme, View } from "react-native";
+import {
+  Pressable,
+  useColorScheme,
+  View,
+  Image,
+  StyleSheet,
+} from "react-native";
 import { ThemedText } from "./ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
 import { faHome, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
@@ -28,7 +34,15 @@ export default function CustomDrawerContent(props: any) {
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props} scrollEnabled={false}>
-        <View style={{ padding: 5 }}>
+        <View style={{ padding: 5, alignItems: 'center' }}>
+          <Image
+            source={
+              theme === "dark"
+                ? require("@/assets/logos/logo_darkmode.png")
+                : require("@/assets/logos/logo_darkmode.png")
+            }
+            style={styles.profileImage}
+          />
           <ThemedText type="h4" style={{ textAlign: "center" }}>
             {firstName} {lasttName}
           </ThemedText>
@@ -40,18 +54,19 @@ export default function CustomDrawerContent(props: any) {
           >
             {accountType} account
           </ThemedText>
-          <Dropdown
+        </View>
+        <Dropdown
             style={{
-              backgroundColor: '#e28',
+              backgroundColor: "#e28",
               borderWidth: 0,
               borderRadius: 10,
               paddingHorizontal: 10,
               paddingVertical: 5,
-              marginHorizontal: 5,
+              marginHorizontal: 10,
               marginVertical: 20,
               elevation: 3,
             }}
-            placeholderStyle={{color: '#fff', textAlign: 'center'  }}
+            placeholderStyle={{ color: "#fff", textAlign: "center" }}
             data={dataList}
             labelField="label"
             valueField="value"
@@ -60,13 +75,12 @@ export default function CustomDrawerContent(props: any) {
             onChange={(item) => {
               setAccountType(item.value);
             }}
-            itemContainerStyle={{backgroundColor: '#e28', margin: -1}}
-            activeColor='#e28'
-            itemTextStyle={{color: '#fff', textAlign: 'center'}}
-            iconColor='#fff'
-            selectedTextStyle={{color: '#fff', textAlign: 'center'}}
+            itemContainerStyle={{ backgroundColor: "#e28", margin: -1 }}
+            activeColor="#e28"
+            itemTextStyle={{ color: "#fff", textAlign: "center" }}
+            iconColor="#fff"
+            selectedTextStyle={{ color: "#fff", textAlign: "center" }}
           />
-        </View>
         <View
           style={{
             paddingTop: 5,
@@ -90,3 +104,13 @@ export default function CustomDrawerContent(props: any) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  profileImage: {
+    height: 120,
+    width: 120,
+    borderRadius: 60,
+    marginBottom: 20,
+    backgroundColor: "#000",
+  },
+});

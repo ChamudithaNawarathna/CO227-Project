@@ -29,6 +29,7 @@ import { StringTime } from "@/components/Common/StringDateTime";
 import { Owner } from "@/controller/Owner";
 import { Bus } from "@/controller/Bus";
 import { Ticket } from "@/controller/Ticket";
+import ScreenWrapper from "@/components/ScreenWrapper";
 
 export default function Tickets() {
   var ticketsAvailable = true;
@@ -107,7 +108,7 @@ export default function Tickets() {
   ];
 
   return (
-    <ThemedView style={styles.mainBody}>
+    <View style={styles.mainBody}>
       <SearchInput
         ref={inputRefs.current[0]}
         nextFocus={inputRefs.current[1]}
@@ -127,7 +128,7 @@ export default function Tickets() {
         layer={2}
       />
 
-      <View>
+      <View style={{ backgroundColor: "transparent" }}>
         <DateTimeInput
           input={date}
           setInput={setDate}
@@ -184,7 +185,10 @@ export default function Tickets() {
         renderItem={({ item }) => (
           <ThemedView style={styles.searchResult}>
             <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
             >
               <View style={{ flexDirection: "row" }}>
                 <View style={{ marginRight: 5, marginBottom: 12 }}>
@@ -232,10 +236,7 @@ export default function Tickets() {
                 >
                   Rs. 200
                 </ThemedText>
-                <ThemedText
-                  type="s5"
-                  style={{ textAlign: "right" }}
-                >
+                <ThemedText type="s5" style={{ textAlign: "right" }}>
                   Depart at: {StringTime(item.departureTime)}
                 </ThemedText>
                 <Pressable
@@ -266,9 +267,7 @@ export default function Tickets() {
           </ThemedView>
         )}
       />
-
-      {/****************************************************************************************************************/}
-    </ThemedView>
+    </View>
   );
 }
 

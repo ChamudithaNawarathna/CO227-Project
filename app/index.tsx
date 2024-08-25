@@ -35,8 +35,8 @@ export default function Index() {
           <Image
             source={
               theme === "dark"
-                ? require("@/assets/images/logo_darkmode.png")
-                : require("@/assets/images/logo_lightmode.png")
+                ? require("@/assets/logos/logo_darkmode.png")
+                : require("@/assets/logos/logo_lightmode.png")
             }
             style={styles.logo}
           />
@@ -78,7 +78,7 @@ export default function Index() {
           <Pressable
             style={styles.loginButton}
             onPress={() => {
-              router.navigate("/(drawer)/home/dashboard" as Href<string>);
+              router.navigate("/(drawer)/profile" as Href<string>);
             }}
           >
             <ThemedText type="buttonText" lightColor="#fff" darkColor="#fff">

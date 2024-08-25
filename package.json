@@ -25,6 +25,7 @@
     "@react-navigation/drawer": "^6.6.15",
     "@react-navigation/native": "^6.0.2",
     "axios": "^1.7.2",
+    "credit-card-type": "^10.0.1",
     "expo": "^51.0.22",
     "expo-constants": "~16.0.2",
     "expo-font": "^12.0.9",
