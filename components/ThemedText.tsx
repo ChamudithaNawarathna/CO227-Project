@@ -26,6 +26,7 @@ export type ThemedTextProps = TextProps & {
   | "s4"
   | "s5"
   | "s6"
+  | "s7"
     | "cardHeader";
 };
 
@@ -63,6 +64,7 @@ export function ThemedText({
         type === "s4" ? styles.s4 : undefined,
         type === "s5" ? styles.s5 : undefined,
         type === "s6" ? styles.s6 : undefined,
+        type === "s7" ? styles.s7 : undefined,
         style,
       ]}
       {...rest}
@@ -142,6 +144,11 @@ const styles = StyleSheet.create({
   },
   s6: {
     fontSize: 14,
+    backgroundColor: "transparent",
+  },
+  s7: {
+    marginTop: -2,
+    fontSize: 11,
     backgroundColor: "transparent",
   },
   subtitle: {

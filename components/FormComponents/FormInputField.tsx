@@ -7,15 +7,22 @@ import {
   View,
   FlatList,
   Pressable,
+  PressableProps,
 } from "react-native";
 import { ThemedText } from "../ThemedText";
 import { ThemedView } from "../ThemedView";
 import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLocationDot,
+  IconDefinition,
+} from "@fortawesome/free-solid-svg-icons";
+import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { StringDate, StringTime } from "../Common/StringDateTime";
 
-const defaultSetInput: Dispatch<SetStateAction<string>> = () => {};
-const defaultSetError: Dispatch<SetStateAction<boolean>> = () => {};
+const defaultSetDateTime: Dispatch<SetStateAction<Date>> = () => {};
+const defaultSetString: Dispatch<SetStateAction<string>> = () => {};
+const defaultSetBoolean: Dispatch<SetStateAction<boolean>> = () => {};
 const defaultValidation = (
   input: string,
   setInput: Dispatch<SetStateAction<string>>,
@@ -49,9 +56,9 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
       nextFocus = undefined,
       title = "",
       input = "",
-      setInput = defaultSetInput,
+      setInput = defaultSetString,
       error = false,
-      setError = defaultSetError,
+      setError = defaultSetBoolean,
       errorMessage = "",
       keyboardType = "default",
       validation = defaultValidation,
@@ -104,7 +111,7 @@ type DropdownProps = {
 export const FormDropdown = ({
   title = "",
   input = "",
-  setInput = defaultSetInput,
+  setInput = defaultSetString,
   dataList = [
     { label: "item 1", value: "1" },
     { label: "item 2", value: "2" },
@@ -149,6 +156,7 @@ type SearchProps = {
   placeholder?: string;
   nextFocus?: RefObject<TextInput>;
   layer: number;
+  iconName: IconDefinition | null;
 };
 
 export const SearchInput = React.forwardRef<TextInput, SearchProps>(
@@ -157,8 +165,9 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
       nextFocus = undefined,
       input = "",
       layer = 1,
-      setInput = defaultSetInput,
+      setInput = defaultSetString,
       placeholder = "",
+      iconName = null,
     },
     ref
   ) => {
@@ -200,7 +209,7 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
           ]}
         >
           <FontAwesomeIcon
-            icon={faLocationDot}
+            icon={iconName as IconProp}
             size={24}
             color={"gray"}
             style={{ marginRight: 7 }}
@@ -228,7 +237,7 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
               style={[
                 styles.searchResult,
                 theme === "dark" && {
-                  backgroundColor: "#444",
+                  backgroundColor: "#666",
                 },
               ]}
             >
@@ -245,12 +254,67 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
   }
 );
 
+type DateTimeProps = {
+  input: Date | null;
+  setInput: Dispatch<SetStateAction<Date>>;
+  placeholder?: string;
+  iconName: IconDefinition | null;
+  type: string;
+  setOpenPicker: Dispatch<SetStateAction<boolean>>;
+};
+
+export function DateTimeInput({
+  input = null,
+  setInput = defaultSetDateTime,
+  placeholder = "",
+  iconName = null,
+  type = "Date",
+  setOpenPicker = defaultSetBoolean,
+}: DateTimeProps) {
+  const theme = useColorScheme() ?? "light";
+  const updateInput = () => {
+    setOpenPicker(true);
+    setInput(new Date());
+  };
+
+  return (
+    <ThemedView>
+      <View
+        style={[
+          styles.searchInputContainer,
+          theme === "dark" && {
+            backgroundColor: "#444",
+          },
+        ]}
+      >
+        <FontAwesomeIcon
+          icon={iconName as IconProp}
+          size={24}
+          color={"gray"}
+          style={{ marginRight: 7 }}
+        />
+        <Pressable
+          style={styles.searchInput}
+          onPress={() => {
+            updateInput();
+          }}
+        >
+          <ThemedText>
+            {type == "Date" && (input != null ? StringDate(input) : placeholder)}
+            {type == "Time" && (input != null ? StringTime(input) : placeholder)}
+          </ThemedText>
+        </Pressable>
+      </View>
+    </ThemedView>
+  );
+}
+
 const styles = StyleSheet.create({
   InputFieldContainer: {
     backgroundColor: "transparent",
   },
   inputField: {
-    width: 280,
+    width: 300,
     color: "#333",
     borderRadius: 20,
     borderWidth: 2,
@@ -289,12 +353,10 @@ const styles = StyleSheet.create({
   },
   searchResult: {
     color: "#333",
-    borderWidth: 2,
-    borderColor: "transparent",
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    backgroundColor: "#fff",
-    elevation: 3,
+    paddingVertical: 7,
+    backgroundColor: "#ddd",
+    marginVertical: -1,
   },
   formError: {
     color: "transparent",

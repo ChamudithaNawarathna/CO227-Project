@@ -5,7 +5,8 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBusAlt, faCog, faExclamationCircle, faHome, faMapLocationDot, faMoneyBillTransfer, faTable, faTicket, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faBusAlt, faCartArrowDown, faCartFlatbed, faCartShopping, faCarTunnel, faCircleDollarToSlot, faCog, faDollar, faExclamationCircle, faFileInvoiceDollar, faHome, faMapLocationDot, faMoneyBillTransfer, faMoneyCheckDollar, faPieChart, faSearch, faSearchLocation, faTable, faTicket, faTicketAlt, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faProductHunt } from '@fortawesome/free-brands-svg-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -17,29 +18,29 @@ export default function TabLayout() {
         headerShown: false,
     }}>
         <Tabs.Screen
-            name='tabone'
+            name='dashboard'
             options={{
-            title: 'Home',
+            title: 'Dashboard',
             tabBarIcon: ({ color, focused }) => (
-                <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+                <FontAwesomeIcon icon={faPieChart} size={28} color={color} />
             ),
             }}
         />
           <Tabs.Screen
-              name='Booking'
+              name='tickets'
               options={{
-                  title: 'Purchase',
+                  title: 'Tickets',
                   tabBarIcon: ({ color, focused }) => (
-                      <FontAwesomeIcon icon={faTicket} size={28} color={color} />
+                    <FontAwesomeIcon icon={faTicket} size={28} color={color} />
                   ),
               }}
           />
         <Tabs.Screen
-            name='tabtwo'
+            name='tracker'
             options={{
-            title: 'Location',
+            title: 'Tracker',
             tabBarIcon: ({ color, focused }) => (
-                <FontAwesomeIcon icon={faMapLocationDot} size={28} color={color} />
+                <FontAwesomeIcon icon={faSearchLocation} size={28} color={color} />
             ),
             }}
         />

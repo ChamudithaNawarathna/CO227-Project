@@ -5,7 +5,7 @@ import {
   Keyboard,
   ImageBackground,
 } from "react-native";
-import { Link, router } from "expo-router";
+import { Href, Link, router } from "expo-router";
 import { useState, useEffect } from "react";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 
@@ -115,7 +115,7 @@ export default function SignUp() {
     }
   }
 
-  function passengerSignUp() {
+  function clearInputFields() {
     setFName("");
     setLName("");
     setPhoneNo("");
@@ -129,6 +129,10 @@ export default function SignUp() {
     setDriverLicenseNo("");
     setOccupation("");
     setOTP("");
+  }
+
+  function passengerSignUp() {
+    clearInputFields();
     passenger = true;
     employee = false;
     owner = false;
@@ -137,19 +141,7 @@ export default function SignUp() {
   }
 
   function employeeSignUp() {
-    setFName("");
-    setLName("");
-    setPhoneNo("");
-    setNIC("");
-    setAccountNo("");
-    setAccHolderName("");
-    setBankName("");
-    setBranchName("");
-    setNameOnLicense("");
-    setNTCLicenseNo("");
-    setDriverLicenseNo("");
-    setOccupation("");
-    setOTP("");
+    clearInputFields();
     passenger = false;
     employee = true;
     owner = false;
@@ -158,19 +150,7 @@ export default function SignUp() {
   }
 
   function ownerSignUp() {
-    setFName("");
-    setLName("");
-    setPhoneNo("");
-    setNIC("");
-    setAccountNo("");
-    setAccHolderName("");
-    setBankName("");
-    setBranchName("");
-    setNameOnLicense("");
-    setNTCLicenseNo("");
-    setDriverLicenseNo("");
-    setOccupation("");
-    setOTP("");
+    clearInputFields();
     passenger = false;
     employee = false;
     owner = true;
@@ -179,7 +159,7 @@ export default function SignUp() {
   }
 
   function submitForm() {
-    router.replace("/(drawer)/home/tabone");
+    router.replace("/(drawer)/home/dashboard" as Href<string>);
   }
 
   function acceptTerms() {
@@ -187,11 +167,11 @@ export default function SignUp() {
   }
 
   function openTermsAndConditions() {
-    // open model
+    router.navigate("/terms" as Href<string>);
   }
 
   function openPrivacyPolicy() {
-    // open model
+    router.navigate("/privacy" as Href<string>);
   }
 
   // Hide form navigation button at first and last page
@@ -576,7 +556,6 @@ const styles = StyleSheet.create({
     width: formPageWidth,
     alignItems: "center",
     backgroundColor: "transparent",
-    //backgroundColor: '#000000',
     padding: 0,
   },
   formBackButton: {
@@ -592,8 +571,6 @@ const styles = StyleSheet.create({
   formBody: {
     backgroundColor: "transparent",
     height: "55%",
-    //backgroundColor: "#fff",
-    //color: "#a6f",
     margin: 10,
     borderRadius: 10,
     padding: 10,
@@ -602,7 +579,6 @@ const styles = StyleSheet.create({
   tncBody: {
     width: formPageWidth,
     alignItems: "center",
-    //backgroundColor: 'transparent',
     backgroundColor: "#fff",
     padding: 0,
   },
@@ -610,6 +586,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     padding: 10,
     marginTop: 90,
+    alignItems: 'center',
   },
   footer: {
     backgroundColor: "transparent",
