@@ -1,8 +1,11 @@
 import { Owner } from "./Owner";
 
-
 export class Bus {
   id: string;
+  regNo: string;
+  ntcNo: string;
+  ntcDriver: Map<number, string>;
+  ntcConductor: Map<number, string>;
   departure: string;
   departureTime: Date;
   terminal: string;
@@ -12,6 +15,10 @@ export class Bus {
 
   constructor(
     id: string,
+    regNo: string,
+    ntcNo: string,
+    ntcDriver: Map<number, string>,
+    ntcConductor: Map<number, string>,
     departure: string,
     departureTime: Date,
     terminal: string,
@@ -20,6 +27,10 @@ export class Bus {
     owner: Owner
   ) {
     this.id = id;
+    this.regNo = regNo;
+    this.ntcNo = ntcNo;
+    this.ntcDriver = ntcDriver;
+    this.ntcConductor = ntcConductor;
     this.departure = departure;
     this.departureTime = departureTime;
     this.terminal = terminal;

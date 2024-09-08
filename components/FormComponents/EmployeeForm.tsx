@@ -4,9 +4,9 @@ import {
   GestureHandlerRootView,
   TextInput,
 } from "react-native-gesture-handler";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
-import { ThemedView } from "../ThemedView";
+import { ThemedView } from "../CommonModules/ThemedView";
 import {
   validateName,
   validatePhoneNo,

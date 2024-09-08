@@ -14,19 +14,21 @@ export type ThemedTextProps = TextProps & {
     | "drawerHeader"
     | "buttonText"
     | "header1"
-  | "h1"
-  | "h2"
-  | "h3"
-  | "h4"
-  | "h5"
-  | "h6"
-  | "s1"
-  | "s2"
-  | "s3"
-  | "s4"
-  | "s5"
-  | "s6"
-  | "s7"
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "s1"
+    | "s2"
+    | "s3"
+    | "s4"
+    | "s5"
+    | "s6"
+    | "s7"
+    | "s8"
+    | "s9"
     | "cardHeader";
 };
 
@@ -65,6 +67,8 @@ export function ThemedText({
         type === "s5" ? styles.s5 : undefined,
         type === "s6" ? styles.s6 : undefined,
         type === "s7" ? styles.s7 : undefined,
+        type === "s8" ? styles.s8 : undefined,
+        type === "s9" ? styles.s9 : undefined,
         style,
       ]}
       {...rest}
@@ -149,6 +153,14 @@ const styles = StyleSheet.create({
   s7: {
     marginTop: -2,
     fontSize: 11,
+    backgroundColor: "transparent",
+  },
+  s8: {
+    fontSize: 9,
+    backgroundColor: "transparent",
+  },
+  s9: {
+    fontSize: 6.5,
     backgroundColor: "transparent",
   },
   subtitle: {

@@ -1,22 +1,31 @@
 import { Ticket } from "@/controller/Ticket";
-import { ThemedText } from "../ThemedText";
-import { ThemedView } from "../ThemedView";
-import { Pressable, StyleSheet, View, Image, useColorScheme } from "react-native";
+import { ThemedText } from "../CommonModules/ThemedText";
+import { ThemedView } from "../CommonModules/ThemedView";
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  Image,
+  useColorScheme,
+} from "react-native";
 import { useState } from "react";
 import QRCode from "react-native-qrcode-svg";
-import { StringDate, StringTime } from "../Common/StringDateTime";
+import { StringDate, StringTime } from "../CommonModules/StringDateTime";
 
 type Props = {
   ticket: Ticket;
 };
 
 export const TicketView = ({ ticket }: Props) => {
-  const theme = useColorScheme() ?? 'light';
+  const theme = useColorScheme() ?? "light";
   const [fullTicket, setFullTicket] = useState(false);
 
   return (
     <Pressable
-      style={[styles.ticketBody, {backgroundColor: theme === 'dark' ? '#444e' : '#fff'}]}
+      style={[
+        styles.ticketBody,
+        { backgroundColor: theme === "dark" ? "#444e" : "#edf8ff" },
+      ]}
       onPress={() => setFullTicket(!fullTicket)}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -24,7 +33,7 @@ export const TicketView = ({ ticket }: Props) => {
           value={ticket.id.toString()}
           backgroundColor="transparent"
           size={60}
-          color={theme === 'dark' ? '#ccc' : '#555'}
+          color={theme === "dark" ? "#ccc" : "#555"}
         />
         <View>
           <ThemedText
@@ -80,7 +89,9 @@ export const TicketView = ({ ticket }: Props) => {
             }}
           >
             <ThemedText type="h6">Date</ThemedText>
-            <ThemedText type="s6">{StringDate(ticket.departureTime)}</ThemedText>
+            <ThemedText type="s6">
+              {StringDate(ticket.departureTime)}
+            </ThemedText>
           </View>
           <View
             style={{
@@ -90,7 +101,9 @@ export const TicketView = ({ ticket }: Props) => {
             }}
           >
             <ThemedText type="h6">Time</ThemedText>
-            <ThemedText type="s6">{StringTime(ticket.departureTime)}</ThemedText>
+            <ThemedText type="s6">
+              {StringTime(ticket.departureTime)}
+            </ThemedText>
           </View>
         </View>
         <View
@@ -156,14 +169,22 @@ export const TicketView = ({ ticket }: Props) => {
             }}
           >
             <View style={{ flexDirection: "column", alignItems: "center" }}>
-              <ThemedText type="s6">Departure: {ticket.departure}</ThemedText>
-              <ThemedText type="s6">{StringDate(ticket.departureTime)}</ThemedText>
-              <ThemedText type="s6">{StringTime(ticket.departureTime)}</ThemedText>
+              <ThemedText type="h6">Departure: {ticket.departure}</ThemedText>
+              <ThemedText type="s6">
+                {StringDate(ticket.departureTime)}
+              </ThemedText>
+              <ThemedText type="s6">
+                {StringTime(ticket.departureTime)}
+              </ThemedText>
             </View>
             <View style={{ flexDirection: "column", alignItems: "center" }}>
-              <ThemedText type="s6">Terminal: {ticket.terminal}</ThemedText>
-              <ThemedText type="s6">{StringDate(ticket.terminalTime)}</ThemedText>
-              <ThemedText type="s6">{StringTime(ticket.terminalTime)}</ThemedText>
+              <ThemedText type="h6">Terminal: {ticket.terminal}</ThemedText>
+              <ThemedText type="s6">
+                {StringDate(ticket.terminalTime)}
+              </ThemedText>
+              <ThemedText type="s6">
+                {StringTime(ticket.terminalTime)}
+              </ThemedText>
             </View>
           </View>
         </View>
@@ -174,10 +195,11 @@ export const TicketView = ({ ticket }: Props) => {
 
 const styles = StyleSheet.create({
   ticketBody: {
-    elevation: 3,
+    elevation: 4,
     borderWidth: 0,
     borderRadius: 10,
     marginHorizontal: 10,
+    marginVertical: 5,
     padding: 10,
   },
   collapsedTicketBody: {

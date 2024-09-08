@@ -3,8 +3,8 @@ import { Href, Link, router } from "expo-router";
 import { useState, useEffect } from "react";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { ThemedView } from "@/components/CommonModules/ThemedView";
 import FontAwesome from "@expo/vector-icons/build/FontAwesome";
 import {
   LogInFormPage1,

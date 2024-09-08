@@ -12,75 +12,82 @@ import {
   Image,
   StyleSheet,
 } from "react-native";
-import { ThemedText } from "./ThemedText";
+import { ThemedText } from "./CommonModules/ThemedText";
 import { MaterialIcons } from "@expo/vector-icons";
 import { faHome, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { accountType, useAppContext } from "@/context/AppContext";
 import { Dropdown } from "react-native-element-dropdown";
+import { Passenger } from "@/controller/Passenger";
+import { Owner } from "@/controller/Owner";
 
 export default function CustomDrawerContent(props: any) {
   const theme = useColorScheme() ?? "light";
   const iconColor = theme === "dark" ? "#eee" : "#777";
   const iconSize = 24;
   const router = useRouter();
-  const { firstName, lasttName, accountType, setAccountType } = useAppContext();
+  const { fName, lName, accountType, setAccountType } = useAppContext();
   const dataList = [
-    { label: "Passenger", value: "Passenger" as accountType },
-    { label: "Bus employee", value: "Bus employee" as accountType },
-    { label: "Bus owner", value: "Bus owner" as accountType },
+    { label: "Passenger Account", value: "Passenger" as accountType },
+    { label: "Bus Operator Account", value: "Operator" as accountType },
+    { label: "Bus Owner Account", value: "Owner" as accountType },
   ];
+
+  function changeAccount(accType: accountType) {
+    setAccountType(accType);
+    switch (accType) {
+      case "Passenger":
+        router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
+        return null;
+      case "Operator":
+        router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
+        return null;
+      case "Owner":
+        router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+        return null;
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props} scrollEnabled={false}>
-        <View style={{ padding: 5, alignItems: 'center' }}>
+        <View style={{ padding: 5, alignItems: "center" }}>
           <Image
-            source={
-              theme === "dark"
-                ? require("@/assets/logos/logo_darkmode.png")
-                : require("@/assets/logos/logo_darkmode.png")
-            }
+            source={require("@/assets/images/blank-profile-picture.png")}
             style={styles.profileImage}
           />
           <ThemedText type="h4" style={{ textAlign: "center" }}>
-            {firstName} {lasttName}
-          </ThemedText>
-          <ThemedText
-            type="s5"
-            style={{ textAlign: "center" }}
-            lightColor="#0bf"
-            darkColor="#1ff"
-          >
-            {accountType} account
+            {fName} {lName}
           </ThemedText>
         </View>
         <Dropdown
-            style={{
-              backgroundColor: "#e28",
-              borderWidth: 0,
-              borderRadius: 10,
-              paddingHorizontal: 10,
-              paddingVertical: 5,
-              marginHorizontal: 10,
-              marginVertical: 20,
-              elevation: 3,
-            }}
-            placeholderStyle={{ color: "#fff", textAlign: "center" }}
-            data={dataList}
-            labelField="label"
-            valueField="value"
-            placeholder={"Switch Account"}
-            value={null}
-            onChange={(item) => {
-              setAccountType(item.value);
-            }}
-            itemContainerStyle={{ backgroundColor: "#e28", margin: -1 }}
-            activeColor="#e28"
-            itemTextStyle={{ color: "#fff", textAlign: "center" }}
-            iconColor="#fff"
-            selectedTextStyle={{ color: "#fff", textAlign: "center" }}
-          />
+          style={{
+            backgroundColor: "#e28",
+            borderWidth: 0,
+            borderRadius: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            marginHorizontal: 10,
+            marginVertical: 20,
+            elevation: 3,
+          }}
+          placeholderStyle={{ color: "#fff", textAlign: "center" }}
+          data={dataList}
+          labelField="label"
+          valueField="value"
+          placeholder={
+            dataList.find((item) => item.value === accountType)?.label
+          }
+          value={null}
+          onChange={(item) => {
+            changeAccount(item.value);
+          }}
+          itemContainerStyle={{ backgroundColor: "#d17", margin: -1 }}
+          activeColor="#d17"
+          itemTextStyle={{ color: "#fff", textAlign: "center" }}
+          iconColor="#fff"
+          selectedTextStyle={{ color: "#fff", textAlign: "center" }}
+        />
         <View
           style={{
             paddingTop: 5,

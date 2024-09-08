@@ -9,8 +9,8 @@ import {
   Pressable,
   PressableProps,
 } from "react-native";
-import { ThemedText } from "../ThemedText";
-import { ThemedView } from "../ThemedView";
+import { ThemedText } from "../CommonModules/ThemedText";
+import { ThemedView } from "../CommonModules/ThemedView";
 import { Dropdown } from "react-native-element-dropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
@@ -18,7 +18,7 @@ import {
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { StringDate, StringTime } from "../Common/StringDateTime";
+import { StringDate, StringTime } from "../CommonModules/StringDateTime";
 
 const defaultSetDateTime: Dispatch<SetStateAction<Date>> = () => {};
 const defaultSetString: Dispatch<SetStateAction<string>> = () => {};

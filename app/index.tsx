@@ -16,8 +16,8 @@ import {
 import { useRef } from "react";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { ThemedView } from "@/components/CommonModules/ThemedView";
 
 export default function Index() {
   const theme = useColorScheme() ?? "light";
@@ -78,7 +78,7 @@ export default function Index() {
           <Pressable
             style={styles.loginButton}
             onPress={() => {
-              router.navigate("/(drawer)/profile" as Href<string>);
+              router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
             }}
           >
             <ThemedText type="buttonText" lightColor="#fff" darkColor="#fff">
