@@ -21,7 +21,7 @@ import React from "react";
 
 /********************************************************** Personal Info Page ***********************************************************/
 
-export const EmployeeFormPage1 = ({
+export const OperatorFormPage1 = ({
   fname,
   setFName,
   lname,
@@ -127,7 +127,7 @@ export const EmployeeFormPage1 = ({
 
 /********************************************************** License Details Page ***********************************************************/
 
-export const EmployeeFormPage2 = ({
+export const OperatorFormPage2 = ({
   nameOnLicense,
   setNameOnLicense,
   ntcLicenseNo,
@@ -237,7 +237,7 @@ export const EmployeeFormPage2 = ({
 
 /**************************************************************** OTP Page *******************************************************************/
 
-export const EmployeeFormPage3 = ({
+export const OperatorFormPage3 = ({
   otp,
   setOTP,
   nextAction,

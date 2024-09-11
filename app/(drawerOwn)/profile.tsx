@@ -1,25 +1,16 @@
 import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import * as ImagePicker from "expo-image-picker";
 import {
   faUser,
-  faArrowRight,
-  faChevronRight,
-  faC,
-  faBars,
   faPhone,
   faIdCard,
   faSignature,
-  faFileSignature,
-  faPerson,
   faUserCircle,
   faBank,
   faDriversLicense,
-  faListNumeric,
-  faSortNumericAsc,
-  faList12,
-  faPalette,
   faN,
+  faEdit,
 } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import {
@@ -27,42 +18,19 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   useColorScheme,
   View,
 } from "react-native";
-import { Ticket } from "@/controller/Ticket";
-import { TicketView } from "@/components/UIComponents/TicketView";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { useAppContext } from "@/context/AppContext";
-import { CreditCardView } from "@/components/UIComponents/CreditCardView";
 import { InfoCard } from "@/components/UIComponents/InfoCard";
-
-var passenger = false;
-var employee = true;
-var owner = true;
-var fName = "John";
-var lName = "Doe";
-var phoneNo = "0767601948";
-
-var occupation = "Driver";
-var nic = "200100001111";
-var driverLicenseNo = "898998898";
-var nameOnLicense = "John Doe";
-var ntcLicenseNo = "d-778998";
-
-var accHolderName = "Mr. John Doe";
-var accountNo = "1234 5678 0000 9876";
-var bankName = "People's bank";
-var branchName = "Peradeniya";
+import { useState } from "react";
 
 export default function Profile() {
+  const { myAccTypes, profileImage, setProfileImage } = useAppContext();
   const theme = useColorScheme() ?? "light";
   const iconColor = theme === "dark" ? "#ddd" : "#777";
-  const iconSize = 15;
   const {
-    accountType,
-
     fName,
     lName,
     phoneNo,
@@ -70,7 +38,6 @@ export default function Profile() {
     accountNo,
     accHolderName,
     bankName,
-    branchName,
     nameOnLicense,
     ntcLicenseNo,
     driverLicenseNo,
@@ -79,18 +46,52 @@ export default function Profile() {
 
   const credits = 500.25;
 
+  const pickImage = async () => {
+    // Request permission to access the media library
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert("Permission to access gallery is required!");
+      return;
+    }
+
+    // Open the image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: false,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProfileImage(result.assets[0].uri);
+    }
+  };
+
   return (
     <ScreenWrapper>
       <View style={styles.mainBody}>
         <View style={{ alignItems: "center", marginBottom: 5 }}>
-          <Image
-            source={
-              theme === "dark"
-                ? require("@/assets/logos/logo_darkmode.png")
-                : require("@/assets/logos/logo_darkmode.png")
-            }
-            style={styles.profileImage}
-          />
+          <View style={{ flexDirection: "row" }}>
+            <Image
+              source={
+                profileImage != ""
+                  ? { uri: profileImage }
+                  : require("@/assets/images/blank-profile-picture.png")
+              }
+              style={styles.profileImage}
+            />
+            <Pressable onPress={pickImage}>
+              <FontAwesomeIcon
+                icon={faEdit}
+                size={20}
+                color={"#fff"}
+                style={{ position: "absolute", bottom: 15, right: -8 }}
+              />
+            </Pressable>
+          </View>
+
           <ThemedText type={"s3"}>
             {fName} {lName}
           </ThemedText>
@@ -98,20 +99,30 @@ export default function Profile() {
         <View
           style={{
             flexDirection: "row",
-            justifyContent: 'space-between',
+            justifyContent: "space-between",
             alignItems: "center",
             marginBottom: 30,
             borderRadius: 20,
             paddingVertical: 3,
-            paddingHorizontal:  5,
-            marginHorizontal: '10%',
+            paddingHorizontal: 5,
+            marginHorizontal: "10%",
           }}
         >
-          <ThemedText type={"h4"} lightColor={"#555"} darkColor={"#fff"} style={{marginLeft: 5}}>Rs. {credits}</ThemedText>
+          <ThemedText
+            type={"h4"}
+            lightColor={"#555"}
+            darkColor={"#fff"}
+            style={{ marginLeft: 5 }}
+          >
+            Rs. {credits}
+          </ThemedText>
           <Pressable
             style={[
               styles.rechargeButton,
-              { borderColor: theme === "dark" ? "#fff" : "#666", borderWidth: 2, },
+              {
+                borderColor: theme === "dark" ? "#fff" : "#666",
+                borderWidth: 2,
+              },
             ]}
             onPress={() => router.replace("/index" as Href<string>)}
           >
@@ -122,12 +133,10 @@ export default function Profile() {
         </View>
 
         <ScrollView
-          style={
-            {
-              backgroundColor: 'transparent',
-              marginHorizontal: 20,
-            }
-          }
+          style={{
+            backgroundColor: "transparent",
+            marginHorizontal: 20,
+          }}
         >
           <View>
             <View>
@@ -146,7 +155,7 @@ export default function Profile() {
                 iconColor={iconColor}
               />
 
-              {owner && (
+              {(myAccTypes.get("Owner") || myAccTypes.get("Operator")) && (
                 <InfoCard
                   title="NIC"
                   iconName={faIdCard}
@@ -163,7 +172,7 @@ export default function Profile() {
                 }}
               />
             </View>
-            {owner && (
+            {myAccTypes.get("Owner") && (
               <View>
                 <ThemedText
                   type="h5"
@@ -192,7 +201,7 @@ export default function Profile() {
                   info={accHolderName}
                   iconColor={iconColor}
                 />
-                {employee && (
+                {myAccTypes.get("Operator") && (
                   <View
                     style={{
                       height: 1,
@@ -203,7 +212,7 @@ export default function Profile() {
                 )}
               </View>
             )}
-            {employee && (
+            {myAccTypes.get("Operator") && (
               <View>
                 <ThemedText
                   type="h5"

@@ -1,158 +1,33 @@
 import {
   StringDate,
-  StringTime,
 } from "@/components/CommonModules/StringDateTime";
-import {
-  DateTimeInput,
-  SearchInput,
-} from "@/components/FormComponents/FormInputField";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
-import { Owner } from "@/controller/Owner";
-import { Bus } from "@/controller/Bus";
-import { Transaction } from "@/controller/Transaction";
 import {
-  faArrowDown,
-  faArrowLeft,
   faArrowLeftLong,
-  faArrowRight,
   faArrowRightLong,
   faArrowRotateBack,
-  faArrowRotateBackward,
-  faArrowTrendDown,
-  faArrowTrendUp,
-  faArrowUp,
-  faArrowUp19,
-  faCalendarDays,
-  faLocationCrosshairs,
-  faLocationDot,
-  faRotateBack,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { Href, router } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
-  Pressable,
   StyleSheet,
   useColorScheme,
   View,
 } from "react-native";
+import { useAppContext } from "@/context/AppContext";
 
 export default function Transactions() {
-  const [location, setLocation] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [openDate, setOpenDate] = useState(false);
+  const { pasTransactions } = useAppContext();
   const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#eee" : "#777";
   const iconSize = 20;
-
-  const data = [
-    new Transaction(
-      "srdtf234546",
-      "payment",
-      120,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Map(),
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "recharge",
-      190,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Map(),
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "payment",
-      1000,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Map(),
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "return",
-      500,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Map(),
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "payment",
-      125.5,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Map(),
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-  ];
 
   return (
     <ThemedView style={styles.mainBody}>
       <FlatList
         style={styles.flatList}
-        data={data}
+        data={pasTransactions}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <ThemedView style={styles.searchResult}>

@@ -10,7 +10,10 @@ export class Bus {
   departureTime: Date;
   terminal: string;
   terminalTime: Date;
+  returnTime: Date;
   seats: Map<number, string>;
+  latitude: number;
+  longitude: number;
   owner: Owner;
 
   constructor(
@@ -23,7 +26,10 @@ export class Bus {
     departureTime: Date,
     terminal: string,
     terminalTime: Date,
+    returnTime: Date,
     seats: Map<number, string>,
+    latitude: number,
+    longitude: number, 
     owner: Owner
   ) {
     this.id = id;
@@ -35,7 +41,10 @@ export class Bus {
     this.departureTime = departureTime;
     this.terminal = terminal;
     this.terminalTime = terminalTime;
+    this.returnTime = returnTime;
     this.seats = seats;
+    this.latitude = latitude;
+    this.longitude = longitude;
     this.owner = new Owner("asdasdf", 134243);
   }
 

@@ -16,10 +16,10 @@ import {
   PassengerFormPage2,
 } from "@/components/FormComponents/PassengrForm";
 import {
-  EmployeeFormPage1,
-  EmployeeFormPage2,
-  EmployeeFormPage3,
-} from "@/components/FormComponents/EmployeeForm";
+  OperatorFormPage1,
+  OperatorFormPage2,
+  OperatorFormPage3,
+} from "@/components/FormComponents/OperatorForm";
 import {
   OwnerFormPage1,
   OwnerFormPage2,
@@ -159,7 +159,7 @@ export default function SignUp() {
   }
 
   function submitForm() {
-    router.replace("/(drawer)/home/dashboard" as Href<string>);
+    router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
   }
 
   function acceptTerms() {
@@ -167,11 +167,11 @@ export default function SignUp() {
   }
 
   function openTermsAndConditions() {
-    router.navigate("/terms" as Href<string>);
+    router.navigate("/modals/termsModal" as Href<string>);
   }
 
   function openPrivacyPolicy() {
-    router.navigate("/privacy" as Href<string>);
+    router.navigate("/modals/privacyModal" as Href<string>);
   }
 
   // Hide form navigation button at first and last page
@@ -308,7 +308,7 @@ export default function SignUp() {
             {/********************** Employee form pages **************************************/}
             {employee && (
               <Animated.View style={styles.formPage}>
-                <EmployeeFormPage1
+                <OperatorFormPage1
                   fname={fname}
                   setFName={setFName}
                   lname={lname}
@@ -325,7 +325,7 @@ export default function SignUp() {
             )}
             {employee && (
               <Animated.View style={styles.formPage}>
-                <EmployeeFormPage2
+                <OperatorFormPage2
                   nameOnLicense={nameOnLicense}
                   setNameOnLicense={setNameOnLicense}
                   ntcLicenseNo={ntcLicenseNo}
@@ -342,7 +342,7 @@ export default function SignUp() {
             )}
             {employee && (
               <Animated.View style={styles.formPage}>
-                <EmployeeFormPage3
+                <OperatorFormPage3
                   otp={otp}
                   setOTP={setOTP}
                   nextAction={scrollFroward}
@@ -444,6 +444,9 @@ export default function SignUp() {
                   I agree to the Privacy Policy and Terms and Conditions{" "}
                 </ThemedText>
                 <Switch
+                  barHeight={25}
+                  switchWidthMultiplier={1.8}
+                  circleSize={25}
                   value={agree}
                   onValueChange={acceptTerms}
                   activeText=""
@@ -586,7 +589,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     padding: 10,
     marginTop: 90,
-    alignItems: 'center',
+    alignItems: "center",
   },
   footer: {
     backgroundColor: "transparent",

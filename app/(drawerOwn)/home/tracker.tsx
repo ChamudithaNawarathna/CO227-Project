@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Pressable,
+  useColorScheme,
+} from "react-native";
 import * as Location from "expo-location";
 import MapLocation from "@/components/UIComponents/MapLocation";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
 
 export default function Tracker() {
+  const theme = useColorScheme() ?? "light";
+  const iconColor = theme === "dark" ? "#aaa" : "#777";
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -32,11 +42,20 @@ export default function Tracker() {
     }
   };
 
+  const reloadLocation = async (): Promise<void> => {
+    setLoading(true);
+    setErrorMsg(null);
+    await getLocation();
+  };
+
   useEffect(() => {
     (async () => {
       const hasPermission = await requestPermissions();
       if (hasPermission) {
-        await getLocation();
+        // Adding a slight delay before getting the location
+        setTimeout(async () => {
+          await getLocation();
+        }, 1000);
       } else {
         setLoading(false); // Stop loading if permissions are denied
       }
@@ -55,9 +74,28 @@ export default function Tracker() {
   return (
     <View style={styles.container}>
       {loading ? (
-        <Text>Loading...</Text> // Show a loading message until the location is fetched
+        <View style={{ alignSelf: "center", marginTop: 250 }}>
+          <ThemedText type="s5" lightColor="#666" darkColor="#ddd">
+            Loading...
+          </ThemedText>
+        </View>
       ) : errorMsg ? (
-        <Text>{errorMsg}</Text>
+        <View style={{ alignSelf: "center", marginTop: 250 }}>
+          <ThemedText type="s5" lightColor={"#555"} darkColor={"#ccc"}>
+            Something went wrong. Please try again
+          </ThemedText>
+          <Pressable style={styles.reloadButton} onPress={reloadLocation}>
+            <FontAwesomeIcon
+              icon={faArrowRotateBack}
+              size={18}
+              color={iconColor}
+              style={{ alignSelf: "center" }}
+            />
+            <ThemedText type="s5" lightColor={iconColor} darkColor={iconColor}>
+              Tap to Retry
+            </ThemedText>
+          </Pressable>
+        </View>
       ) : (
         location && <MapLocation />
       )}
@@ -69,7 +107,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  reloadButton: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
+    alignItems: "center",
+    marginHorizontal: 10,
+    marginVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
+    backgroundColor: "transparent",
+  },
 });
+
 
 // import { Image, StyleSheet, Pressable } from "react-native";
 // import { Link } from "expo-router";

@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { useRef, useState } from "react";
 import {
-  DateTimeInput,
+  DateTimeInputSquare,
   SearchInput,
 } from "@/components/FormComponents/FormInputField";
 import React from "react";
@@ -30,23 +30,12 @@ import { Owner } from "@/controller/Owner";
 import { Bus } from "@/controller/Bus";
 import { Ticket } from "@/controller/Ticket";
 import ScreenWrapper from "@/components/ScreenWrapper";
+import { useAppContext } from "@/context/AppContext";
+import BusView from "@/components/UIComponents/BusView";
 
 export default function Tickets() {
-  var ticketsAvailable = true;
-  const ticket = new Ticket();
-  const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#eee" : "#777";
+  const { busData } = useAppContext();
   const iconSize = 20;
-
-  var cost = 0;
-
-  const dataList = [
-    { label: "item 1", cost: "1" },
-    { label: "item 2", cost: "2" },
-    { label: "item 3", cost: "3" },
-  ];
-
-  const [input, setInput] = useState("");
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -55,77 +44,13 @@ export default function Tickets() {
   const [openDate, setOpenDate] = useState(false);
   const [openTime, setOpenTime] = useState(false);
 
+  const filteredBusData = busData.filter(
+    (bus) => bus.departure === from && bus.terminal === to
+  );
+
   const inputRefs = useRef(
     Array.from({ length: 2 }, () => React.createRef<TextInput>())
   );
-
-  const data = [
-    new Bus(
-      "srdtf234546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Badulla",
-      new Date(),
-      "Colombo",
-      new Date(),
-      new Map(),
-      new Owner("123abc", 1200)
-    ),
-    new Bus(
-      "srdtf24509",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Colombo",
-      new Date(),
-      "Kandy",
-      new Date(),
-      new Map(),
-      new Owner("123abc", 1200)
-    ),
-    new Bus(
-      "s35hh34546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Anuradapura",
-      new Date(),
-      "Hambantota",
-      new Date(),
-      new Map(),
-      new Owner("123fgc", 8000)
-    ),
-    new Bus(
-      "s35hh34546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Anuradapura",
-      new Date(),
-      "Hambantota",
-      new Date(),
-      new Map(),
-      new Owner("123fgc", 8000)
-    ),
-    new Bus(
-      "s35hh34546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Anuradapura",
-      new Date(),
-      "Hambantota",
-      new Date(),
-      new Map(),
-      new Owner("123fgc", 8000)
-    ),
-  ];
 
   function openSeats() {
     router.navigate("/seats" as Href<string>);
@@ -153,7 +78,7 @@ export default function Tickets() {
       />
 
       <View style={{ backgroundColor: "transparent" }}>
-        <DateTimeInput
+        <DateTimeInputSquare
           input={date}
           setInput={setDate}
           iconName={faCalendarDays}
@@ -176,7 +101,7 @@ export default function Tickets() {
           />
         )}
 
-        <DateTimeInput
+        <DateTimeInputSquare
           input={time}
           setInput={setTime}
           iconName={faClock}
@@ -204,89 +129,18 @@ export default function Tickets() {
 
       <FlatList
         style={styles.flatList}
-        data={data}
+        data={filteredBusData}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <ThemedView style={styles.searchResult}>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ flexDirection: "row" }}>
-                <View style={{ marginRight: 5, marginBottom: 12 }}>
-                  <FontAwesomeIcon
-                    icon={faLocationDot}
-                    size={iconSize}
-                    color={"#4c4"}
-                    style={{ alignSelf: "center" }}
-                  />
-                  <View style={styles.horizontalLine}></View>
-                  <FontAwesomeIcon
-                    icon={faLocationDot}
-                    size={iconSize}
-                    color={"#4af"}
-                    style={{ alignSelf: "center" }}
-                  />
-                </View>
-                <View
-                  style={{ justifyContent: "space-between", marginTop: -5 }}
-                >
-                  <View>
-                    <ThemedText type="s4" lightColor="#000" darkColor="#fff">
-                      {item.departure}
-                    </ThemedText>
-                    <ThemedText type="s7" lightColor="#666" darkColor="#ccc">
-                      Departure
-                    </ThemedText>
-                  </View>
-                  <View>
-                    <ThemedText type="s4" lightColor="#000" darkColor="#fff">
-                      {item.terminal}
-                    </ThemedText>
-                    <ThemedText type="s7" lightColor="#666" darkColor="#ccc">
-                      Terminal
-                    </ThemedText>
-                  </View>
-                </View>
-              </View>
-              <View style={{ justifyContent: "space-between" }}>
-                <ThemedText
-                  type="h4"
-                  lightColor="#000"
-                  darkColor="#fff"
-                  style={{ textAlign: "right" }}
-                >
-                  Rs. 200
-                </ThemedText>
-                <ThemedText type="s5" style={{ textAlign: "right" }}>
-                  Depart at: {StringTime(item.departureTime)}
-                </ThemedText>
-                <Pressable
-                  style={{
-                    backgroundColor: "#e28",
-                    borderWidth: 0,
-                    borderRadius: 50,
-                    paddingHorizontal: 10,
-                    paddingVertical: 5,
-                  }}
-                  onPress={openSeats}
-                >
-                  <ThemedText
-                    type={"s4"}
-                    style={{ textAlign: "center" }}
-                    lightColor="#fff"
-                    darkColor="#fff"
-                  >
-                    Buy Ticket
-                  </ThemedText>
-                </Pressable>
-              </View>
-            </View>
-          </ThemedView>
-        )}
+        renderItem={({ item }) => <BusView bus={item} />}
       />
+
+      {filteredBusData.length == 0 && (
+        <View style={{ alignSelf: "center", marginBottom: 200 }}>
+          <ThemedText type="s5" lightColor="#666" darkColor="#ccc">
+            No buses are available
+          </ThemedText>
+        </View>
+      )}
     </View>
   );
 }

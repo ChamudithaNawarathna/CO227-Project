@@ -1,7 +1,7 @@
 import { User } from "./User";
 
 
-export class Employee extends User {
+export class Operator extends User {
   credits: number | null;
   seats: Map<string, number>; // Maps passenger ID to purchased ticket count
 

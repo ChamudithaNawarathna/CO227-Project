@@ -6,6 +6,7 @@ import { useAppContext } from "@/context/AppContext";
 
 type SeatProps = {
   index: number;
+  reserved?: boolean;
 };
 
 const seatColors = new Map<String, string>([
@@ -15,34 +16,42 @@ const seatColors = new Map<String, string>([
   ["Reserved", "#f90"],
 ]);
 
-export default function Seat({ index }: SeatProps) {
+export default function Seat({ index, reserved = false }: SeatProps) {
   const theme = useColorScheme() ?? "light";
   const { seatNo, setSeatNo, seatStatus, setSeatStatus } = useAppContext();
 
-  const updateStatus = (index: number) => {
-    setSeatStatus(() => {
-      const updatedStatus = [...seatStatus];
-      if (seatStatus[index] == "Available") {
-        updatedStatus[seatNo] = "Available";
-        updatedStatus[index] = "Selected";
-        setSeatNo(index);
-      } else if (seatStatus[index] == "Selected") {
-        updatedStatus[index] = "Available";
-        setSeatNo(0);
-      }
-      return updatedStatus;
-    });
+  const updateStatus = (index: number, reserved: boolean) => {
+    if (reserved) {
+      return null;
+    } else {
+      setSeatStatus(() => {
+        const updatedStatus = [...seatStatus];
+        if (seatStatus[index] == "Available") {
+          updatedStatus[seatNo] = "Available";
+          updatedStatus[index] = "Selected";
+          setSeatNo(index);
+        } else if (seatStatus[index] == "Selected") {
+          updatedStatus[index] = "Available";
+          setSeatNo(0);
+        }
+        return updatedStatus;
+      });
+    }
   };
 
   return (
     <Pressable
       style={[
         styles.seatButton,
-        { backgroundColor: seatColors.get(seatStatus[index]) },
+        {
+          backgroundColor: reserved
+            ? seatColors.get("Reserved")
+            : seatColors.get(seatStatus[index]),
+        },
       ]}
-      onPress={() => updateStatus(index)}
+      onPress={() => updateStatus(index, reserved)}
     >
-      <ThemedText type="h3" lightColor="#fff">
+      <ThemedText type="h4" lightColor="#fff">
         {index}
       </ThemedText>
     </Pressable>
@@ -52,7 +61,7 @@ export default function Seat({ index }: SeatProps) {
 const styles = StyleSheet.create({
   seatButton: {
     margin: 5,
-    paddingHorizontal: 10,
+    paddingHorizontal: 7,
     paddingVertical: 5,
     borderRadius: 10,
     alignItems: "center",

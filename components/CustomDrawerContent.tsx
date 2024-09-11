@@ -22,6 +22,7 @@ import { Passenger } from "@/controller/Passenger";
 import { Owner } from "@/controller/Owner";
 
 export default function CustomDrawerContent(props: any) {
+  const { myAccTypes, profileImage } = useAppContext();
   const theme = useColorScheme() ?? "light";
   const iconColor = theme === "dark" ? "#eee" : "#777";
   const iconSize = 24;
@@ -34,16 +35,26 @@ export default function CustomDrawerContent(props: any) {
   ];
 
   function changeAccount(accType: accountType) {
-    setAccountType(accType);
     switch (accType) {
       case "Passenger":
+        setAccountType(accType);
         router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
         return null;
       case "Operator":
-        router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
+        if (myAccTypes.get(accType) == true) {
+          setAccountType(accType);
+          router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
+        } else {
+          router.navigate("/modals/opeSignupModal" as Href<string>);
+        }
         return null;
       case "Owner":
-        router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+        if (myAccTypes.get(accType) == true) {
+          setAccountType(accType);
+          router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+        } else {
+          router.navigate("/modals/ownSignupModal" as Href<string>);
+        }
         return null;
     }
   }
@@ -53,7 +64,11 @@ export default function CustomDrawerContent(props: any) {
       <DrawerContentScrollView {...props} scrollEnabled={false}>
         <View style={{ padding: 5, alignItems: "center" }}>
           <Image
-            source={require("@/assets/images/blank-profile-picture.png")}
+            source={
+              profileImage != ""
+                ? { uri: profileImage }
+                : require("@/assets/images/blank-profile-picture.png")
+            }
             style={styles.profileImage}
           />
           <ThemedText type="h4" style={{ textAlign: "center" }}>
@@ -66,7 +81,7 @@ export default function CustomDrawerContent(props: any) {
             borderWidth: 0,
             borderRadius: 10,
             paddingHorizontal: 10,
-            paddingVertical: 5,
+            paddingVertical: 10,
             marginHorizontal: 10,
             marginVertical: 20,
             elevation: 3,
@@ -82,7 +97,7 @@ export default function CustomDrawerContent(props: any) {
           onChange={(item) => {
             changeAccount(item.value);
           }}
-          itemContainerStyle={{ backgroundColor: "#d17", margin: -1 }}
+          itemContainerStyle={{ backgroundColor: "#d17", margin: -1, borderWidth: 0 }}
           activeColor="#d17"
           itemTextStyle={{ color: "#fff", textAlign: "center" }}
           iconColor="#fff"

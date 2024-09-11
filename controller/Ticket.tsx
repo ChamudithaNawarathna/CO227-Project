@@ -22,7 +22,7 @@ export class Ticket {
     id: string = "123456789",
     busID: string = "adfasdfs",
     passengerID: string = "asdffas",
-    status: string = "Confirmed",
+    status: string = "Valid",
     seat: number = 5,
     title: string = "SLTB",
     busclass: string = "Normal",

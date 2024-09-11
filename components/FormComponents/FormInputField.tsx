@@ -254,7 +254,7 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
   }
 );
 
-type DateTimeProps = {
+type DateTimeSquareProps = {
   input: Date | null;
   setInput: Dispatch<SetStateAction<Date>>;
   placeholder?: string;
@@ -263,14 +263,14 @@ type DateTimeProps = {
   setOpenPicker: Dispatch<SetStateAction<boolean>>;
 };
 
-export function DateTimeInput({
+export function DateTimeInputSquare({
   input = null,
   setInput = defaultSetDateTime,
   placeholder = "",
   iconName = null,
   type = "Date",
   setOpenPicker = defaultSetBoolean,
-}: DateTimeProps) {
+}: DateTimeSquareProps) {
   const theme = useColorScheme() ?? "light";
   const updateInput = () => {
     setOpenPicker(true);
@@ -300,8 +300,69 @@ export function DateTimeInput({
           }}
         >
           <ThemedText>
-            {type == "Date" && (input != null ? StringDate(input) : placeholder)}
-            {type == "Time" && (input != null ? StringTime(input) : placeholder)}
+            {type == "Date" &&
+              (input != null ? StringDate(input) : placeholder)}
+            {type == "Time" &&
+              (input != null ? StringTime(input) : placeholder)}
+          </ThemedText>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+type DateTimeRoundProps = {
+  input: Date | null;
+  setInput: Dispatch<SetStateAction<Date>>;
+  title: string;
+  placeholder?: string;
+  type: string;
+  setOpenPicker: Dispatch<SetStateAction<boolean>>;
+};
+
+export function DateTimeInputRound({
+  input = null,
+  setInput = defaultSetDateTime,
+  title = "",
+  placeholder = "",
+  type = "Date",
+  setOpenPicker = defaultSetBoolean,
+}: DateTimeRoundProps) {
+  const theme = useColorScheme() ?? "light";
+  const updateInput = () => {
+    setOpenPicker(true);
+    setInput(new Date());
+  };
+
+  return (
+    <View>
+      <ThemedText lightColor="#777" darkColor="#eee">
+        {title}
+      </ThemedText>
+      <View
+        style={{
+          width: 300,
+          borderRadius: 20,
+          borderWidth: 2,
+          borderColor: "transparent",
+          paddingHorizontal: 10,
+          paddingVertical: 5,
+          marginBottom: 30,
+          backgroundColor: theme === "dark" ? "#444" : "#fff",
+          elevation: 3,
+        }}
+      >
+        <Pressable
+          style={styles.searchInput}
+          onPress={() => {
+            updateInput();
+          }}
+        >
+          <ThemedText>
+            {type == "Date" &&
+              (input != null ? StringDate(input) : placeholder)}
+            {type == "Time" &&
+              (input != null ? StringTime(input) : placeholder)}
           </ThemedText>
         </Pressable>
       </View>
@@ -360,11 +421,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   inputDropdown: {
-    width: 280,
+    width: 300,
     color: "#333",
     borderRadius: 20,
     paddingHorizontal: 10,
-    paddingVertical: -10,
+    paddingVertical: 10,
     marginBottom: 10,
     backgroundColor: "#fff",
     elevation: 3,

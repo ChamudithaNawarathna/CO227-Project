@@ -26,6 +26,7 @@ import {
 import { ThemedView } from "@/components/CommonModules/ThemedView";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 import { color } from "react-native-elements/dist/helpers";
+import { AppContext, AppProvider } from "@/context/AppContext";
 
 export default function DrawerLayout() {
   const navigation = useNavigation();
@@ -33,152 +34,156 @@ export default function DrawerLayout() {
   const iconSize = 24;
 
   return (
-    <GestureHandlerRootView>
-      <Drawer
-        drawerContent={CustomDrawerContent}
-        screenOptions={{
-          //drawerHideStatusBarOnOpen: true,
-          drawerInactiveBackgroundColor: "transparent",
-          drawerActiveBackgroundColor: theme === "dark" ? "#4de4" : "#4de8",
-          drawerType: "front",
-          drawerStyle: {
-            backgroundColor: theme === "dark" ? "#333" : "#fff",
-            width: 250,
-          },
-          drawerActiveTintColor: theme === "dark" ? "#2ff" : "#05c",
-          drawerInactiveTintColor: theme === "dark" ? "#eee" : "#777",
-          drawerAllowFontScaling: true,
-          headerShadowVisible: false,
-          headerTitle: () => (
-            <View style={styles.drawerHeader}>
-              <Image
-                source={
-                  theme === "dark"
-                    ? require("@/assets/logos/logo_darkmode.png")
-                    : require("@/assets/logos/logo_darkmode.png")
-                }
-                style={styles.logo}
+      <GestureHandlerRootView>
+        <Drawer
+          drawerContent={CustomDrawerContent}
+          screenOptions={{
+            //drawerHideStatusBarOnOpen: true,
+            drawerInactiveBackgroundColor: "transparent",
+            drawerActiveBackgroundColor: theme === "dark" ? "#4de4" : "#4de8",
+            drawerType: "front",
+            drawerStyle: {
+              backgroundColor: theme === "dark" ? "#333" : "#fff",
+              width: 250,
+            },
+            drawerActiveTintColor: theme === "dark" ? "#2ff" : "#05c",
+            drawerInactiveTintColor: theme === "dark" ? "#eee" : "#777",
+            drawerAllowFontScaling: true,
+            headerShadowVisible: false,
+            headerTitle: () => (
+              <View style={styles.drawerHeader}>
+                <Image
+                  source={
+                    theme === "dark"
+                      ? require("@/assets/logos/logo_darkmode.png")
+                      : require("@/assets/logos/logo_darkmode.png")
+                  }
+                  style={styles.logo}
+                />
+              </View>
+            ),
+            headerTitleAlign: "center",
+            headerBackground: ({}) => (
+              <ThemedView
+                style={{
+                  flex: 1,
+                  backgroundColor: theme === "dark" ? "#5fb5e5" : "#5fb5e5",
+                }}
               />
-            </View>
-          ),
-          headerTitleAlign: "center",
-          headerBackground: ({}) => (
-            <ThemedView
-              style={{
-                flex: 1,
-                backgroundColor: theme === "dark" ? "#5fb5e5" : "#5fb5e5",
-              }}
-            />
-          ),
-          headerLeft: () => (
-            <Pressable
-              style={{
-                backgroundColor: "transparent",
-                borderWidth: 0,
-                paddingHorizontal: 10,
-                paddingVertical: 5,
-              }}
-              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            >
-              <FontAwesomeIcon
-                icon={faBars}
-                size={24}
-                color={theme === "dark" ? "#fff" : "#fff"}
-              />
-            </Pressable>
-          ),
-        }}
-      >
-        <Drawer.Screen
-          name="home"
-          options={{
-            drawerLabel: "Home",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon icon={faHome} size={iconSize} color={color} />
+            ),
+            headerLeft: () => (
+              <Pressable
+                style={{
+                  backgroundColor: "transparent",
+                  borderWidth: 0,
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                }}
+                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              >
+                <FontAwesomeIcon
+                  icon={faBars}
+                  size={24}
+                  color={theme === "dark" ? "#fff" : "#fff"}
+                />
+              </Pressable>
             ),
           }}
-        />
+        >
+          <Drawer.Screen
+            name="home"
+            options={{
+              drawerLabel: "Home",
+              drawerIcon: ({ color }) => (
+                <FontAwesomeIcon icon={faHome} size={iconSize} color={color} />
+              ),
+            }}
+          />
 
-        <Drawer.Screen
-          name="profile"
-          options={{
-            drawerLabel: "Profile",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon icon={faUser} size={iconSize} color={color} />
-            ),
-            headerTitle: "Profile",
-            headerTintColor: "#fff", // Change this to your desired header text color
-          }}
-        />
-        <Drawer.Screen
-          name="timetables"
-          options={{
-            drawerLabel: "Timetables",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon icon={faTable} size={iconSize} color={color} />
-            ),
-            headerTitle: "Timetables",
-          }}
-        />
-        <Drawer.Screen
-          name="transactions"
-          options={{
-            drawerLabel: "Transactions",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon
-                icon={faMoneyBillTransfer}
-                size={iconSize}
-                color={color}
-              />
-            ),
-            headerTitle: "Transactions",
-          }}
-        />
-        <Drawer.Screen
-          name="settings"
-          options={{
-            drawerLabel: "Settings",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon icon={faCog} size={iconSize} color={color} />
-            ),
-            headerTitle: "Settings",
-          }}
-        />
-        <Drawer.Screen
-          name="about"
-          options={{
-            drawerLabel: "About",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon
-                icon={faInfoCircle}
-                size={iconSize}
-                color={color}
-              />
-            ),
-            headerTitle: "About",
-          }}
-        />
-        <Drawer.Screen
-          name="buses"
-          options={{
-            drawerLabel: "Buses",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon icon={faBusAlt} size={iconSize} color={color} />
-            ),
-            headerTitle: "Buses",
-          }}
-        />
-        <Drawer.Screen
-          name="analytics"
-          options={{
-            drawerLabel: "Analytics",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon icon={faChartLine} size={iconSize} color={color} />
-            ),
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
+          <Drawer.Screen
+            name="profile"
+            options={{
+              drawerLabel: "Profile",
+              drawerIcon: ({ color }) => (
+                <FontAwesomeIcon icon={faUser} size={iconSize} color={color} />
+              ),
+              headerTitle: "Profile",
+              headerTintColor: "#fff",
+            }}
+          />
+          <Drawer.Screen
+            name="transactions"
+            options={{
+              drawerLabel: "Transactions",
+              drawerIcon: ({ color }) => (
+                <FontAwesomeIcon
+                  icon={faMoneyBillTransfer}
+                  size={iconSize}
+                  color={color}
+                />
+              ),
+              headerTitle: "Transactions",
+              headerTintColor: "#fff",
+            }}
+          />
+          <Drawer.Screen
+            name="settings"
+            options={{
+              drawerLabel: "Settings",
+              drawerIcon: ({ color }) => (
+                <FontAwesomeIcon icon={faCog} size={iconSize} color={color} />
+              ),
+              headerTitle: "Settings",
+              headerTintColor: "#fff",
+            }}
+          />
+          <Drawer.Screen
+            name="about"
+            options={{
+              drawerLabel: "About",
+              drawerIcon: ({ color }) => (
+                <FontAwesomeIcon
+                  icon={faInfoCircle}
+                  size={iconSize}
+                  color={color}
+                />
+              ),
+              headerTitle: "About",
+              headerTintColor: "#fff",
+            }}
+          />
+          <Drawer.Screen
+            name="buses"
+            options={{
+              drawerLabel: "Buses",
+              drawerIcon: ({ color }) => (
+                <FontAwesomeIcon
+                  icon={faBusAlt}
+                  size={iconSize}
+                  color={color}
+                />
+              ),
+              headerTitle: "Buses",
+              headerTintColor: "#fff",
+            }}
+          />
+          <Drawer.Screen
+            name="analytics"
+            options={{
+              drawerLabel: "Analytics",
+              drawerIcon: ({ color }) => (
+                <FontAwesomeIcon
+                  icon={faChartLine}
+                  size={iconSize}
+                  color={color}
+                />
+              ),
+              headerTitle: "Analytics",
+              headerTintColor: "#fff",
+            }}
+          />
+        </Drawer>
+      </GestureHandlerRootView>
   );
 }
 

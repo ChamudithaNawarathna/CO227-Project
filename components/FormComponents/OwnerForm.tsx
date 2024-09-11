@@ -165,7 +165,7 @@ export const OwnerFormPage2 = ({
     } else {
       setNextVisible(false);
     }
-  }, [accountNo, bankName, branchName, currentPos]);
+  }, [accHolderName, accountNo, bankName, branchName, currentPos]);
 
   // Make "Back" button visible
   useEffect(() => {
