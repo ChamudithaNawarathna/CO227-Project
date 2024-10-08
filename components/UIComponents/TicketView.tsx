@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useState } from "react";
 import QRCode from "react-native-qrcode-svg";
-import { StringDate, StringTime } from "../CommonModules/StringDateTime";
+import { DateToString, TimeToString } from "../CommonModules/DateTimeToString";
 
 type Props = {
   ticket: Ticket;
@@ -24,7 +24,7 @@ export const TicketView = ({ ticket }: Props) => {
     <Pressable
       style={[
         styles.ticketBody,
-        { backgroundColor: theme === "dark" ? "#444e" : "#edf8ff" },
+        { backgroundColor: theme === "dark" ? "#666e" : "#edf8ff" },
       ]}
       onPress={() => setFullTicket(!fullTicket)}
     >
@@ -37,7 +37,10 @@ export const TicketView = ({ ticket }: Props) => {
         />
         <View>
           <ThemedText
-            style={styles.ticketStatus}
+            style={{textAlignVertical: "center",
+              textAlign: "center",
+              backgroundColor: ticket.status == "Valid" ? "#2c1" : "#a19",
+              borderRadius: 10}}
             lightColor="#fff"
             darkColor="#fff"
           >
@@ -90,7 +93,7 @@ export const TicketView = ({ ticket }: Props) => {
           >
             <ThemedText type="h6">Date</ThemedText>
             <ThemedText type="s6">
-              {StringDate(ticket.departureTime)}
+              {DateToString(ticket.departureTime)}
             </ThemedText>
           </View>
           <View
@@ -102,7 +105,7 @@ export const TicketView = ({ ticket }: Props) => {
           >
             <ThemedText type="h6">Time</ThemedText>
             <ThemedText type="s6">
-              {StringTime(ticket.departureTime)}
+              {TimeToString(ticket.departureTime)}
             </ThemedText>
           </View>
         </View>
@@ -148,7 +151,7 @@ export const TicketView = ({ ticket }: Props) => {
               }}
             >
               <ThemedText type="s6">Booked date</ThemedText>
-              <ThemedText type="s6">{StringDate(ticket.bookedTime)}</ThemedText>
+              <ThemedText type="s6">{DateToString(ticket.bookedTime)}</ThemedText>
             </View>
             <View
               style={{
@@ -158,7 +161,7 @@ export const TicketView = ({ ticket }: Props) => {
               }}
             >
               <ThemedText type="s6">Booked time</ThemedText>
-              <ThemedText type="s6">{StringTime(ticket.bookedTime)}</ThemedText>
+              <ThemedText type="s6">{TimeToString(ticket.bookedTime)}</ThemedText>
             </View>
           </View>
           <View
@@ -171,19 +174,19 @@ export const TicketView = ({ ticket }: Props) => {
             <View style={{ flexDirection: "column", alignItems: "center" }}>
               <ThemedText type="h6">Departure: {ticket.departure}</ThemedText>
               <ThemedText type="s6">
-                {StringDate(ticket.departureTime)}
+                {DateToString(ticket.departureTime)}
               </ThemedText>
               <ThemedText type="s6">
-                {StringTime(ticket.departureTime)}
+                {TimeToString(ticket.departureTime)}
               </ThemedText>
             </View>
             <View style={{ flexDirection: "column", alignItems: "center" }}>
               <ThemedText type="h6">Terminal: {ticket.terminal}</ThemedText>
               <ThemedText type="s6">
-                {StringDate(ticket.terminalTime)}
+                {DateToString(ticket.terminalTime)}
               </ThemedText>
               <ThemedText type="s6">
-                {StringTime(ticket.terminalTime)}
+                {TimeToString(ticket.terminalTime)}
               </ThemedText>
             </View>
           </View>

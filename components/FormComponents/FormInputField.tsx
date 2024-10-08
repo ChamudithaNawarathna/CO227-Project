@@ -1,4 +1,4 @@
-import React, { Dispatch, RefObject, SetStateAction, useState } from "react";
+import React, { Dispatch, RefObject, SetStateAction, useEffect, useState } from "react";
 import {
   TextInput,
   StyleSheet,
@@ -18,7 +18,8 @@ import {
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import { StringDate, StringTime } from "../CommonModules/StringDateTime";
+import { DateToString, TimeToString } from "../CommonModules/DateTimeToString";
+import * as FileSystem from "expo-file-system";
 
 const defaultSetDateTime: Dispatch<SetStateAction<Date>> = () => {};
 const defaultSetString: Dispatch<SetStateAction<string>> = () => {};
@@ -159,7 +160,7 @@ type SearchProps = {
   iconName: IconDefinition | null;
 };
 
-export const SearchInput = React.forwardRef<TextInput, SearchProps>(
+export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
   (
     {
       nextFocus = undefined,
@@ -172,31 +173,52 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
     ref
   ) => {
     const theme = useColorScheme() ?? "light";
+    const [busStops, setBusStops] = useState<string[]>([]);
     const [filteredData, setFilteredData] = useState<string[]>([]);
-    const data = [
-      "Colombo",
-      "Balangoda",
-      "Kandy",
-      "Peradeniya",
-      "Matara",
-      "Galle",
-      "Jaffna",
-    ];
+    const folderUri = FileSystem.documentDirectory + "docs";
+    const fileUri = folderUri + "/busStops.json";
+    const loadBusStops = async () => {
+      try {
+        const fileContent = await FileSystem.readAsStringAsync(fileUri, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+        const parsedData = JSON.parse(fileContent);
+
+        // Assuming the structure of the JSON is [{ name: "Stop Name", location: { lat, lng } }, ...]
+        const stopNames = parsedData.map((stop: any) => stop.name);
+        setBusStops(stopNames);
+      } catch (error) {
+        console.error("Failed to load bus stops: ", error);
+      }
+    };
+
+    // UseEffect to load bus stops when the component mounts
+    useEffect(() => {
+      loadBusStops();
+    }, []);
+
     const updateSearch = (text: string) => {
       setInput(text);
+      
       if (text === "") {
         setFilteredData([]);
       } else {
         setFilteredData(
-          data.filter((item) => item.toLowerCase().includes(text.toLowerCase()))
+          busStops.filter((item) => {
+            // Split the bus stop name by comma and take the first word
+            const firstWord = item.split(",")[0].trim().toLowerCase();
+            return firstWord.includes(text.toLowerCase());
+          })
         );
       }
     };
+    
 
-    const selectLocation = (input: string) => {
+    const selectResult = (input: string) => {
       setInput(input);
       setFilteredData([]);
     };
+
 
     return (
       <View style={{ zIndex: layer, position: "relative" }}>
@@ -241,9 +263,12 @@ export const SearchInput = React.forwardRef<TextInput, SearchProps>(
                 },
               ]}
             >
-              <Pressable onPress={() => selectLocation(item)}>
-                <ThemedText lightColor="#000" darkColor="#fff">
-                  {item}
+              <Pressable style={{flexDirection: 'row'}} onPress={() => selectResult(item)}>
+                <ThemedText type="s5" lightColor="#000" darkColor="#fff">
+                  {item.split(",")[0].trim()}
+                </ThemedText>
+                <ThemedText lightColor="#aaa" darkColor="#fff">
+                  {', '+item.split(",")[1].trim()}{', '+item.split(",")[2].trim()}
                 </ThemedText>
               </Pressable>
             </ThemedView>
@@ -301,9 +326,9 @@ export function DateTimeInputSquare({
         >
           <ThemedText>
             {type == "Date" &&
-              (input != null ? StringDate(input) : placeholder)}
+              (input != null ? DateToString(input) : placeholder)}
             {type == "Time" &&
-              (input != null ? StringTime(input) : placeholder)}
+              (input != null ? TimeToString(input) : placeholder)}
           </ThemedText>
         </Pressable>
       </View>
@@ -360,9 +385,9 @@ export function DateTimeInputRound({
         >
           <ThemedText>
             {type == "Date" &&
-              (input != null ? StringDate(input) : placeholder)}
+              (input != null ? DateToString(input) : placeholder)}
             {type == "Time" &&
-              (input != null ? StringTime(input) : placeholder)}
+              (input != null ? TimeToString(input) : placeholder)}
           </ThemedText>
         </Pressable>
       </View>
@@ -413,7 +438,7 @@ const styles = StyleSheet.create({
     color: "#333",
     paddingHorizontal: 10,
     paddingVertical: 7,
-    backgroundColor: "#ddd",
+    backgroundColor: "#fff",
     marginVertical: -1,
   },
   formError: {

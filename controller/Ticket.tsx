@@ -1,59 +1,76 @@
-
 export class Ticket {
-  id: string;
-  busID: string;
-  passengerID: string;
-  status: string;
-  seat: number;
-  title: string;
-  busclass: string;
-  routeNo: string;
-  bookedTime: Date;
-  duration: string;
-  price: number;
-  departure: string;
-  departureTime: Date;
-  terminal: string;
-  terminalTime: Date;
-  startLocation: string;
-  endLocation: string;
+  ticketNo: string;
+  bookedTime?: Date;
+  vehicalNo?: string;
+  org?: string; // Organization
+  type?: string; // eg. Luxury, Normal, Semi-Luxury
+  routeNo?: string;
+  route?: string; // Start - End
+  departure?: Date; // time of departure
+  from?: string;
+  to?: string;
+  fromT?: string; // Journey start time
+  toT?: string; // Journey end time
+  distance?: string;
+  price?: string;
+  discount?: string;
+  unitPrice?: string;
+  transID?: string;
+  full?: string;
+  half?: string;
+  seatNos?: string[];
+  status?: string;
+  tracking?: boolean;
+  cancel?: boolean;
 
   constructor(
-    id: string = "123456789",
-    busID: string = "adfasdfs",
-    passengerID: string = "asdffas",
-    status: string = "Valid",
-    seat: number = 5,
-    title: string = "SLTB",
-    busclass: string = "Normal",
-    routeNo: string = "222",
-    bookedTime: Date = new Date(),
-    duration: string = "2h 40m",
-    price: number = 700.0,
-    departure: string = "Colombo",
-    departureTime: Date = new Date(),
-    terminal: string = "Kandy",
-    terminalTime: Date = new Date(),
-    startLocation: string = "Colombo",
-    endLocation: string = "Peradeniya"
+    ticketNo: string,
+    bookedTime: Date,
+    vehicalNo: string,
+    org: string,
+    type: string,
+    routeNo: string,
+    route: string, // Start - End
+    departure: Date, // time of departure
+    from: string,
+    to: string,
+    fromT: string, // Journey start time
+    toT: string, // Journey end time
+    distance: string,
+    price: string,
+    discount: string,
+    unitPrice: string,
+    transID: string,
+    full: string,
+    half: string,
+    seatNos: string[],
+    status: string,
+    tracking: boolean,
+    cancel: boolean
   ) {
-    this.id = id;
-    this.busID = busID;
-    this.passengerID = passengerID;
-    this.status = status;
-    this.seat = seat;
-    this.title = title;
-    this.busclass = busclass;
-    this.routeNo = routeNo;
+    this.ticketNo = ticketNo;
     this.bookedTime = bookedTime;
-    this.duration = duration;
-    this.price = price;
+    this.vehicalNo = vehicalNo;
+    this.org = org;
+    this.type = type;
+    this.routeNo = routeNo;
+    this.route = route;
     this.departure = departure;
-    this.departureTime = departureTime;
-    this.terminal = terminal;
-    this.terminalTime = terminalTime;
-    this.startLocation = startLocation;
-    this.endLocation = endLocation;
+    this.from = from;
+    this.to = to;
+    this.fromT = fromT;
+    this.toT = toT;
+    this.distance = distance;
+    this.price = price;
+    this.discount = discount;
+    this.unitPrice = unitPrice;
+    this.transID = transID;
+    this.full = full;
+    this.half = half;
+    this.seatNos = seatNos;
+    this.status = status;
+    this.tracking = tracking;
+    this.cancel = cancel;
   }
 
   cancelTicket(): boolean {

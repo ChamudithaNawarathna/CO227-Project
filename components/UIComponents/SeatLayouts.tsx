@@ -1,5 +1,63 @@
 import { View } from "react-native";
 import Seat from "./Seat";
+import { ThemedText } from "../CommonModules/ThemedText";
+
+export function SeatLegend() {
+  const seatColors = new Map<String, string>([
+    ["Available", "#999a"],
+    ["Selected", "#0af"],
+    ["Not-Available", "#f30e"],
+    ["Reserved", "#f90"],
+  ]);
+  return (
+    <View style={{ flex: 2, marginTop: 20 }}>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <View
+          style={{
+            height: 20,
+            width: 20,
+            backgroundColor: seatColors.get("Available"),
+            borderRadius: 10,
+          }}
+        ></View>
+        <ThemedText>Available</ThemedText>
+      </View>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <View
+          style={{
+            height: 20,
+            width: 20,
+            backgroundColor: seatColors.get("Selected"),
+            borderRadius: 10,
+          }}
+        ></View>
+        <ThemedText>Selected</ThemedText>
+      </View>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <View
+          style={{
+            height: 20,
+            width: 20,
+            backgroundColor: seatColors.get("Not-Available"),
+            borderRadius: 10,
+          }}
+        ></View>
+        <ThemedText>Not-Available</ThemedText>
+      </View>
+      <View style={{ flexDirection: "row", gap: 10 }}>
+        <View
+          style={{
+            height: 20,
+            width: 20,
+            backgroundColor: seatColors.get("Reserved"),
+            borderRadius: 10,
+          }}
+        ></View>
+        <ThemedText>Reserved</ThemedText>
+      </View>
+    </View>
+  );
+}
 
 export function Seat44Layout() {
   return (

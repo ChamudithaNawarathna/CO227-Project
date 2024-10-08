@@ -11,9 +11,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import TermsAndConditions from "@/assets/TermsAndConditions.json";
+import TermsAndConditions from "@/assets/docs/TermsAndConditions.json";
 
-export default function Terms() {
+export default function TermsModal() {
   const theme = useColorScheme() ?? "light";
   const [modalVisible, setModalVisible] = useState(true);
   const { termsAndConditions: terms } = TermsAndConditions;

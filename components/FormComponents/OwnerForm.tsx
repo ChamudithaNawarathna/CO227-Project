@@ -15,6 +15,7 @@ import {
   validateBankName,
   validateBranchName,
   validateOTP,
+  validateEmail,
 } from "./FormFunctions";
 import { formStyles } from "./FormStyles";
 import { FormInput } from "./FormInputField";
@@ -31,6 +32,8 @@ export const OwnerFormPage1 = ({
   setPhoneNo,
   nic,
   setNIC,
+  email,
+  setEmail,
   setNextVisible,
   setBackVisible,
   currentPos,
@@ -39,6 +42,7 @@ export const OwnerFormPage1 = ({
   const [lnameError, setLnameError] = useState(false);
   const [phoneNoError, setPhoneNoError] = useState(false);
   const [nicError, setNICError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
   const inputRefs = useRef(
     Array.from({ length: 4 }, () => React.createRef<TextInput>())
   );
@@ -50,16 +54,18 @@ export const OwnerFormPage1 = ({
       !lnameError &&
       !phoneNoError &&
       !nicError &&
+      !emailError &&
       fname != "" &&
       lname != "" &&
       phoneNo != "" &&
-      nic != ""
+      nic != "" &&
+      email != ""
     ) {
       setNextVisible(true);
     } else {
       setNextVisible(false);
     }
-  }, [fname, lname, phoneNo, nic, currentPos]);
+  }, [fname, lname, phoneNo, nic, email, currentPos]);
 
   // Make "Back" button visible
   useEffect(() => {
@@ -112,6 +118,7 @@ export const OwnerFormPage1 = ({
       />
       <FormInput
         ref={inputRefs.current[3]}
+        nextFocus={inputRefs.current[4]}
         title="NIC"
         input={nic}
         setInput={setNIC}
@@ -121,6 +128,18 @@ export const OwnerFormPage1 = ({
         validation={validateNIC}
         maxLength={12}
         placeholder="NIC"
+      />
+      <FormInput
+        ref={inputRefs.current[4]}
+        title="Email Address"
+        input={email}
+        setInput={setEmail}
+        error={emailError}
+        setError={setEmailError}
+        errorMessage={"Invalid email address"}
+        validation={validateEmail}
+        maxLength={256}
+        placeholder="Email address"
       />
     </GestureHandlerRootView>
   );

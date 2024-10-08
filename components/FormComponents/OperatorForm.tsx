@@ -14,6 +14,7 @@ import {
   validateOTP,
   validateNTCNo,
   validateLicenseNo,
+  validateEmail,
 } from "./FormFunctions";
 import { formStyles } from "./FormStyles";
 import { FormDropdown, FormInput } from "./FormInputField";
@@ -30,6 +31,8 @@ export const OperatorFormPage1 = ({
   setPhoneNo,
   nic,
   setNIC,
+  email,
+  setEmail,
   setNextVisible,
   setBackVisible,
   currentPos,
@@ -38,8 +41,9 @@ export const OperatorFormPage1 = ({
   const [lnameError, setLnameError] = useState(false);
   const [phoneNoError, setPhoneNoError] = useState(false);
   const [nicError, setNICError] = useState(false);
+  const [emailError, setEmailError] = useState(false);
   const inputRefs = useRef(
-    Array.from({ length: 5 }, () => React.createRef<TextInput>())
+    Array.from({ length: 4 }, () => React.createRef<TextInput>())
   );
 
   // Make "Next" button visible
@@ -49,16 +53,18 @@ export const OperatorFormPage1 = ({
       !lnameError &&
       !phoneNoError &&
       !nicError &&
+      !emailError &&
       fname != "" &&
       lname != "" &&
       phoneNo != "" &&
-      nic != ""
+      nic != "" &&
+      email != ""
     ) {
       setNextVisible(true);
     } else {
       setNextVisible(false);
     }
-  }, [fname, lname, phoneNo, nic, currentPos]);
+  }, [fname, lname, phoneNo, nic, email, currentPos]);
 
   // Make "Back" button visible
   useEffect(() => {
@@ -111,6 +117,7 @@ export const OperatorFormPage1 = ({
       />
       <FormInput
         ref={inputRefs.current[3]}
+        nextFocus={inputRefs.current[4]}
         title="NIC"
         input={nic}
         setInput={setNIC}
@@ -120,6 +127,18 @@ export const OperatorFormPage1 = ({
         validation={validateNIC}
         maxLength={12}
         placeholder="NIC"
+      />
+      <FormInput
+        ref={inputRefs.current[4]}
+        title="Email Address"
+        input={email}
+        setInput={setEmail}
+        error={emailError}
+        setError={setEmailError}
+        errorMessage={"Invalid email address"}
+        validation={validateEmail}
+        maxLength={256}
+        placeholder="Email address"
       />
     </GestureHandlerRootView>
   );
@@ -150,7 +169,7 @@ export const OperatorFormPage2 = ({
   const occupations = [
     { label: "Driver", value: "Driver" },
     { label: "Conductor", value: "Conductor" },
-    { label: "Driver and Conductor", value: "Driver and Conductor" },
+    { label: "Both", value: "Both" },
   ];
 
   // Make "Next" button visible
@@ -202,7 +221,7 @@ export const OperatorFormPage2 = ({
         maxLength={7}
         placeholder="A-00000"
       />
-      {(occupation == "Driver" || occupation == "Driver and Conductor") && (
+      {(occupation == "Driver" || occupation == "Both") && (
         <FormInput
           ref={inputRefs.current[1]}
           nextFocus={inputRefs.current[2]}
@@ -217,7 +236,7 @@ export const OperatorFormPage2 = ({
           placeholder="John Doe"
         />
       )}
-      {(occupation == "Driver" || occupation == "Driver and Conductor") && (
+      {(occupation == "Driver" || occupation == "Both") && (
         <FormInput
           ref={inputRefs.current[2]}
           title="Driver's License Number"

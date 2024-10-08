@@ -6,7 +6,8 @@ import {
   useColorScheme,
 } from "react-native";
 import * as Location from "expo-location";
-import MapLocation from "@/components/UIComponents/MapLocation";
+import PasBusLocation from "@/components/UIComponents/PasBusLocation";
+import OwnBusLocation from "@/components/UIComponents/OwnBusLocation";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
@@ -97,7 +98,8 @@ export default function Tracker() {
           </Pressable>
         </View>
       ) : (
-        location && <MapLocation />
+        // location && <PasBusLocation />
+        location && <OwnBusLocation />
       )}
     </View>
   );

@@ -1,38 +1,27 @@
 import {
   Modal,
   Pressable,
-  ScrollView,
   StyleSheet,
   TextInput,
-  useColorScheme,
-  View,
 } from "react-native";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faClock, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import SeatLayout from "@/components/UIComponents/SeatLayout";
-import { AppProvider, useAppContext } from "@/context/AppContext";
+import { useEffect, useRef, useState } from "react";
+import { useAppContext } from "@/context/AppContext";
 import React from "react";
 import {
-  DateTimeInputRound,
-  DateTimeInputSquare,
   FormInput,
 } from "@/components/FormComponents/FormInputField";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 import {
   validateAccountNo,
   validateName,
   validateNIC,
-  validateNTCNo,
 } from "@/components/FormComponents/FormFunctions";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-export default function signupModal() {
+export default function SignupModal() {
   const [nic, setNIC] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accHolderName, setAccHolderName] = useState("");

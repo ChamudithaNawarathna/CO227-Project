@@ -18,23 +18,35 @@ const seatColors = new Map<String, string>([
 
 export default function Seat({ index, reserved = false }: SeatProps) {
   const theme = useColorScheme() ?? "light";
-  const { seatNo, setSeatNo, seatStatus, setSeatStatus } = useAppContext();
+  const { seatNos, setSeatNos, seatStatus, setSeatStatus } = useAppContext();
 
-  const updateStatus = (index: number, reserved: boolean) => {
+  const updateStatus = () => {
     if (reserved) {
       return null;
     } else {
       setSeatStatus(() => {
-        const updatedStatus = [...seatStatus];
-        if (seatStatus[index] == "Available") {
-          updatedStatus[seatNo] = "Available";
-          updatedStatus[index] = "Selected";
-          setSeatNo(index);
-        } else if (seatStatus[index] == "Selected") {
-          updatedStatus[index] = "Available";
-          setSeatNo(0);
+        const newSeatStatus = [...seatStatus];
+        const newSeatNos = [...seatNos];
+        // Check if the seat number is already in seatNos, if it is not available returns -1
+        const seatIndex = seatNos.indexOf(index);
+
+        // If seat is "Available", make it "Selected" and insert the seat nummber in seatNos
+        // If seat is "Selected", make it "Available" and remove the seat number from seatNos
+        if (newSeatStatus[index] === "Available") {
+          newSeatStatus[index] = "Selected";
+          if (seatIndex === -1) {
+            newSeatNos.push(index);
+          }
+        } else if (newSeatStatus[index] === "Selected") {
+          newSeatStatus[index] = "Available";
+          if (seatIndex !== -1) {
+            newSeatNos.splice(seatIndex, 1);
+          }
         }
-        return updatedStatus;
+
+        setSeatNos(newSeatNos);
+        setSeatStatus(newSeatStatus);
+        return newSeatStatus;
       });
     }
   };
@@ -49,7 +61,7 @@ export default function Seat({ index, reserved = false }: SeatProps) {
             : seatColors.get(seatStatus[index]),
         },
       ]}
-      onPress={() => updateStatus(index, reserved)}
+      onPress={updateStatus}
     >
       <ThemedText type="h4" lightColor="#fff">
         {index}

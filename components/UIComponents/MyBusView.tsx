@@ -7,7 +7,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { router, Href } from "expo-router";
 import { Pressable, View, StyleSheet, useColorScheme } from "react-native";
-import { StringTime } from "../CommonModules/StringDateTime";
+import { StringTime } from "../CommonModules/DateTimeToString";
 import { ThemedText } from "../CommonModules/ThemedText";
 import StarRating from "./StarRating";
 

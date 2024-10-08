@@ -13,7 +13,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faClock, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import SeatLayout from "@/components/UIComponents/SeatLayout";
 import { AppProvider, useAppContext } from "@/context/AppContext";
 import React from "react";
 import {
@@ -33,7 +32,7 @@ import {
 } from "@/components/FormComponents/FormFunctions";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-export default function opeSignupModal() {
+export default function OpeSignupModal() {
   const [nic, setNIC] = useState("");
   const [nameOnLicense, setNameOnLicense] = useState("");
   const [ntcLicenseNo, setNTCLicenseNo] = useState("");
@@ -49,7 +48,7 @@ export default function opeSignupModal() {
   const occupations = [
     { label: "Driver", value: "Driver" },
     { label: "Conductor", value: "Conductor" },
-    { label: "Driver and Conductor", value: "Driver and Conductor" },
+    { label: "Both", value: "Both" },
   ];
 
   const inputRefs = useRef(
@@ -140,7 +139,7 @@ export default function opeSignupModal() {
           maxLength={7}
           placeholder="A-00000"
         />
-        {(occupation == "Driver" || occupation == "Driver and Conductor") && (
+        {(occupation == "Driver" || occupation == "Both") && (
           <FormInput
             ref={inputRefs.current[2]}
             nextFocus={inputRefs.current[3]}
@@ -155,7 +154,7 @@ export default function opeSignupModal() {
             placeholder="John Doe"
           />
         )}
-        {(occupation == "Driver" || occupation == "Driver and Conductor") && (
+        {(occupation == "Driver" || occupation == "Both") && (
           <FormInput
             ref={inputRefs.current[3]}
             title="Driver's License Number"

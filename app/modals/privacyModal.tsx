@@ -5,9 +5,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import PrivacyPolicy from "@/assets/PrivacyPolicy.json";
+import PrivacyPolicy from "@/assets/docs/PrivacyPolicy.json";
 
-export default function Privacy() {
+export default function PrivacyModal() {
   const theme = useColorScheme() ?? "light";
   const [modalVisible, setModalVisible] = useState(true);
   const { privacyPolicy: policy } = PrivacyPolicy;

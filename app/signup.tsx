@@ -27,76 +27,61 @@ import {
 } from "@/components/FormComponents/OwnerForm";
 import FontAwesome from "@expo/vector-icons/build/FontAwesome";
 import { Switch } from "react-native-switch";
+import { useAppContext } from "@/context/AppContext";
+import axios from "axios";
 
-var formPageCount = 3; // Excluding the common "Sign up as a passenger, employee or owner" form page
+var formPageCount = 3; // Excluding the common "Sign up as a passenger, operator or owner" form page
 const formPageWidth = 300;
-var passenger = true;
-var employee = false;
-var owner = false;
 
 export default function SignUp() {
-  const [fname, setFName] = useState("");
-  const [lname, setLName] = useState("");
-  const [phoneNo, setPhoneNo] = useState("");
-  const [nic, setNIC] = useState("");
+  const {
+    baseURL,
+    fName,
+    lName,
+    phoneNo,
+    email,
+    nic,
+    accountNo,
+    accHolderName,
+    bankName,
+    branchName,
+    ntcLicenseNo,
+    driverLicenseNo,
+    occupation,
+    setID,
+    setFName,
+    setLName,
+    setPhoneNo,
+    setEmail,
+    setNIC,
+    setAccountNo,
+    setAccHolderName,
+    setBankName,
+    setBranchName,
+    setNTCLicenseNo,
+    setDriverLicenseNo,
+    setOccupation,
+    setMyAccTypes,
+    setProfileImage,
+    setAccountType,
+    setSeatStatus,
+    setMyBusLocations,
+    setMyTickets,
+  } = useAppContext();
 
-  const [accountNo, setAccountNo] = useState("");
-  const [accHolderName, setAccHolderName] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [branchName, setBranchName] = useState("");
-
-  const [nameOnLicense, setNameOnLicense] = useState("");
-  const [ntcLicenseNo, setNTCLicenseNo] = useState("");
-  const [driverLicenseNo, setDriverLicenseNo] = useState("");
-  const [occupation, setOccupation] = useState("");
-
+  const [passenger, setPassenger] = useState(true);
+  const [operator, setOperator] = useState(false);
+  const [owner, setOwner] = useState(false);
   const [otp, setOTP] = useState("");
   const [agree, setAgree] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
-
-  const [loading, setLoading] = useState(false);
-
-  // Submitting form /////////////////////////////////////////////////////////////////////////////////
-
-  // const handleSubmit = async () => {
-  //   if (nameOnLicense === '' || phoneNo === '' || dateOfBirth === '') {
-  //     // Please fill the form completely
-  //     return;
-  //   }
-
-  //   setLoading(true);
-
-  //   try {
-  //     const response = await fetch('http://localhost/api/users' , {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({nameOnLicense, phoneNo, dateOfBirth}),
-  //     });
-
-  //     const result = await response.json();
-
-  //     if (response.ok) {
-  //       setNameOnLicense('');
-  //       setPhoneNo('');
-  //       setDateOfBirth('');
-  //     }
-  //   } catch (error) {
-  //     //Error
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // Submitting form /////////////////////////////////////////////////////////////////////////////////
 
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [currentPos, setCurrentPos] = useState(0);
   const [backVisible, setBackVisible] = useState(false);
   const [nextVisible, setNextVisible] = useState(false);
 
-  function scrollFroward() {
+  function scrollForward() {
     if (scrollRef.current) {
       let newPos =
         currentPos < formPageCount * formPageWidth
@@ -124,7 +109,6 @@ export default function SignUp() {
     setAccHolderName("");
     setBankName("");
     setBranchName("");
-    setNameOnLicense("");
     setNTCLicenseNo("");
     setDriverLicenseNo("");
     setOccupation("");
@@ -133,33 +117,40 @@ export default function SignUp() {
 
   function passengerSignUp() {
     clearInputFields();
-    passenger = true;
-    employee = false;
-    owner = false;
+    setPassenger(true);
+    setOperator(false);
+    setOwner(false);
     formPageCount = 3;
-    scrollFroward();
+    scrollForward();
   }
 
-  function employeeSignUp() {
+  function operatorSignUp() {
     clearInputFields();
-    passenger = false;
-    employee = true;
-    owner = false;
+    setPassenger(false);
+    setOperator(true);
+    setOwner(false);
     formPageCount = 4;
-    scrollFroward();
+    scrollForward();
   }
 
   function ownerSignUp() {
     clearInputFields();
-    passenger = false;
-    employee = false;
-    owner = true;
+    setPassenger(false);
+    setOperator(false);
+    setOwner(true);
     formPageCount = 4;
-    scrollFroward();
+    scrollForward();
   }
 
   function submitForm() {
-    router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+    insertNewUser;
+    if (operator) {
+      router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
+    } else if (owner) {
+      router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+    } else {
+      router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
+    }
   }
 
   function acceptTerms() {
@@ -187,12 +178,40 @@ export default function SignUp() {
     }
   }, [currentPos]);
 
-  // // Checking if keyboard appeared or not
-  // useEffect (() => {
-  //   const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {setKeyboardShow(true)});
-  //   const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {setKeyboardShow(false)});
-  //   return () => {keyboardDidShowListener.remove(); keyboardDidHideListener.remove();}
-  // }, []);
+  // Function to insert a new user
+  const insertNewUser = async () => {
+    const userData = {
+      userType: operator ? "Operator" : owner ? "Owner" : "Passenger",
+      empType: occupation,
+      fName: fName,
+      lName: lName,
+      email: email,
+      mobile: phoneNo,
+      nic: nic,
+      birthday: "null", // Replace with actual birthday
+      ntc: ntcLicenseNo,
+      licence: driverLicenseNo,
+      accName: accHolderName,
+      accNo: accountNo,
+      bank: bankName,
+      branch: branchName,
+    };
+
+    try {
+      const response = await axios.post(`${baseURL}/mobileAPI/user/add`, {
+        type: "newUser", // Specify the request type for inserting a new user
+        data: userData, // User data to insert
+      });
+
+      if (response.data.error) {
+        console.error("Error inserting new user:", response.data.error);
+      } else {
+        console.log("New user inserted successfully:", response.data);
+      }
+    } catch (error) {
+      console.error("Error inserting new user:", error);
+    }
+  };
 
   return (
     <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
@@ -217,7 +236,7 @@ export default function SignUp() {
             showsHorizontalScrollIndicator={false}
             pointerEvents={"box-none"}
           >
-            {/******** Sign up as a passenger, employee or owner form page ******************/}
+            {/******** Sign up as a passenger, operator or owner form page ******************/}
             <Animated.View style={styles.formPage}>
               <Image
                 source={require("@/assets/images/People waiting for bus at bus stop.png")}
@@ -246,7 +265,7 @@ export default function SignUp() {
                     styles.signInTypeButton,
                     { backgroundColor: "#8fafff" },
                   ]}
-                  onPress={employeeSignUp}
+                  onPress={operatorSignUp}
                   pointerEvents={"auto"}
                 >
                   <ThemedText
@@ -254,7 +273,7 @@ export default function SignUp() {
                     lightColor="#fff"
                     darkColor="#fff"
                   >
-                    Sign up as an employee
+                    Sign up as a bus operator
                   </ThemedText>
                 </Pressable>
                 <Pressable
@@ -280,12 +299,14 @@ export default function SignUp() {
             {passenger && (
               <Animated.View style={styles.formPage}>
                 <PassengerFormPage1
-                  fname={fname}
+                  fname={fName}
                   setFName={setFName}
-                  lname={lname}
+                  lname={lName}
                   setLName={setLName}
                   phoneNo={phoneNo}
                   setPhoneNo={setPhoneNo}
+                  email={email}
+                  setEmail={setEmail}
                   setNextVisible={setNextVisible}
                   setBackVisible={setBackVisible}
                   currentPos={currentPos}
@@ -297,7 +318,7 @@ export default function SignUp() {
                 <PassengerFormPage2
                   otp={otp}
                   setOTP={setOTP}
-                  nextAction={scrollFroward}
+                  nextAction={scrollForward}
                   setNextVisible={setNextVisible}
                   setBackVisible={setBackVisible}
                   currentPos={currentPos}
@@ -305,16 +326,18 @@ export default function SignUp() {
               </Animated.View>
             )}
 
-            {/********************** Employee form pages **************************************/}
-            {employee && (
+            {/********************** Operator form pages **************************************/}
+            {operator && (
               <Animated.View style={styles.formPage}>
                 <OperatorFormPage1
-                  fname={fname}
+                  fname={fName}
                   setFName={setFName}
-                  lname={lname}
+                  lname={lName}
                   setLName={setLName}
                   phoneNo={phoneNo}
                   setPhoneNo={setPhoneNo}
+                  email={email}
+                  setEmail={setEmail}
                   nic={nic}
                   setNIC={setNIC}
                   setNextVisible={setNextVisible}
@@ -323,11 +346,9 @@ export default function SignUp() {
                 />
               </Animated.View>
             )}
-            {employee && (
+            {operator && (
               <Animated.View style={styles.formPage}>
                 <OperatorFormPage2
-                  nameOnLicense={nameOnLicense}
-                  setNameOnLicense={setNameOnLicense}
                   ntcLicenseNo={ntcLicenseNo}
                   setNTCLicenseNo={setNTCLicenseNo}
                   driverLicenseNo={driverLicenseNo}
@@ -340,12 +361,12 @@ export default function SignUp() {
                 />
               </Animated.View>
             )}
-            {employee && (
+            {operator && (
               <Animated.View style={styles.formPage}>
                 <OperatorFormPage3
                   otp={otp}
                   setOTP={setOTP}
-                  nextAction={scrollFroward}
+                  nextAction={scrollForward}
                   setNextVisible={setNextVisible}
                   setBackVisible={setBackVisible}
                   currentPos={currentPos}
@@ -357,12 +378,14 @@ export default function SignUp() {
             {owner && (
               <Animated.View style={styles.formPage}>
                 <OwnerFormPage1
-                  fname={fname}
+                  fname={fName}
                   setFName={setFName}
-                  lname={lname}
+                  lname={lName}
                   setLName={setLName}
                   phoneNo={phoneNo}
                   setPhoneNo={setPhoneNo}
+                  email={email}
+                  setEmail={setEmail}
                   nic={nic}
                   setNIC={setNIC}
                   setNextVisible={setNextVisible}
@@ -393,7 +416,7 @@ export default function SignUp() {
                 <OwnerFormPage3
                   otp={otp}
                   setOTP={setOTP}
-                  nextAction={scrollFroward}
+                  nextAction={scrollForward}
                   setNextVisible={setNextVisible}
                   setBackVisible={setBackVisible}
                   currentPos={currentPos}
@@ -477,7 +500,7 @@ export default function SignUp() {
             </Pressable>
           )}
           {nextVisible && (
-            <Pressable style={styles.formNextButton} onPress={scrollFroward}>
+            <Pressable style={styles.formNextButton} onPress={scrollForward}>
               <ThemedText
                 type="subtitle"
                 lightColor="#a1aadd"

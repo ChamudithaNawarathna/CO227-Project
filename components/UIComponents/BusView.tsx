@@ -2,7 +2,7 @@ import { Pressable, View, StyleSheet } from "react-native";
 import { ThemedText } from "../CommonModules/ThemedText";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
-import { StringTime } from "../CommonModules/StringDateTime";
+import { TimeToString } from "../CommonModules/DateTimeToString";
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { Href, router } from "expo-router";
@@ -45,16 +45,16 @@ export default function BusView({ bus }: BusViewProps) {
           </View>
           <View style={{ justifyContent: "space-between", marginTop: -5 }}>
             <View>
-              <ThemedText type="s4" lightColor="#000" darkColor="#fff">
-                {bus.departure}
+              <ThemedText type="s5" lightColor="#000" darkColor="#fff">
+                {bus.departure.split(',')[0]}
               </ThemedText>
               <ThemedText type="s7" lightColor="#666" darkColor="#ccc">
                 Departure
               </ThemedText>
             </View>
             <View>
-              <ThemedText type="s4" lightColor="#000" darkColor="#fff">
-                {bus.terminal}
+              <ThemedText type="s5" lightColor="#000" darkColor="#fff">
+                {bus.terminal.split(',')[0]}
               </ThemedText>
               <ThemedText type="s7" lightColor="#666" darkColor="#ccc">
                 Terminal
@@ -69,17 +69,16 @@ export default function BusView({ bus }: BusViewProps) {
             darkColor="#fff"
             style={{ textAlign: "right" }}
           >
-            Rs. 200
+            Rs. 80
           </ThemedText>
-          <ThemedText type="s5" style={{ textAlign: "right" }}>
-            Depart at: {StringTime(bus.departureTime)}
+          <ThemedText type="s6" style={{ textAlign: "right" }}>
+            Depart at: {TimeToString(bus.departureTime)}
           </ThemedText>
           <Pressable
             style={{
               backgroundColor: "#e28",
               borderWidth: 0,
               borderRadius: 50,
-              paddingHorizontal: 10,
               paddingVertical: 5,
             }}
             onPress={openSeats}

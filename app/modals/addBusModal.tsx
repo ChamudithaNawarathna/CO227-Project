@@ -13,7 +13,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faClock, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import { Dispatch, SetStateAction, useRef, useState } from "react";
-import SeatLayout from "@/components/UIComponents/SeatLayout";
 import { AppProvider, useAppContext } from "@/context/AppContext";
 import React from "react";
 import {
@@ -29,7 +28,7 @@ import {
   validateNTCNo,
 } from "@/components/FormComponents/FormFunctions";
 
-export default function addBus() {
+export default function AddBusModal() {
   const [regNo, setRegNo] = useState("");
   const [ntcNo, setNTCNo] = useState("");
   const [ntcDriver1, setNTCDriver1] = useState("");

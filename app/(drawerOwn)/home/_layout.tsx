@@ -26,15 +26,6 @@ export default function TabLayout() {
             ),
             }}
         />
-          <Tabs.Screen
-              name='tickets'
-              options={{
-                  title: 'Tickets',
-                  tabBarIcon: ({ color, focused }) => (
-                    <FontAwesomeIcon icon={faTicket} size={28} color={color} />
-                  ),
-              }}
-          />
         <Tabs.Screen
             name='tracker'
             options={{

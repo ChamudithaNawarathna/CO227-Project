@@ -24,6 +24,16 @@ export function validatePhoneNo (text: string, setPhoneNo: Function, setError: F
     }
 };
 
+export function validateEmail(text: string, setEmail: Function, setError: Function) {
+    setEmail(text);
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (text === '' || regex.test(text)) {
+        setError(false);
+    } else {
+        setError(true);
+    }
+}
+
 export function validateNIC (text: string, setNIC: Function, setError: Function) {
     var validFormat = false;
     const textLength = text.length;
@@ -80,7 +90,7 @@ export function validateBranchName (text: string, setBranchName: Function, setEr
 export function validateOTP (text: string, setOTP: Function, setError: Function) {
     setOTP(text);
     const regex = /^[0-9]+$/;
-    if (text === '' || regex.test(text)|| text.length < 6) {
+    if (text === '' || regex.test(text)|| text.length <= 6) {
         setError(false);
     }
     else {

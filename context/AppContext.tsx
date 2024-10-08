@@ -17,9 +17,16 @@ type grapData = {
   label?: string;
 };
 
+type busLocationData = {
+  id: string;
+  latitude: number;
+  longitude: number;
+};
+
 export type accountType = "Passenger" | "Operator" | "Owner";
 
 interface AppContextProps {
+  baseURL: string;
   profileImage: string;
   setProfileImage: Dispatch<SetStateAction<string>>;
   id: string;
@@ -27,27 +34,43 @@ interface AppContextProps {
   accountType: string;
   setAccountType: Dispatch<SetStateAction<accountType>>;
   myAccTypes: Map<string, boolean>;
+  setMyAccTypes: Dispatch<SetStateAction<Map<string, boolean>>>;
+  credits: number;
+  setCredits: Dispatch<SetStateAction<number>>;
   fName: string;
+  setFName: Dispatch<SetStateAction<string>>;
   lName: string;
+  setLName: Dispatch<SetStateAction<string>>;
   phoneNo: string;
+  setPhoneNo: Dispatch<SetStateAction<string>>;
+  email: string;
+  setEmail: Dispatch<SetStateAction<string>>;
   nic: string;
+  setNIC: Dispatch<SetStateAction<string>>;
   accountNo: string;
+  setAccountNo: Dispatch<SetStateAction<string>>;
   accHolderName: string;
+  setAccHolderName: Dispatch<SetStateAction<string>>;
   bankName: string;
+  setBankName: Dispatch<SetStateAction<string>>;
   branchName: string;
-  nameOnLicense: string;
+  setBranchName: Dispatch<SetStateAction<string>>;
   ntcLicenseNo: string;
+  setNTCLicenseNo: Dispatch<SetStateAction<string>>;
   driverLicenseNo: string;
+  setDriverLicenseNo: Dispatch<SetStateAction<string>>;
   occupation: string;
-  seatNo: number;
-  setSeatNo: Dispatch<SetStateAction<number>>;
+  setOccupation: Dispatch<SetStateAction<string>>;
+  seatNos: number[];
+  setSeatNos: Dispatch<SetStateAction<number[]>>;
   seatStatus: string[];
-  setSeatStatus: Dispatch<React.SetStateAction<any[]>>;
+  setSeatStatus: Dispatch<SetStateAction<string[]>>;
   busData: Bus[];
   myBuses: Bus[];
-  myTickets: Map<string, Ticket>;
-  setMyTickets: Dispatch<React.SetStateAction<Map<string, Ticket>>>;
-  pasTransactions: Transaction[];
+  myBusLocations: busLocationData[];
+  setMyBusLocations: Dispatch<SetStateAction<busLocationData[]>>;
+  myTickets?: Map<string, Ticket>;
+  setMyTickets: Dispatch<SetStateAction<Map<string, Ticket> | undefined>>;
   income7: grapData[];
   income30: grapData[];
   incomeYear: grapData[];
@@ -60,52 +83,113 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  const baseURL = "http://192.168.54.221:20240";
   const [profileImage, setProfileImage] = useState("");
-  const [id, setID] = useState("1234ggfdg");
+  const [id, setID] = useState("12");
   const [accountType, setAccountType] = useState<accountType>("Passenger");
-  const myAccTypes = new Map([
-    ["Operator", false],
-    ["Owner", true],
-  ]);
-  const fName = "Chamuditha";
-  const lName = "Nawarathna";
-  const phoneNo = "0767601948";
-  const nic = "200109801854";
-  const accountNo = "100234569817";
-  const accHolderName = "C. Nawarathna";
-  const bankName = "Commercial Bank";
-  const branchName = "Balangoda";
-  const nameOnLicense = "C. Nawarathna";
-  const ntcLicenseNo = "D-980726";
-  const driverLicenseNo = "12343423423";
-  const occupation = "Driver and Conductor";
-  const [seatNo, setSeatNo] = useState(0);
+  const [myAccTypes, setMyAccTypes] = useState<Map<string, boolean>>(
+    new Map([
+      ["Operator", true],
+      ["Owner", true],
+    ])
+  );
+  const [credits, setCredits] = useState(500);
+  const [fName, setFName] = useState<string>("Chamuditha");
+  const [lName, setLName] = useState<string>("Nawarathna");
+  const [phoneNo, setPhoneNo] = useState<string>("0767601948");
+  const [email, setEmail] = useState<string>("e20035@eng.pdn.ac.lk");
+  const [nic, setNIC] = useState<string>("200109808082");
+  const [accountNo, setAccountNo] = useState<string>("123-456-789-012");
+  const [accHolderName, setAccHolderName] = useState<string>("C. Nawarathna");
+  const [bankName, setBankName] = useState<string>("People's bank");
+  const [branchName, setBranchName] = useState<string>("Balangoda");
+  const [ntcLicenseNo, setNTCLicenseNo] = useState<string>("AB12321");
+  const [driverLicenseNo, setDriverLicenseNo] = useState<string>("LA345666");
+  const [occupation, setOccupation] = useState<string>("Both");
+  const [seatNos, setSeatNos] = useState<number[]>([]);
   const [seatStatus, setSeatStatus] = useState(Array(60).fill("Available"));
 
   /* Data for passenger account */
 
-  const [myTickets, setMyTickets] = useState(
+  const [myTickets, setMyTickets] = useState<Map<string, Ticket> | undefined>(
     new Map([
-      ["a12345", new Ticket("a12345")],
-      ["b12345", new Ticket("b12345")],
+      [
+        "001",
+        new Ticket(
+          "001",
+          new Date("2024-10-06"),
+          "AB1234",
+          "Express",
+          "Luxury",
+          "E01 Colombo - Galle",
+          "Colombo - Galle",
+          new Date("2024-10-06T08:00"),
+          "Colombo",
+          "Galle",
+          "20:15",
+          "1:30",
+          "120 km",
+          "1500",
+          "0",
+          "1500",
+          "TXN001",
+          "1",
+          "0",
+          ["A1", "A2"],
+          "Confirmed",
+          true,
+          false
+        ),
+      ],
+      [
+        "002",
+        new Ticket(
+          "002",
+          new Date("2024-10-06"),
+          "CD5678",
+          "Rapid",
+          "Standard",
+          "E01 Colombo - Galle",
+          "Galle - Colombo",
+          new Date("2024-10-06T18:00"),
+          "Galle",
+          "Colombo",
+          "12:45",
+          "2:51",
+          "120 km",
+          "1200",
+          "0",
+          "1200",
+          "TXN002",
+          "2",
+          "1",
+          ["B1", "B2"],
+          "Confirmed",
+          true,
+          true
+        ),
+      ],
     ])
   );
 
+  // ["a12345", new Ticket("a12345")],
+  //     ["b12345", new Ticket("b12345")],
+
   const busData = [
     new Bus(
-      "srdtf234546",
+      "srtf234546",
       "NA-35678",
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
-      "Badulla",
+      "Kurunduwatte, Kandy",
       new Date(),
-      "Colombo",
+      "Akbar, Kandy",
       new Date(),
       new Date(),
       new Map(),
-      0.687879989,
-      3.45466643431,
+      6.93548,
+      79.84868,
       new Owner("123abc", 1200)
     ),
     new Bus(
@@ -114,14 +198,14 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
-      "Colombo",
+      "Peradeniya, Kandy",
       new Date(),
-      "Kandy",
+      "Galaha Junction, Kandy",
       new Date(),
       new Date(),
       new Map(),
-      2.687879989,
-      5.45466643431,
+      9.66845,
+      80.00742,
       new Owner("123abc", 1200)
     ),
     new Bus(
@@ -130,177 +214,65 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
-      "Anuradapura",
+      "Botanical Garden, Kandy",
       new Date(),
-      "Hambantota",
+      "Hospital, Kandy",
       new Date(),
       new Date(),
       new Map(),
-      3.4879989,
-      9.45466643431,
+      6.0461,
+      80.2103,
       new Owner("123fgc", 8000)
     ),
     new Bus(
-      "s35hh34546",
+      "s35hh34549",
       "NA-35678",
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
-      "Anuradapura",
+      "Akbar, Kandy",
       new Date(),
-      "Hambantota",
+      "Dangolla Junction, Kandy",
       new Date(),
       new Date(),
       new Map(),
-      0.687879989,
-      3.45466643431,
+      7.7102,
+      81.6924,
       new Owner("123fgc", 8000)
     ),
     new Bus(
-      "s35hh34546",
+      "s35hh35546",
       "NA-35678",
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
-      "Anuradapura",
+      "Gatambe, Kandy",
       new Date(),
-      "Hambantota",
+      "Kandy Hospital, Kandy",
       new Date(),
       new Date(),
       new Map(),
-      0.687879989,
-      3.45466643431,
+      7.2906,
+      80.6336,
       new Owner("123fgc", 8000)
-    ),
-  ];
-
-  const pasTransactions = [
-    new Transaction(
-      "srdtf234546",
-      "payment",
-      120,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Date(),
-        new Map(),
-        0.687879989,
-        3.45466643431,
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "recharge",
-      190,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Date(),
-        new Map(),
-        0.687879989,
-        3.45466643431,
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "payment",
-      1000,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Date(),
-        new Map(),
-        0.687879989,
-        3.45466643431,
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "return",
-      500,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Date(),
-        new Map(),
-        0.687879989,
-        3.45466643431,
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
-    ),
-    new Transaction(
-      "srdtf234546",
-      "payment",
-      125.5,
-      new Bus(
-        "s35hh34546",
-        "NA-35678",
-        "ads3546567",
-        new Map([[1, "d-234466"]]),
-        new Map([[1, "c-234466"]]),
-        "Anuradapura",
-        new Date(),
-        "Hambantota",
-        new Date(),
-        new Date(),
-        new Map(),
-        0.687879989,
-        3.45466643431,
-        new Owner("123fgc", 8000)
-      ),
-      new Date()
     ),
   ];
 
   /* Data for bus operator account */
 
-  const [bookedTickets, setBookedTickets] = useState(
-    new Map([
-      ["9015776", new Ticket("9015776")],
-      ["6578799", new Ticket("6578799")],
-    ])
-  );
+  const [bookedTickets, setBookedTickets] =
+    useState();
+
+    // new Map([
+    //   ["9015776", new Ticket("9015776")],
+    //   ["6578799", new Ticket("6578799")],
+    // ])
 
   /* Data for bus owner account */
 
   const myBuses = [
     new Bus(
-      "srdtf234546",
+      "srtf234546",
       "NA-35678",
       "ads3546567",
       new Map([[1, "d-234466"]]),
@@ -317,7 +289,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     ),
     new Bus(
       "srdtf24509",
-      "NA-35678",
+      "NA-35679",
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
@@ -333,7 +305,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     ),
     new Bus(
       "s35hh34546",
-      "NA-35678",
+      "NA-35680",
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
@@ -348,8 +320,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       new Owner("123fgc", 8000)
     ),
     new Bus(
-      "s35hh34546",
-      "NA-35678",
+      "s35hh34549",
+      "NA-35681",
       "ads3546567",
       new Map([[1, "d-234466"]]),
       new Map([[1, "c-234466"]]),
@@ -363,23 +335,15 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       81.6924,
       new Owner("123fgc", 8000)
     ),
-    new Bus(
-      "s35hh34546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Anuradapura",
-      new Date(),
-      "Hambantota",
-      new Date(),
-      new Date(),
-      new Map(),
-      7.2906,
-      80.6336,
-      new Owner("123fgc", 8000)
-    ),
   ];
+
+  const [myBusLocations, setMyBusLocations] = useState<busLocationData[]>(
+    myBuses.map((bus) => ({
+      id: bus.id,
+      latitude: bus.latitude,
+      longitude: bus.longitude,
+    }))
+  );
 
   const income7 = [
     {
@@ -626,6 +590,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
+        baseURL,
         profileImage,
         setProfileImage,
         id,
@@ -633,27 +598,43 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         accountType,
         setAccountType,
         myAccTypes,
+        setMyAccTypes,
+        credits,
+        setCredits,
         fName,
+        setFName,
         lName,
+        setLName,
         phoneNo,
+        setPhoneNo,
+        email,
+        setEmail,
         nic,
+        setNIC,
         accountNo,
+        setAccountNo,
         accHolderName,
+        setAccHolderName,
         bankName,
+        setBankName,
         branchName,
-        nameOnLicense,
+        setBranchName,
         ntcLicenseNo,
+        setNTCLicenseNo,
         driverLicenseNo,
+        setDriverLicenseNo,
         occupation,
-        seatNo,
-        setSeatNo,
+        setOccupation,
+        seatNos,
+        setSeatNos,
         seatStatus,
         setSeatStatus,
         busData,
         myBuses,
+        myBusLocations,
+        setMyBusLocations,
         myTickets,
         setMyTickets,
-        pasTransactions,
         income7,
         income30,
         incomeYear,

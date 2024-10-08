@@ -6,8 +6,11 @@ import { LocationObject } from "expo-location";
 import MapViewDirections from "react-native-maps-directions";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
+import axios from "axios";
+import { useAppContext } from "@/context/AppContext";
 
-export default function MapLocation() {
+export default function PasBusLocation() {
+  const { baseURL, myTickets } = useAppContext();
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [destination, setDestination] = useState<{
@@ -15,9 +18,8 @@ export default function MapLocation() {
     longitude: number;
   } | null>(null);
   const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#eee" : "#777";
-  const iconSize = 20;
 
+  // Request location permissions
   const requestPermissions = async (): Promise<void> => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -26,6 +28,7 @@ export default function MapLocation() {
     }
   };
 
+  // Get current location
   const getLocation = async (): Promise<LocationObject | null> => {
     try {
       let location = await Location.getCurrentPositionAsync({
@@ -38,24 +41,47 @@ export default function MapLocation() {
     }
   };
 
+  //Fetch destination coordinates from the server
+  const fetchDestination = async (regNo: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/mobileAPI/bus/busloc`, {
+        params: { regNo },
+      });
+
+      const { lat, lng } = response.data;
+
+      // Convert lat and lng to numbers to ensure MapViewDirections receives valid coordinates
+      setDestination({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
+      });
+
+      console.log("Fetched destination:", response.data);
+    } catch (error) {
+      console.error("Error fetching destination:", error);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       await requestPermissions();
       let loc = await getLocation();
       setLocation(loc);
       if (loc) {
-        // Set a sample destination for demonstration purposes
-        setDestination({
-          latitude: loc.coords.latitude + 0.04, // Adjust as needed
-          longitude: loc.coords.longitude + 0.009, // Adjust as needed
-        });
         console.log("Current Location:", loc.coords);
-        console.log("Destination:", {
-          latitude: loc.coords.latitude + 0.01,
-          longitude: loc.coords.longitude + 0.01,
-        });
       }
     })();
+
+    const interval = setInterval(async () => {
+      let loc = await getLocation();
+      setLocation(loc);
+      if (loc) {
+        console.log("Updated Location:", loc.coords);
+      }
+      await fetchDestination("NA-5083");
+    }, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -67,8 +93,10 @@ export default function MapLocation() {
           <MapView
             style={StyleSheet.absoluteFillObject}
             initialRegion={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
+              // latitude: location.coords.latitude,
+              // longitude: location.coords.longitude,
+              latitude: 7.264831,
+              longitude: 80.596882,
               latitudeDelta: 0.0922,
               longitudeDelta: 0.0421,
             }}
@@ -76,8 +104,10 @@ export default function MapLocation() {
           >
             <Marker
               coordinate={{
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
+                // latitude: location.coords.latitude,
+                // longitude: location.coords.longitude,
+                latitude: 7.264831,
+                longitude: 80.596882,
               }}
             />
             {destination && (
@@ -96,16 +126,21 @@ export default function MapLocation() {
                 </Marker>
                 <MapViewDirections
                   origin={{
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
+                    // latitude: location.coords.latitude,
+                    // longitude: location.coords.longitude,
+                    latitude: 7.264831,
+                    longitude: 80.596882,
                   }}
                   destination={{
                     latitude: destination.latitude,
                     longitude: destination.longitude,
                   }}
-                  apikey="AIzaSyAe0QzwhP9SW5wsLN_XekECNUdZJwLieK8"
+                  apikey="AIzaSyB8KTu2cHiVsaBQAjxVFfe5YSjUaQHZVec"
                   strokeWidth={6}
-                  strokeColor="hotpink"
+                  strokeColor="#d17"
+                  onError={(errorMessage) => {
+                    console.error("MapViewDirections Error:", errorMessage);
+                  }}
                 />
               </View>
             )}
