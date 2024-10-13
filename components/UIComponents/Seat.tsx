@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState, useEffect } from "react";
 import { Pressable, useColorScheme, View, StyleSheet } from "react-native";
 import { ThemedText } from "../CommonModules/ThemedText";
 import { useAppContext } from "@/context/AppContext";
@@ -9,7 +9,7 @@ type SeatProps = {
   reserved?: boolean;
 };
 
-const seatColors = new Map<String, string>([
+const seatColors = new Map<string, string>([
   ["Available", "#999a"],
   ["Selected", "#0af"],
   ["Not-Available", "#f30e"],
@@ -18,47 +18,44 @@ const seatColors = new Map<String, string>([
 
 export default function Seat({ index, reserved = false }: SeatProps) {
   const theme = useColorScheme() ?? "light";
-  const { seatNos, setSeatNos, seatStatus, setSeatStatus } = useAppContext();
+  const { accountType, seatNos, setSeatNos } = useAppContext();
+
+  useEffect(() => {
+    // This effect ensures the component re-renders when seatNos changes
+  }, [seatNos]);
 
   const updateStatus = () => {
     if (reserved) {
-      return null;
-    } else {
-      setSeatStatus(() => {
-        const newSeatStatus = [...seatStatus];
-        const newSeatNos = [...seatNos];
-        // Check if the seat number is already in seatNos, if it is not available returns -1
-        const seatIndex = seatNos.indexOf(index);
-
-        // If seat is "Available", make it "Selected" and insert the seat nummber in seatNos
-        // If seat is "Selected", make it "Available" and remove the seat number from seatNos
-        if (newSeatStatus[index] === "Available") {
-          newSeatStatus[index] = "Selected";
-          if (seatIndex === -1) {
-            newSeatNos.push(index);
-          }
-        } else if (newSeatStatus[index] === "Selected") {
-          newSeatStatus[index] = "Available";
-          if (seatIndex !== -1) {
-            newSeatNos.splice(seatIndex, 1);
-          }
-        }
-
-        setSeatNos(newSeatNos);
-        setSeatStatus(newSeatStatus);
-        return newSeatStatus;
-      });
+      return;
     }
+
+    const newSeatNos = [...seatNos];
+    const seatIndex = seatNos.indexOf(index);
+
+    if (seatIndex === -1) {
+      // Add seat to selected seats
+      newSeatNos.push(index);
+    } else {
+      // Remove seat from selected seats
+      newSeatNos.splice(seatIndex, 1);
+    }
+
+    setSeatNos(newSeatNos);
   };
+
+  const isSelected = seatNos.includes(index);
 
   return (
     <Pressable
+      pointerEvents={accountType === "Passenger" ? "auto" : "none"}
       style={[
         styles.seatButton,
         {
           backgroundColor: reserved
             ? seatColors.get("Reserved")
-            : seatColors.get(seatStatus[index]),
+            : isSelected
+            ? seatColors.get("Selected")
+            : seatColors.get("Available"),
         },
       ]}
       onPress={updateStatus}
@@ -73,8 +70,8 @@ export default function Seat({ index, reserved = false }: SeatProps) {
 const styles = StyleSheet.create({
   seatButton: {
     margin: 5,
-    paddingHorizontal: 7,
-    paddingVertical: 5,
+    paddingHorizontal: 11,
+    paddingVertical: 8,
     borderRadius: 10,
     alignItems: "center",
   },

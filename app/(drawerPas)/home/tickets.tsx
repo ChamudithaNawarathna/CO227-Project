@@ -84,7 +84,7 @@ type BusStopIDs = {
 };
 
 export default function Tickets() {
-  const { baseURL, busData } = useAppContext();
+  const { baseURL} = useAppContext();
   const iconSize = 20;
   const [displaySeatsModel, setDisplaySeatsModel] = useState(false);
   const [from, setFrom] = useState("");
@@ -320,7 +320,22 @@ export default function Tickets() {
 
       {/********************************************* Search Result ****************************************************/}
 
-      <Button title="Search" onPress={handleSearch} />
+      <Pressable
+        onPress={handleSearch}
+        style={{
+          backgroundColor: "#77f",
+          alignItems: "center",
+          borderRadius: 10,
+          paddingVertical: 10,
+          marginVertical: 7,
+          marginHorizontal: 7
+        }}
+      >
+        <ThemedText type="h5" lightColor="#fff">
+          Search
+        </ThemedText>
+      </Pressable>
+
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {error && <Text style={styles.errorText}>{error}</Text>}
 

@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, useColorScheme, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  useColorScheme,
+  Image,
+  Alert,
+} from "react-native";
 import MapView, { Marker, Polyline, Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
@@ -8,16 +15,56 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import { useAppContext } from "@/context/AppContext";
+import Constants from "expo-constants";
+import { Picker } from "@react-native-picker/picker";
+import { Dropdown } from "react-native-element-dropdown";
+
+type Bus = {
+  regNo: string;
+  routeNo: string;
+  route: string;
+};
 
 export default function PasBusLocation() {
+  const googleMapsApiKey =
+    Constants.expoConfig?.android?.config?.googleMaps?.apiKey ||
+    Constants.expoConfig?.ios?.config?.googleMapsApiKey;
   const { baseURL, myTickets } = useAppContext();
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [destination, setDestination] = useState<{
+  const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
+  const [busLocation, setBusLocation] = useState<{
     latitude: number;
     longitude: number;
+    speed: number;
   } | null>(null);
   const theme = useColorScheme() ?? "light";
+
+  const availableBuses: Bus[] = myTickets
+  ? Array.from(myTickets.values())
+      .filter((ticket) => ticket.tracking) // Only include tickets where tracking is true
+      .map((ticket) => ({
+        regNo: ticket.vehicalNo || "", // Fallback to an empty string if vehicalNo is undefined
+        routeNo: ticket.routeNo || "", // Fallback to an empty string if routeNo is undefined
+        route: ticket.route || "", // Fallback to an empty string if route is undefined
+      }))
+      .filter((bus) => bus.regNo && bus.route) // Filter out any buses with undefined regNo or route
+  : [];
+
+// Use a Set to track seen regNo values
+const seenRegNos = new Set<string>();
+
+// Format the dropdown data, ensuring unique regNo
+const dropdownData = availableBuses.reduce((acc, bus) => {
+  if (!seenRegNos.has(bus.regNo)) {
+    seenRegNos.add(bus.regNo); // Mark this regNo as seen
+    acc.push({
+      label: `${bus.regNo} | ${bus.route}`, // Show vehicalNo and route in the dropdown
+      value: bus, // Set the entire bus object as the value
+    });
+  }
+  return acc;
+}, [] as { label: string; value: Bus }[]);
 
   // Request location permissions
   const requestPermissions = async (): Promise<void> => {
@@ -41,24 +88,23 @@ export default function PasBusLocation() {
     }
   };
 
-  //Fetch destination coordinates from the server
-  const fetchDestination = async (regNo: string) => {
+  // Fetch bus location
+  const fetchBusLocation = async (regNo: string) => {
     try {
-      const response = await axios.get(`${baseURL}/mobileAPI/bus/busloc`, {
-        params: { regNo },
+      const response = await axios.get(`${baseURL}/tracking/trk1`, {
+        params: { data: regNo },
       });
 
-      const { lat, lng } = response.data;
-
-      // Convert lat and lng to numbers to ensure MapViewDirections receives valid coordinates
-      setDestination({
+      const { lat, lng, speed } = response.data;
+      setBusLocation({
         latitude: parseFloat(lat),
         longitude: parseFloat(lng),
+        speed: parseFloat(speed),
       });
-
-      console.log("Fetched destination:", response.data);
-    } catch (error) {
-      console.error("Error fetching destination:", error);
+      console.log(response.data);
+    } catch (err) {
+      console.error("Failed to fetch bus location", err);
+      setBusLocation(null);
     }
   };
 
@@ -78,10 +124,14 @@ export default function PasBusLocation() {
       if (loc) {
         console.log("Updated Location:", loc.coords);
       }
-      await fetchDestination("NA-5083");
+      if (selectedBus) await fetchBusLocation(selectedBus.regNo);
     }, 2000);
 
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    setSelectedBus(availableBuses[0]);
   }, []);
 
   return (
@@ -90,61 +140,91 @@ export default function PasBusLocation() {
         <Text>{errorMsg}</Text>
       ) : (
         location && (
-          <MapView
-            style={StyleSheet.absoluteFillObject}
-            initialRegion={{
-              // latitude: location.coords.latitude,
-              // longitude: location.coords.longitude,
-              latitude: 7.264831,
-              longitude: 80.596882,
-              latitudeDelta: 0.0922,
-              longitudeDelta: 0.0421,
-            }}
-            showsUserLocation
-          >
-            <Marker
-              coordinate={{
-                // latitude: location.coords.latitude,
-                // longitude: location.coords.longitude,
-                latitude: 7.264831,
-                longitude: 80.596882,
+          <View style={StyleSheet.absoluteFillObject}>
+            <Dropdown
+              style={styles.inputDropdown}
+              placeholderStyle={[{ color: "gray" }]}
+              data={dropdownData}
+              labelField={"label"}
+              valueField={"value"}
+              placeholder="Select a bus"
+              value={selectedBus ? selectedBus.regNo : null} // Show regNo when selected
+              onChange={(item) => {
+                setSelectedBus(item.value); // Update selected bus with the Bus object
               }}
             />
-            {destination && (
-              <View>
-                <Marker
-                  coordinate={{
-                    latitude: destination.latitude,
-                    longitude: destination.longitude,
-                  }}
-                  pinColor="blue"
-                >
-                  <Image
-                    source={require("@/assets/icons/bus_location_icon.png")}
-                    style={{ width: 50, height: 50 }}
-                  />
-                </Marker>
-                <MapViewDirections
-                  origin={{
-                    // latitude: location.coords.latitude,
-                    // longitude: location.coords.longitude,
-                    latitude: 7.264831,
-                    longitude: 80.596882,
-                  }}
-                  destination={{
-                    latitude: destination.latitude,
-                    longitude: destination.longitude,
-                  }}
-                  apikey="AIzaSyB8KTu2cHiVsaBQAjxVFfe5YSjUaQHZVec"
-                  strokeWidth={6}
-                  strokeColor="#d17"
-                  onError={(errorMessage) => {
-                    console.error("MapViewDirections Error:", errorMessage);
-                  }}
+            {/* <Picker
+              selectedValue={selectedBus}
+              onValueChange={(itemValue: any) => setSelectedBus(itemValue)}
+              style={{
+                position: "absolute",
+                zIndex: 2,
+                height: 20,
+                width: 200,
+                backgroundColor: "#fffd",
+                margin: 12,
+              }}
+            >
+              {availableBuses.map((ticket, index) => (
+                <Picker.Item
+                  key={index}
+                  label={`${ticket.vehicalNo} - ${ticket.route}`}
+                  value={ticket.vehicalNo}
                 />
-              </View>
-            )}
-          </MapView>
+              ))}
+            </Picker> */}
+            <MapView
+              style={StyleSheet.absoluteFillObject}
+              initialRegion={{
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }}
+              showsUserLocation
+            >
+              <Marker
+                coordinate={{
+                  latitude: location.coords.latitude,
+                  longitude: location.coords.longitude,
+                }}
+              />
+              {busLocation && (
+                <View>
+                  <Marker
+                    coordinate={{
+                      latitude: busLocation.latitude,
+                      longitude: busLocation.longitude,
+                    }}
+                    pinColor="blue"
+                  >
+                    <Image
+                      source={require("@/assets/icons/bus_location_icon.png")}
+                      style={{ width: 50, height: 50 }}
+                    />
+                  </Marker>
+                  {googleMapsApiKey && (
+                    <MapViewDirections
+                      origin={{
+                        latitude: location.coords.latitude,
+                        longitude: location.coords.longitude,
+                      }}
+                      destination={{
+                        latitude: busLocation.latitude,
+                        longitude: busLocation.longitude,
+                      }}
+                      apikey={googleMapsApiKey}
+                      strokeWidth={6}
+                      strokeColor="#d17"
+                      onError={(errorMessage) => {
+                        console.error("MapViewDirections Error:", errorMessage);
+                      }}
+                    />
+                  )}
+                </View>
+              )}
+            </MapView>
+          </View>
         )
       )}
     </View>
@@ -158,5 +238,17 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: "100%",
+  },
+  inputDropdown: {
+    width: 300,
+    color: "#333",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    marginBottom: 10,
+    backgroundColor: "#fff",
+    elevation: 3,
+    zIndex: 2,
+    margin: 12
   },
 });

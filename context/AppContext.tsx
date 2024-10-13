@@ -1,4 +1,3 @@
-import { Bus } from "@/controller/Bus";
 import { Owner } from "@/controller/Owner";
 import { Ticket } from "@/controller/Ticket";
 import { Transaction } from "@/controller/Transaction";
@@ -17,10 +16,26 @@ type grapData = {
   label?: string;
 };
 
-type busLocationData = {
+type VehicleDetails = {
+  vehicleRegNo: string;
+  seats: number;
+  date: string;
+  departureTime: string;
+  bookedSeats: string[];
+};
+
+type Bus = {
   id: string;
-  latitude: number;
-  longitude: number;
+  regNo: string;
+  service: string;
+  seats: number;
+  rides: number;
+  ridesIncrement: number;
+  earning: number;
+  earningIncrement: number;
+  rating: number;
+  insuranceExp: string;
+  VRL_Exp: string;
 };
 
 export type accountType = "Passenger" | "Operator" | "Owner";
@@ -63,12 +78,10 @@ interface AppContextProps {
   setOccupation: Dispatch<SetStateAction<string>>;
   seatNos: number[];
   setSeatNos: Dispatch<SetStateAction<number[]>>;
-  seatStatus: string[];
-  setSeatStatus: Dispatch<SetStateAction<string[]>>;
-  busData: Bus[];
+  busScheduleDetails: VehicleDetails[];
+  setBusScheduleDetails: Dispatch<SetStateAction<VehicleDetails[]>>;
   myBuses: Bus[];
-  myBusLocations: busLocationData[];
-  setMyBusLocations: Dispatch<SetStateAction<busLocationData[]>>;
+  setMyBuses: Dispatch<SetStateAction<Bus[]>>;
   myTickets?: Map<string, Ticket>;
   setMyTickets: Dispatch<SetStateAction<Map<string, Ticket> | undefined>>;
   income7: grapData[];
@@ -107,243 +120,109 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [driverLicenseNo, setDriverLicenseNo] = useState<string>("LA345666");
   const [occupation, setOccupation] = useState<string>("Both");
   const [seatNos, setSeatNos] = useState<number[]>([]);
-  const [seatStatus, setSeatStatus] = useState(Array(60).fill("Available"));
 
   /* Data for passenger account */
 
+  // const [myTickets, setMyTickets] = useState<Map<string, Ticket> | undefined>();
   const [myTickets, setMyTickets] = useState<Map<string, Ticket> | undefined>(
-    new Map([
-      [
-        "001",
-        new Ticket(
-          "001",
-          new Date("2024-10-06"),
-          "AB1234",
-          "Express",
-          "Luxury",
-          "E01 Colombo - Galle",
-          "Colombo - Galle",
-          new Date("2024-10-06T08:00"),
-          "Colombo",
-          "Galle",
-          "20:15",
-          "1:30",
-          "120 km",
-          "1500",
-          "0",
-          "1500",
-          "TXN001",
-          "1",
-          "0",
-          ["A1", "A2"],
-          "Confirmed",
-          true,
-          false
-        ),
-      ],
-      [
-        "002",
-        new Ticket(
-          "002",
-          new Date("2024-10-06"),
-          "CD5678",
-          "Rapid",
-          "Standard",
-          "E01 Colombo - Galle",
-          "Galle - Colombo",
-          new Date("2024-10-06T18:00"),
-          "Galle",
-          "Colombo",
-          "12:45",
-          "2:51",
-          "120 km",
-          "1200",
-          "0",
-          "1200",
-          "TXN002",
-          "2",
-          "1",
-          ["B1", "B2"],
-          "Confirmed",
-          true,
-          true
-        ),
-      ],
-    ])
+    () => {
+      const ticket1 = new Ticket(
+        "TKT001",
+        new Date("2024-10-01"),
+        "VH123",
+        "BusOrg",
+        "Luxury",
+        "RT101",
+        "City A - City B",
+        new Date("2024-10-10T08:00:00"),
+        "City A, Kandy, Srilanka",
+        "City B, Kandy, Srilanka",
+        "08:00",
+        "10:00",
+        "200km",
+        "50",
+        "5",
+        "45",
+        "TXN001",
+        "30",
+        "20",
+        ["1A", "1B"],
+        "booked",
+        true,
+        true
+      );
+
+      const ticket2 = new Ticket(
+        "TKT002",
+        new Date("2024-10-02"),
+        "VH124",
+        "BusOrg",
+        "Semi-Luxury",
+        "RT102",
+        "City C - City D",
+        new Date("2024-10-11T09:00:00"),
+        "City C, Kandy, Srilanka",
+        "City D, Kandy, Srilanka",
+        "09:00",
+        "11:00",
+        "150km",
+        "40",
+        "4",
+        "36",
+        "TXN002",
+        "25",
+        "15",
+        ["2A", "2B"],
+        "booked",
+        false,
+        false
+      );
+
+      const ticket3 = new Ticket(
+        "TKT003",
+        new Date("2024-10-03"),
+        "VH125",
+        "BusOrg",
+        "Normal",
+        "RT103",
+        "City E - City F",
+        new Date("2024-10-12T10:00:00"),
+        "City E, Kandy, Srilanka",
+        "City F, Kandy, Srilanka",
+        "10:00",
+        "12:00",
+        "100km",
+        "30",
+        "3",
+        "27",
+        "TXN003",
+        "20",
+        "10",
+        ["3A", "3B"],
+        "booked",
+        true,
+        false
+      );
+
+      // Create a map with ticketNo as the key
+      const ticketMap = new Map<string, Ticket>();
+      ticketMap.set(ticket1.ticketNo, ticket1);
+      ticketMap.set(ticket2.ticketNo, ticket2);
+      ticketMap.set(ticket3.ticketNo, ticket3);
+
+      return ticketMap;
+    }
   );
-
-  // ["a12345", new Ticket("a12345")],
-  //     ["b12345", new Ticket("b12345")],
-
-  const busData = [
-    new Bus(
-      "srtf234546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Kurunduwatte, Kandy",
-      new Date(),
-      "Akbar, Kandy",
-      new Date(),
-      new Date(),
-      new Map(),
-      6.93548,
-      79.84868,
-      new Owner("123abc", 1200)
-    ),
-    new Bus(
-      "srdtf24509",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Peradeniya, Kandy",
-      new Date(),
-      "Galaha Junction, Kandy",
-      new Date(),
-      new Date(),
-      new Map(),
-      9.66845,
-      80.00742,
-      new Owner("123abc", 1200)
-    ),
-    new Bus(
-      "s35hh34546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Botanical Garden, Kandy",
-      new Date(),
-      "Hospital, Kandy",
-      new Date(),
-      new Date(),
-      new Map(),
-      6.0461,
-      80.2103,
-      new Owner("123fgc", 8000)
-    ),
-    new Bus(
-      "s35hh34549",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Akbar, Kandy",
-      new Date(),
-      "Dangolla Junction, Kandy",
-      new Date(),
-      new Date(),
-      new Map(),
-      7.7102,
-      81.6924,
-      new Owner("123fgc", 8000)
-    ),
-    new Bus(
-      "s35hh35546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Gatambe, Kandy",
-      new Date(),
-      "Kandy Hospital, Kandy",
-      new Date(),
-      new Date(),
-      new Map(),
-      7.2906,
-      80.6336,
-      new Owner("123fgc", 8000)
-    ),
-  ];
 
   /* Data for bus operator account */
 
-  const [bookedTickets, setBookedTickets] =
-    useState();
-
-    // new Map([
-    //   ["9015776", new Ticket("9015776")],
-    //   ["6578799", new Ticket("6578799")],
-    // ])
+  const [busScheduleDetails, setBusScheduleDetails] = useState<
+    VehicleDetails[]
+  >([]);
 
   /* Data for bus owner account */
 
-  const myBuses = [
-    new Bus(
-      "srtf234546",
-      "NA-35678",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Badulla",
-      new Date(),
-      "Colombo",
-      new Date(),
-      new Date(),
-      new Map(),
-      6.93548,
-      79.84868,
-      new Owner("123abc", 1200)
-    ),
-    new Bus(
-      "srdtf24509",
-      "NA-35679",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Colombo",
-      new Date(),
-      "Kandy",
-      new Date(),
-      new Date(),
-      new Map(),
-      9.66845,
-      80.00742,
-      new Owner("123abc", 1200)
-    ),
-    new Bus(
-      "s35hh34546",
-      "NA-35680",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Anuradapura",
-      new Date(),
-      "Hambantota",
-      new Date(),
-      new Date(),
-      new Map(),
-      6.0461,
-      80.2103,
-      new Owner("123fgc", 8000)
-    ),
-    new Bus(
-      "s35hh34549",
-      "NA-35681",
-      "ads3546567",
-      new Map([[1, "d-234466"]]),
-      new Map([[1, "c-234466"]]),
-      "Anuradapura",
-      new Date(),
-      "Hambantota",
-      new Date(),
-      new Date(),
-      new Map(),
-      7.7102,
-      81.6924,
-      new Owner("123fgc", 8000)
-    ),
-  ];
-
-  const [myBusLocations, setMyBusLocations] = useState<busLocationData[]>(
-    myBuses.map((bus) => ({
-      id: bus.id,
-      latitude: bus.latitude,
-      longitude: bus.longitude,
-    }))
-  );
+  const [myBuses, setMyBuses] = useState<Bus[]>([]);
 
   const income7 = [
     {
@@ -627,12 +506,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setOccupation,
         seatNos,
         setSeatNos,
-        seatStatus,
-        setSeatStatus,
-        busData,
+        busScheduleDetails,
+        setBusScheduleDetails,
         myBuses,
-        myBusLocations,
-        setMyBusLocations,
+        setMyBuses,
         myTickets,
         setMyTickets,
         income7,

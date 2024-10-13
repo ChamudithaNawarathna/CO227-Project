@@ -9,154 +9,322 @@ import {
   ActivityIndicator,
   GestureResponderEvent,
   Pressable,
+  useColorScheme,
 } from "react-native";
 import StringToDate from "../CommonModules/StringToDateTime";
 import { useAppContext } from "@/context/AppContext";
 import Modal from "react-native-modal";
+import { DateToString, TimeToString } from "../CommonModules/DateTimeToString";
+import { ThemedText } from "../CommonModules/ThemedText";
+import { faCircleInfo, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import QRCode from "react-native-qrcode-svg";
 
 type Props = {
   isVisible: boolean;
   onClose: (event: GestureResponderEvent) => void;
-  refNo: string;
-  org: string;
-  fromT: string;
-  toT: string;
-  tracking: boolean;
-  cancel: boolean;
+  ticket: Ticket;
 };
 
-const FullTicketView = ({
-  isVisible,
-  onClose,
-  refNo,
-  org,
-  fromT,
-  toT,
-  tracking,
-  cancel,
-}: Props) => {
-  const [ticket, setTicket] = useState<Ticket>();
-  const [loading, setLoading] = useState(false);
-  const { baseURL, myTickets, setMyTickets } = useAppContext();
-
-  // Function to fetch recentTicket details by reference string
-  const fetchTicketDetails = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${baseURL}/tickets/tkt2`, {
-        params: { refNo },
-      });
-      const ticket = new Ticket(
-        response.data.ticketNo,
-        StringToDate(response.data.issuedDate, response.data.issuedTime),
-        response.data.vehicleNo, // Corrected typo
-        org,
-        response.data.type,
-        response.data.routeNo,
-        response.data.route,
-        StringToDate(response.data.date, response.data.time),
-        response.data.from,
-        response.data.to,
-        fromT,
-        toT,
-        response.data.distance,
-        response.data.price,
-        response.data.discount,
-        response.data.unitPrice,
-        response.data.transID,
-        response.data.full,
-        response.data.half,
-        response.data.seatNos,
-        response.data.status,
-        tracking,
-        cancel
-      );
-      const updatedTickets = new Map(myTickets);
-      updatedTickets.set(refNo, ticket);
-      setMyTickets(updatedTickets);
-      setTicket(ticket);
-    } catch (err) {
-      console.error("Error fetching ticket details:", err); // Updated error message
-      Alert.alert(
-        "Error",
-        "An error occurred while fetching the ticket details" // Updated error message
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    const existingTicket = myTickets ? myTickets.get(refNo) : undefined;
-
-    // Only fetch details if the ticket does not already exist in myTickets
-    if (!existingTicket) {
-      fetchTicketDetails();
-    } else {
-      setTicket(existingTicket); // Set the existing ticket from myTickets
-    }
-  }, [refNo, org, fromT, toT, tracking, cancel, myTickets]);
+const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
+  const theme = useColorScheme() ?? "light";
 
   return (
-    <Modal style={styles.container} isVisible={isVisible}>
-      {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : ticket ? (
-        <View>
-          <Pressable onPress={onClose}>
-            <Text>Close</Text>
-          </Pressable>
-          <Text style={styles.header}>Ticket No: {ticket.ticketNo}</Text>
-          <Text>Booked Time: {ticket.bookedTime?.toLocaleTimeString()}</Text>
-          <Text>Vehicle No: {ticket.vehicalNo}</Text>
-          <Text>Organization: {ticket.org}</Text>
-          <Text>Type: {ticket.type}</Text>
-          <Text>Route No: {ticket.routeNo}</Text>
-          <Text>Route: {ticket.route}</Text>
-          <Text>Date: {ticket.departure?.toLocaleDateString()}</Text>
-          <Text>From: {ticket.from}</Text>
-          <Text>To: {ticket.to}</Text>
-          <Text>From Time: {ticket.fromT}</Text>
-          <Text>To Time: {ticket.toT}</Text>
-          <Text>Distance: {ticket.distance} km</Text>
-          <Text>Price: ${ticket.price}</Text>
-          <Text>Discount: {ticket.discount}%</Text>
-          <Text>Unit Price: ${ticket.unitPrice}</Text>
-          <Text>Transaction ID: {ticket.transID}</Text>
-          <Text>Full Tickets: {ticket.full}</Text>
-          <Text>Half Tickets: {ticket.half}</Text>
-          <Text>Seat Nos: {ticket.seatNos}</Text>
-          <Text>Status: {ticket.status}</Text>
-          <Text>Tracking: {ticket.tracking ? "Enabled" : "Disabled"}</Text>
-          <Text>Cancel: {ticket.cancel ? "Yes" : "No"}</Text>
+    <Modal isVisible={isVisible}>
+      <Pressable style={styles.cancelIcon} onPress={onClose}>
+        <FontAwesomeIcon icon={faXmark} size={32} color={"#ccc"} />
+      </Pressable>
+      <View
+        style={{
+          backgroundColor: theme === "dark" ? "#555" : "#fff",
+          borderRadius: 10,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#f91",
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 10,
+            paddingVertical: 5,
+            paddingHorizontal: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <QRCode
+            value={`${ticket.vehicalNo}|${TimeToString(ticket.departure)}|${ticket.from?.split(",")[0]?.trim()}|${ticket.to?.split(",")[0]?.trim()}|${ticket.seatNos}|${ticket.full}|${ticket.half}`}
+            size={70}
+            color="#fff"
+            backgroundColor="transparent"
+          />
+          <View>
+            <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+              Reference No: {ticket.ticketNo}
+            </ThemedText>
+            <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+              Departure: {DateToString(ticket.departure)}
+              {` / `}
+              {TimeToString(ticket.departure)}
+            </ThemedText>
+            <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+              Booked on: {DateToString(ticket.bookedDate)}
+              {` / `}
+              {TimeToString(ticket.bookedDate)}
+            </ThemedText>
+          </View>
         </View>
-      ) : (
-        <View>
-          <Pressable onPress={onClose}>
-            <Text>Close</Text>
-          </Pressable>
-          <Text>Nothing to show here</Text>
+
+        <View
+          style={{
+            paddingHorizontal: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginVertical: 10,
+          }}
+        >
+          <View>
+            <ThemedText type="h6" darkColor="#fff">
+              Origin
+            </ThemedText>
+            <ThemedText type="h4" darkColor="#fff">
+              {ticket.fromT}
+            </ThemedText>
+            <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+              <ThemedText type="h4" darkColor="#fff">
+                {ticket.from?.split(",")[0]?.trim()}
+              </ThemedText>
+            </View>
+          </View>
+          <View>
+            <ThemedText type="h6" darkColor="#fff">
+              Destination
+            </ThemedText>
+            <ThemedText type="h4" darkColor="#fff">
+              {ticket.toT}
+            </ThemedText>
+            <View style={{ flexDirection: "row", alignItems: "baseline" }}>
+              <ThemedText type="h4" darkColor="#fff">
+                {ticket.to?.split(",")[0]?.trim()}
+              </ThemedText>
+            </View>
+          </View>
         </View>
-      )}
+
+        <View
+          style={{
+            paddingHorizontal: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginVertical: 10,
+          }}
+        >
+          <View style={{ alignItems: "center" }}>
+            <ThemedText type="h5" lightColor="#575050" darkColor="#ddd">
+              Bus
+            </ThemedText>
+            <ThemedText type="s5" lightColor="#888" darkColor="#aaa">
+              {ticket.vehicalNo}
+            </ThemedText>
+          </View>
+
+          <View style={{ alignItems: "center" }}>
+            <ThemedText type="h5" lightColor="#575050" darkColor="#ddd">
+              Type
+            </ThemedText>
+            <ThemedText type="s5" lightColor="#888" darkColor="#aaa">
+              {ticket.type}
+            </ThemedText>
+          </View>
+
+          <View style={{ alignItems: "center" }}>
+            <ThemedText type="h5" lightColor="#575050" darkColor="#ddd">
+              Distance
+            </ThemedText>
+            <ThemedText type="s5" lightColor="#888" darkColor="#aaa">
+              {ticket.distance} km
+            </ThemedText>
+          </View>
+
+          <View style={{ alignItems: "center" }}>
+            <ThemedText type="h5" lightColor="#575050" darkColor="#ddd">
+              Route
+            </ThemedText>
+            <ThemedText type="s5" lightColor="#888" darkColor="#aaa">
+              {ticket.routeNo}
+            </ThemedText>
+          </View>
+        </View>
+
+        <View style={{ marginHorizontal: 10, marginVertical: 20 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <ThemedText type="h5">Route:</ThemedText>
+            <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
+              {ticket.routeNo} {ticket.route}
+            </ThemedText>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <ThemedText type="h5">Organization:</ThemedText>
+            <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
+              {ticket.org}
+            </ThemedText>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <ThemedText type="h5">Adults:</ThemedText>
+            <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
+              {ticket.full}
+            </ThemedText>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <ThemedText type="h5">Children:</ThemedText>
+            <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
+              {ticket.half}
+            </ThemedText>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <ThemedText type="h5">Unit Price:</ThemedText>
+            <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
+              LKR {ticket.unitPrice}
+            </ThemedText>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <ThemedText type="h5">Discount:</ThemedText>
+            <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
+              {ticket.discount} %
+            </ThemedText>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            <ThemedText type="h5">Price:</ThemedText>
+            <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
+              LKR {ticket.price}
+            </ThemedText>
+          </View>
+        </View>
+
+        <View style={{ alignItems: "center" }}>
+          <ThemedText type="h4" darkColor="#fff">
+            Seat No(s): {ticket.seatNos}
+          </ThemedText>
+        </View>
+
+        {ticket.tracking && (
+          <View
+            style={{
+              marginVertical: 10,
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 5,
+              alignItems: "center",
+            }}
+          >
+            <FontAwesomeIcon icon={faCircleInfo} size={14} color={"#f91"} />
+            <Text style={{ fontWeight: "bold", fontSize: 13, color: "#f91" }}>
+              Tracking is available
+            </Text>
+          </View>
+        )}
+        {!ticket.tracking && (
+          <View
+            style={{
+              marginVertical: 10,
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 5,
+              alignItems: "center",
+            }}
+          >
+            <FontAwesomeIcon icon={faCircleInfo} size={14} color={"#f91"} />
+            <Text style={{ fontWeight: "bold", fontSize: 13, color: "#f91" }}>
+              Tracking is available 5 min before the bus departure
+            </Text>
+          </View>
+        )}
+
+        <View
+          style={{
+            margin: 10,
+            borderBottomLeftRadius: 10,
+            borderBottomRightRadius: 10,
+            paddingVertical: 5,
+            paddingHorizontal: 10,
+            alignItems: "center",
+          }}
+        >
+          <QRCode
+            value={`${ticket.vehicalNo}|${TimeToString(ticket.departure)}|${ticket.from?.split(",")[0]?.trim()}|${ticket.to?.split(",")[0]?.trim()}|${ticket.seatNos}|${ticket.full}|${ticket.half}`}
+            size={200}
+            color={theme === "dark" ? "#fff" : "#000"}
+            backgroundColor="transparent"
+          />
+        </View>
+      </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    margin: 10,
     backgroundColor: "#f9f9f9",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    borderRadius: 15,
   },
   header: {
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  cancelIcon: {
+    marginHorizontal: 5,
+    marginBottom: 5,
+    flexDirection: "row",
+    alignSelf: "flex-end",
   },
 });
 

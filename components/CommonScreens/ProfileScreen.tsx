@@ -238,7 +238,7 @@ export default function ProfileScreen() {
 
                 <InfoCard
                   title="NTC license number"
-                  iconName={faN}
+                  iconName={faDriversLicense}
                   info={ntcLicenseNo}
                   iconColor={iconColor}
                 />

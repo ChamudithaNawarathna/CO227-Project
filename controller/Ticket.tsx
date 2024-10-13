@@ -1,6 +1,6 @@
 export class Ticket {
   ticketNo: string;
-  bookedTime?: Date;
+  bookedDate?: Date;
   vehicalNo?: string;
   org?: string; // Organization
   type?: string; // eg. Luxury, Normal, Semi-Luxury
@@ -25,7 +25,7 @@ export class Ticket {
 
   constructor(
     ticketNo: string,
-    bookedTime: Date,
+    bookedDate: Date,
     vehicalNo: string,
     org: string,
     type: string,
@@ -49,7 +49,7 @@ export class Ticket {
     cancel: boolean
   ) {
     this.ticketNo = ticketNo;
-    this.bookedTime = bookedTime;
+    this.bookedDate = bookedDate;
     this.vehicalNo = vehicalNo;
     this.org = org;
     this.type = type;

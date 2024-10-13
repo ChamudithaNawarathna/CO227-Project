@@ -5,9 +5,10 @@ import * as Location from "expo-location";
 import { useColorScheme } from "react-native";
 import { useAppContext } from "@/context/AppContext";
 import { Picker } from "@react-native-picker/picker";
+import axios from "axios";
 
 export default function OwnBusLocation() {
-  const { myBuses, myBusLocations, setMyBusLocations } = useAppContext();
+  const { baseURL, myBuses, myBusLocations} = useAppContext();
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -15,6 +16,11 @@ export default function OwnBusLocation() {
   const [selectedBusLocation, setSelectedBusLocation] = useState<{
     latitude: number;
     longitude: number;
+  } | null>(null);
+  const [busLocation, setBusLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    speed: number;
   } | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const theme = useColorScheme() ?? "light";
@@ -40,15 +46,25 @@ export default function OwnBusLocation() {
     }
   };
 
-  const fetchBusLocations = async () => {
-    // Simulate fetching updated bus locations from a server
-    const updatedBuses = myBusLocations.map((bus) => ({
-      ...bus,
-      latitude: bus.latitude + (Math.random() - 2) * 0.0001,
-      longitude: bus.longitude + (Math.random() - 2) * 0.0001,
-    }));
-    setMyBusLocations(updatedBuses);
-  };
+ // Fetch bus location
+ const fetchBusLocation = async (regNo: string) => {
+  try {
+    const response = await axios.get(`${baseURL}/tracking/trk1`, {
+      params: { data: regNo },
+    });
+
+    const { lat, lng, speed } = response.data;
+    setBusLocation({
+      latitude: parseFloat(lat),
+      longitude: parseFloat(lng),
+      speed: parseFloat(speed),
+    });
+    console.log(response.data);
+  } catch (err) {
+    console.error("Failed to fetch bus location", err)
+    setBusLocation(null);
+  }
+};
 
   useEffect(() => {
     (async () => {
@@ -57,7 +73,7 @@ export default function OwnBusLocation() {
       setLocation(loc);
     })();
 
-    const interval = setInterval(fetchBusLocations, 1000); // Update every 5 seconds
+    const interval = setInterval(fetchBusLocation, 1000); // Update every 5 seconds
     return () => clearInterval(interval);
   }, []);
 

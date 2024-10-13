@@ -1,81 +1,240 @@
 import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { ScrollView, StyleSheet, useColorScheme, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from "react-native";
 import { AppContext, useAppContext } from "@/context/AppContext";
-import { LineGraph } from "@/components/UIComponents/LineGraph";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { EarningsGraph } from "@/components/UIComponents/EarningGraph";
+import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Dropdown } from "react-native-element-dropdown"; // Ensure to install this or another dropdown package
+
+// Define the income data structure for type safety
+interface IncomeData {
+  weekly: {
+    receivedData: number[];
+    refundData: number[];
+    earningData: number[];
+    xLabels: string[];
+  };
+  monthly: {
+    receivedData: number[];
+    refundData: number[];
+    earningData: number[];
+    xLabels: string[];
+  };
+  annual: {
+    receivedData: number[];
+    refundData: number[];
+    earningData: number[];
+    xLabels: string[];
+  };
+}
+
+// Define the dropdown options
+const dropdownOptions = [
+  { label: "Total Earnings", value: "earningData" },
+  { label: "Total Refunds", value: "refundData" },
+  { label: "Total Received", value: "receivedData" },
+];
 
 export default function Analytics() {
+  const { baseURL, id } = useAppContext();
   const theme = useColorScheme() ?? "light";
-  const { income7, income30, incomeYear } = useAppContext();
-  
+  const iconColor = theme === "dark" ? "#aaa" : "#777";
+
+  const [incomeData, setIncomeData] = useState<IncomeData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // State for selected data types for each graph
+  const [selectedWeeklyData, setSelectedWeeklyData] =
+    useState<string>("earningData");
+  const [selectedMonthlyData, setSelectedMonthlyData] =
+    useState<string>("earningData");
+  const [selectedAnnualData, setSelectedAnnualData] =
+    useState<string>("earningData");
+
+  const fetchIncomeData = async () => {
+    try {
+      const response = await axios.post(`${baseURL}/bus/incomeTotal`, { id });
+      setIncomeData(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching bus income data:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchIncomeData();
+  }, []);
+
+  // Function to get data for weekly graph
+  const getWeeklyData = (dataType: keyof IncomeData["weekly"]) => {
+    if (!incomeData) return [];
+    const earningData = incomeData.weekly[dataType];
+    return earningData.map((value, idx) => ({
+      label: incomeData.weekly.xLabels[idx],
+      value: Number(value),
+    }));
+  };
+
+  // Function to get data for monthly and annual graphs
+  const getMonthlyData = (dataType: keyof IncomeData["monthly"]) => {
+    if (!incomeData) return [];
+    const earningData = incomeData.monthly[dataType];
+    return earningData.map((value, idx) => ({
+      label: incomeData.monthly.xLabels[idx],
+      value: Number(value),
+    }));
+  };
+
+  const getAnnualData = (dataType: keyof IncomeData["annual"]) => {
+    if (!incomeData) return [];
+    const earningData = incomeData.annual[dataType];
+    return earningData.map((value, idx) => ({
+      label: incomeData.annual.xLabels[idx],
+      value: Number(value),
+    }));
+  };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
   return (
     <View style={styles.mainBody}>
-      <ScrollView
-        style={{
-          backgroundColor: "transparent",
-        }}
-      >
-        <View style={{ marginVertical: 20 }}>
-          <ThemedText
-            type="h4"
-            style={{ marginTop: 25, marginBottom: 10, marginHorizontal: 5 }}
-          >
-            Income (7 days)
-          </ThemedText>
-          <LineGraph
-            input={income7}
-            lineColorDark="#0f8"
-            lineColorLight="#0d8"
-            startColorDark="#0f8"
-            startColorLight="#0d8"
-            endColorDark="#0f8"
-            endColorLight="#0d8"
-            xSpacing={55}
-            xLabelWidth={90}
-            yLabelWidth={45}
+      <ScrollView style={{ backgroundColor: "transparent" }}>
+        <Pressable
+          style={{
+            marginTop: 10,
+            marginHorizontal: 10,
+            flexDirection: "row",
+            gap: 5,
+            alignSelf: "flex-end",
+          }}
+          onPress={fetchIncomeData}
+        >
+          <FontAwesomeIcon
+            icon={faArrowRotateBack}
+            size={18}
+            color={iconColor}
+            style={{ alignSelf: "center" }}
           />
-        </View>
+          <ThemedText type="s5" lightColor={iconColor} darkColor={iconColor}>
+            Refresh
+          </ThemedText>
+        </Pressable>
 
-        <View style={{ marginVertical: 20 }}>
-          <ThemedText
-            type="h4"
-            style={{ marginTop: 25, marginBottom: 10, marginHorizontal: 5 }}
-          >
-            Income (30 days)
-          </ThemedText>
-          <LineGraph
-            input={income30}
-            lineColorDark="#fa8"
-            lineColorLight="#f98"
-            startColorDark="#fa8"
-            startColorLight="#f98"
-            endColorDark="#fa8"
-            endColorLight="#fa8"
-            xSpacing={9}
-            xLabelWidth={50}
-            yLabelWidth={45}
-          />
-        </View>
+        {incomeData && (
+          <View style={{ marginHorizontal: 5 }}>
+            <View
+              style={{
+                marginBottom: 50,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 10,
+                  justifyContent: "flex-start",
+                }}
+              >
+                <ThemedText style={styles.title}>Weekly</ThemedText>
+                <Dropdown
+                  style={styles.inputDropdown}
+                  placeholderStyle={{ color: "gray" }}
+                  data={dropdownOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Data Type"
+                  value={selectedWeeklyData}
+                  onChange={(item) => {
+                    setSelectedWeeklyData(item.value); // Update selected data type for weekly
+                  }}
+                />
+              </View>
+              <EarningsGraph
+                data={getWeeklyData(
+                  selectedWeeklyData as keyof IncomeData["weekly"]
+                )}
+              />
+            </View>
 
-        <View style={{ marginVertical: 20 }}>
-          <ThemedText
-            type="h4"
-            style={{ marginTop: 25, marginBottom: 10, marginHorizontal: 5 }}
-          >
-            Income (Year)
-          </ThemedText>
-          <LineGraph
-            input={incomeYear}
-            lineColorDark="#f4f"
-            lineColorLight="#f1f"
-            startColorDark="#f4f"
-            startColorLight="#f1f"
-            endColorDark="#f4f"
-            endColorLight="#f4f"
-            xSpacing={27}
-            xLabelWidth={50}
-            yLabelWidth={45}
-          />
-        </View>
+            <View
+              style={{
+                marginBottom: 50,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 10,
+                  justifyContent: "flex-start",
+                }}
+              >
+                <ThemedText style={styles.title}>Monthly</ThemedText>
+                <Dropdown
+                  style={styles.inputDropdown}
+                  placeholderStyle={{ color: "gray" }}
+                  data={dropdownOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Data Type"
+                  value={selectedMonthlyData}
+                  onChange={(item) => {
+                    setSelectedMonthlyData(item.value); // Update selected data type for monthly
+                  }}
+                />
+              </View>
+              <EarningsGraph
+                data={getMonthlyData(
+                  selectedMonthlyData as keyof IncomeData["monthly"]
+                )}
+              />
+            </View>
+
+            <View
+              style={{
+                marginBottom: 50,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 10,
+                  justifyContent: "flex-start",
+                  marginHorizontal: 10,
+                }}
+              >
+                <ThemedText style={styles.title}>Annual</ThemedText>
+                <Dropdown
+                  style={styles.inputDropdown}
+                  placeholderStyle={{ color: "gray" }}
+                  data={dropdownOptions}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Select Data Type"
+                  value={selectedAnnualData}
+                  onChange={(item) => {
+                    setSelectedAnnualData(item.value); // Update selected data type for annual
+                  }}
+                />
+              </View>
+              <EarningsGraph
+                data={getAnnualData(
+                  selectedAnnualData as keyof IncomeData["annual"]
+                )}
+              />
+            </View>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -86,42 +245,19 @@ const styles = StyleSheet.create({
     padding: 10,
     flex: 1,
   },
-  rechargeButton: {
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
+  inputDropdown: {
+    height: 40,
+    width: 150,
+    borderColor: "#aaa",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
     borderRadius: 20,
-  },
-  cardBody: {
-    borderWidth: 0,
-    borderRadius: 10,
-    marginHorizontal: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 20,
-  },
-  cardHeader: {
-    marginTop: 25,
-    marginBottom: 5,
-    marginHorizontal: 15,
-    backgroundColor: "transparent",
-  },
-  ticketBody: {
-    borderWidth: 0,
-    borderRadius: 10,
-    margin: 5,
-    padding: 10,
-    backgroundColor: "#1cd7",
-  },
-  drawerHeader: {
-    flexDirection: "row",
-    backgroundColor: "transparent",
-    gap: 10,
-  },
-  profileImage: {
-    height: 120,
-    width: 120,
-    borderRadius: 60,
-    marginBottom: 12,
-    backgroundColor: "#000",
   },
 });

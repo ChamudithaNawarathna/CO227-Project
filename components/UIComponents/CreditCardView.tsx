@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { useState } from "react";
 import QRCode from "react-native-qrcode-svg";
-import { StringDate, StringTime } from "../CommonModules/DateTimeToString";
 
 type CreditCardProps = {
   ticket: Ticket;

@@ -2,33 +2,34 @@ import { View, Text, Pressable, useColorScheme, Alert } from "react-native";
 import FullTicketView from "./FullTicketView";
 import { useState } from "react";
 import {
+  faCancel,
+  faCircleInfo,
+  faDeleteLeft,
   faDumpster,
+  faEye,
+  faInfo,
+  faInfoCircle,
+  faLocationDot,
+  faMagnifyingGlassLocation,
+  faMapLocationDot,
   faRightFromBracket,
+  faTrash,
+  faTrashAlt,
+  faTrashArrowUp,
+  faTrashCan,
+  faTrashRestore,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useAppContext } from "@/context/AppContext";
 import axios from "axios";
 import { DateToString, TimeToString } from "../CommonModules/DateTimeToString";
 import { TicketCancelModal } from "@/app/modals/messages/ticketCancel";
+import { ThemedText } from "../CommonModules/ThemedText";
+import QRCode from "react-native-qrcode-svg";
+import { Ticket } from "@/controller/Ticket";
 
 type Props = {
-  refNo: string;
-  date: string;
-  from: string;
-  to: string;
-  departure: string;
-  fromT: string;
-  toT: string;
-  seats: string;
-  full: string;
-  half: string;
-  price: string;
-  regNo: string;
-  org: string;
-  service: string;
-  route: string;
-  tracking: boolean;
-  cancel: boolean;
+  ticket: Ticket;
 };
 
 interface RefundData {
@@ -42,31 +43,15 @@ interface RefundData {
   refund: string;
 }
 
-export const AvailableTicketView = ({
-  refNo,
-  date,
-  from,
-  to,
-  departure,
-  fromT,
-  toT,
-  seats,
-  full,
-  half,
-  price,
-  regNo,
-  org,
-  service,
-  route,
-  tracking,
-  cancel,
-}: Props) => {
+export const AvailableTicketView = ({ ticket }: Props) => {
   const { baseURL, busData } = useAppContext();
   const [displayFullTicket, setDisplayFullTicket] = useState(false);
   const [displayTicketCancel, setDisplayTicketCancel] = useState(false);
   const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#eee" : "#777";
-  const iconSize = 24;
+  const iconColor = theme === "dark" ? "#ccc" : "#777";
+  const disabledIconColor = theme === "dark" ? "#666" : "#ccc";
+  const iconSize = 20;
+  const iconTitleSize = 10;
   const [refundData, setRefundData] = useState<RefundData | null>(null); // Refund Info
   const [loading, setLoading] = useState<boolean>(false); // Loading State
 
@@ -78,13 +63,12 @@ export const AvailableTicketView = ({
     try {
       const response = await axios.post(`${baseURL}/tickets/tkt5`, {
         data: {
-          refNo,
+          refNo: ticket.ticketNo,
           cancelDate,
           cancelTime,
         },
       });
-
-      setRefundData(response.data); // Store refund data
+      setRefundData(response.data);
     } catch (err) {
       Alert.alert(
         "Error",
@@ -97,64 +81,197 @@ export const AvailableTicketView = ({
   };
 
   return (
-    <Pressable
-      style={{ padding: 15, borderBottomWidth: 1, borderBottomColor: "#ddd" }}
-      onPress={() => setDisplayFullTicket(true)}
+    <View
+      style={{
+        marginBottom: 15,
+        borderRadius: 10,
+        backgroundColor: theme === "dark" ? "#555" : "#fff",
+        elevation: 5,
+      }}
     >
-      <Text style={{ fontWeight: "bold" }}>Ticket No: {refNo}</Text>
-      <Text>Date: {date}</Text>
-      <Text>
-        From: {from} - To: {to}
-      </Text>
-      <Text>
-        From: {fromT} - To: {toT}
-      </Text>
-      <Text>Departure: {departure}</Text>
-      <Text>Seats: {seats}</Text>
-      <Text>Price: {price}</Text>
-      <Text>Vehicle Reg No: {regNo}</Text>
-      <Text>Organization: {org}</Text>
-      <Text>Service: {service}</Text>
-      <Text>Route: {route}</Text>
-      <Text>
-        Full: {full} Half: {half}
-      </Text>
-      <Text>Tracking Enabled: {tracking ? "Yes" : "No"}</Text>
-      <Text>Can Cancel: {cancel ? "Yes" : "No"}</Text>
+      <View
+        style={{
+          backgroundColor: theme === "dark" ? "#f91" : "#f91",
+          borderTopLeftRadius: 10,
+          borderTopRightRadius: 10,
+          paddingVertical: 5,
+          paddingHorizontal: 10,
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <QRCode
+          value={`${ticket.vehicalNo}|${TimeToString(ticket.departure)}|${ticket.from?.split(",")[0]?.trim()}|${ticket.to?.split(",")[0]?.trim()}|${ticket.seatNos}|${ticket.full}|${ticket.half}`}
+          size={70}
+          color="#fff"
+          backgroundColor="transparent"
+        />
+        <View>
+          <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+            Reference No: {ticket.ticketNo}
+          </ThemedText>
+          <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+            Departure: {DateToString(ticket.departure)}
+            {` / `}
+            {TimeToString(ticket.departure)}
+          </ThemedText>
+        </View>
+      </View>
 
-      <View style={{ flexDirection: "row", backgroundColor: "green" }}>
+      <View
+        style={{
+          paddingHorizontal: 10,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          marginVertical: 10,
+        }}
+      >
+        <View>
+          <ThemedText type="h6">Origin</ThemedText>
+          <ThemedText type="h4">{ticket.fromT}</ThemedText>
+          <ThemedText type="h4">
+            {ticket.from?.split(",")[0]?.trim()}
+          </ThemedText>
+        </View>
+        <View>
+          <ThemedText type="h6">Destination</ThemedText>
+          <ThemedText type="h4">{ticket.toT}</ThemedText>
+          <ThemedText type="h4">{ticket.to?.split(",")[0]?.trim()}</ThemedText>
+        </View>
+      </View>
+      <View style={{ paddingHorizontal: 10, marginBottom: 5 }}>
+        <ThemedText type="s6" lightColor="#999" darkColor="#ddd">
+          {ticket.vehicalNo} | {ticket.org} | {ticket.type} | {ticket.routeNo}{" "}
+          {ticket.route}
+        </ThemedText>
+      </View>
+      <View
+        style={{
+          paddingHorizontal: 10,
+          flexDirection: "row",
+          justifyContent: "space-between",
+          gap: 5,
+          marginBottom: 5,
+        }}
+      >
+        <View>
+          <ThemedText type="h6">Price: LKR {ticket.price}</ThemedText>
+          <ThemedText type="h6">Seat No(s): {ticket.seatNos}</ThemedText>
+        </View>
+        <View>
+          <ThemedText type="h6">
+            Adult: {ticket.full} | Child: {ticket.half}
+          </ThemedText>
+        </View>
+      </View>
+      {ticket.tracking && (
+        <View
+          style={{
+            marginVertical: 10,
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 5,
+            alignItems: "center",
+          }}
+        >
+          <FontAwesomeIcon icon={faCircleInfo} size={14} color={"#f91"} />
+          <Text style={{ fontWeight: "bold", fontSize: 13, color: "#f91" }}>
+            Tracking is available
+          </Text>
+        </View>
+      )}
+      {!ticket.tracking && (
+        <View
+          style={{
+            marginVertical: 10,
+            flexDirection: "row",
+            justifyContent: "center",
+            gap: 5,
+            alignItems: "center",
+          }}
+        >
+          <FontAwesomeIcon icon={faCircleInfo} size={14} color={"#f91"} />
+          <Text style={{ fontWeight: "bold", fontSize: 13, color: "#f91" }}>
+            Tracking is available 5 min before the bus departure
+          </Text>
+        </View>
+      )}
+
+      <View
+        style={{
+          borderBottomLeftRadius: 10,
+          borderBottomRightRadius: 10,
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+          backgroundColor: theme === "dark" ? "#444" : "#eee",
+        }}
+      >
         <Pressable
           style={{
-            padding: 15,
+            padding: 5,
+            alignItems: "center",
           }}
           onPress={handleRefundRequest}
-          pointerEvents={cancel ? "auto" : "none"}
+          pointerEvents={ticket.cancel ? "auto" : "none"}
         >
-          {cancel ? (
+          {ticket.cancel ? (
+            <FontAwesomeIcon icon={faTrash} size={iconSize} color={iconColor} />
+          ) : (
             <FontAwesomeIcon
-              icon={faDumpster}
+              icon={faTrash}
+              size={iconSize}
+              color={disabledIconColor}
+            />
+          )}
+          <Text
+            style={{
+              fontSize: iconTitleSize,
+              color: ticket.cancel ? iconColor : disabledIconColor,
+            }}
+          >
+            Cancel
+          </Text>
+        </Pressable>
+        <Pressable
+          style={{
+            padding: 5,
+            alignItems: "center",
+          }}
+          onPress={() => setDisplayFullTicket(true)}
+        >
+          {ticket.tracking ? (
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
               size={iconSize}
               color={iconColor}
             />
           ) : (
-            <FontAwesomeIcon icon={faDumpster} size={iconSize} color={"gray"} />
+            <FontAwesomeIcon
+              icon={faMapLocationDot}
+              size={iconSize}
+              color={disabledIconColor}
+            />
           )}
+          <Text
+            style={{
+              fontSize: iconTitleSize,
+              color: ticket.tracking ? iconColor : disabledIconColor,
+            }}
+          >
+            Track Location
+          </Text>
         </Pressable>
         <Pressable
           style={{
-            padding: 15,
+            padding: 5,
+            alignItems: "center",
           }}
           onPress={() => setDisplayFullTicket(true)}
         >
-          <Text>Tracking {tracking ? "Available" : "Not available"}</Text>
-        </Pressable>
-        <Pressable
-          style={{
-            padding: 15,
-          }}
-          onPress={() => setDisplayFullTicket(true)}
-        >
-          <Text>Full ticket</Text>
+          <FontAwesomeIcon icon={faEye} size={iconSize} color={iconColor} />
+          <Text style={{ fontSize: iconTitleSize, color: iconColor }}>
+            Full ticket
+          </Text>
         </Pressable>
       </View>
       {refundData && (
@@ -175,14 +292,9 @@ export const AvailableTicketView = ({
       <FullTicketView
         isVisible={displayFullTicket}
         onClose={() => setDisplayFullTicket(false)}
-        key={refNo}
-        refNo={refNo}
-        org={org}
-        fromT={fromT}
-        toT={toT}
-        tracking={tracking}
-        cancel={cancel}
+        key={ticket.ticketNo}
+        ticket={ticket}
       />
-    </Pressable>
+    </View>
   );
 };

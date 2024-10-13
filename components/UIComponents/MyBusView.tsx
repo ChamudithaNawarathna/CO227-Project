@@ -7,7 +7,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { router, Href } from "expo-router";
 import { Pressable, View, StyleSheet, useColorScheme } from "react-native";
-import { StringTime } from "../CommonModules/DateTimeToString";
+import { TimeToString } from "../CommonModules/DateTimeToString";
 import { ThemedText } from "../CommonModules/ThemedText";
 import StarRating from "./StarRating";
 
@@ -75,7 +75,7 @@ export default function MyBusView({ bus }: MyBusViewProps) {
           }}
         >
           <ThemedText type="h5">{bus.departure}</ThemedText>
-          <ThemedText type="s6">{StringTime(bus.departureTime)}</ThemedText>
+          <ThemedText type="s6">{TimeToString(bus.departureTime)}</ThemedText>
         </View>
 
         <View style={styles.horizontalLine}></View>
@@ -92,7 +92,7 @@ export default function MyBusView({ bus }: MyBusViewProps) {
           }}
         >
           <ThemedText type="h5">{bus.terminal}</ThemedText>
-          <ThemedText type="s6">{StringTime(bus.terminalTime)}</ThemedText>
+          <ThemedText type="s6">{TimeToString(bus.terminalTime)}</ThemedText>
         </View>
       </View>
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>

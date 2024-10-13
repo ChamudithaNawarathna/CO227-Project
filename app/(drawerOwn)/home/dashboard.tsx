@@ -6,9 +6,11 @@ import {
   faArrowRight,
   faChevronRight,
   faC,
+  faArrowRotateBack,
 } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import {
+  ActivityIndicator,
   Button,
   FlatList,
   Pressable,
@@ -19,353 +21,161 @@ import {
   View,
 } from "react-native";
 import { Ticket } from "@/controller/Ticket";
-import { TicketView } from "@/components/UIComponents/TicketView";
 import ScreenWrapper from "@/components/ScreenWrapper";
 import { useAppContext } from "@/context/AppContext";
 import { requestPermissions } from "@/components/LocationUpdate";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Location from "expo-location";
 import BusList from "@/components/BusList";
 import axios from "axios";
-import { LineGraph } from "@/components/UIComponents/LineGraph";
+import { EarningsGraph } from "@/components/UIComponents/EarningGraph";
+import { Dropdown } from "react-native-element-dropdown";
 
-var ticketsAvailable = true;
-
-interface user {
-  userType: string;
-  empType: string;
-  fName: string;
-  lName: string;
-  email: string;
-  mobile: string;
-  nic: string;
-  birthDay: string;
-  ntc: string;
-  licence: string;
-  accName: string;
-  accNo: string;
-  bank: string;
-  branch: string;
+// Define the income data structure for type safety
+interface IncomeData {
+  vehicleRegNo: string;
+  weekly: {
+    receivedData: number[];
+    refundData: number[];
+    earningData: number[];
+    xLabels: string[];
+  };
 }
 
 export default function Dashboard() {
-  const addUser = async (userData: user) => {
+  const { baseURL, id, credits } = useAppContext();
+  const theme = useColorScheme() ?? "light";
+  const iconColor = theme === "dark" ? "#aaa" : "#777";
+  const [incomeData, setIncomeData] = useState<IncomeData[]>([]); // Changed initial state to an empty array
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null); // Add error state
+  const [selectedWeeklyData, setSelectedWeeklyData] =
+    useState<string>("earningData");
+
+  const fetchIncomeData = async () => {
     try {
-      const response = await axios.post(`${baseURL}/mobileAPI/user/users`, {
-        type: "Req3", // Specify the request type for adding a user
-        data: userData, // This should include all necessary user details
-      });
-      console.log(response.data); // Should return "success" or "error"
+      const response = await axios.post(`${baseURL}/bus/incomeIndie`, { id });
+      setIncomeData(response.data);
     } catch (error) {
-      console.error("Error adding user:", error);
+      console.error("Error fetching bus income data:", error);
+      setError("Failed to fetch income data."); // Set error message
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Example user data for an employee
-  const newUser = {
-    userType: "employee", // or "passenger" or "owner"
-    empType: "staff", // Relevant for employee and owner
-    fName: "Jane",
-    lName: "Doe",
-    email: "e20035@eng.pdn.ac.lk",
-    mobile: "0767601948",
-    nic: "NIC123456",
-    birthDay: "1990-01-01",
-    ntc: "NTC123456",
-    licence: "LIC123456",
-    accName: "Jane Doe",
-    accNo: "123456789",
-    bank: "Some Bank",
-    branch: "Main Branch",
+  const getWeeklyData = (dataType: keyof IncomeData["weekly"]) => {
+    if (!incomeData || incomeData.length === 0) return []; // Check for array and length
+    const earningsData = incomeData[0].weekly[dataType]; // Access the weekly property of the first item
+    return earningsData.map((value, idx) => ({
+      label: incomeData[0].weekly.xLabels[idx],
+      value: Number(value),
+    }));
   };
 
-  const getUserInfo = async (phoneNumber: string) => {
-    try {
-      const response = await axios.post(
-        `${baseURL}/mobileAPI/user/users/info`,
-        {
-          type: "Req1", // Specify the request type for fetching user info
-          data: phoneNumber, // Phone number to search for
-        }
-      );
+  // Options for the dropdown
+  const dropdownOptions = [
+    { label: "Earnings", value: "earningData" },
+    { label: "Refunds", value: "refundData" },
+    { label: "Received", value: "receivedData" },
+  ];
 
-      if (response.data.error) {
-        console.error("Error fetching user info:", response.data.error);
-      } else {
-        console.log("User info retrieved successfully:", response.data);
-        // Handle the retrieved user data here
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-    }
-  };
+  // useEffect(() => {
+  //   fetchIncomeData();
+  // }, [id]); // Add id as a dependency
 
-  interface VerifyOTPResponse {
-    error?: string;
-    success?: string;
-    verified?: boolean;
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
   }
 
-  // Example user phone number
-  const phoneNumber = "94703406796";
-
-  // Example user data
-
-  const { baseURL, credits, myTickets } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
-
-  const bus1 = [
-    {
-      value: 21600,
-      date: "11 Apr 2022",
-      label: "11 Apr",
-    },
-    {
-      value: 29500,
-      date: "12 Apr 2022",
-      label: "12 Apr",
-    },
-    {
-      value: 10950,
-      date: "13 Apr 2022",
-      label: "13 Apr",
-    },
-    {
-      value: 10700,
-      date: "14 Apr 2022",
-      label: "14 Apr",
-    },
-    {
-      value: 9900,
-      date: "15 Apr 2022",
-      label: "15 Apr",
-    },
-    {
-      value: 26300,
-      date: "16 Apr 2022",
-      label: "16 Apr",
-    },
-  ];
-
-  const bus2 = [
-    {
-      value: 21600,
-      date: "11 Apr 2022",
-      label: "11 Apr",
-    },
-    {
-      value: 29500,
-      date: "12 Apr 2022",
-      label: "12 Apr",
-    },
-    {
-      value: 10950,
-      date: "13 Apr 2022",
-      label: "13 Apr",
-    },
-    {
-      value: 30700,
-      date: "14 Apr 2022",
-      label: "14 Apr",
-    },
-    {
-      value: 39900,
-      date: "15 Apr 2022",
-      label: "15 Apr",
-    },
-    {
-      value: 26300,
-      date: "16 Apr 2022",
-      label: "16 Apr",
-    },
-  ];
-  const bus3 = [
-    {
-      value: 31600,
-      date: "11 Apr 2022",
-      label: "11 Apr",
-    },
-    {
-      value: 29500,
-      date: "12 Apr 2022",
-      label: "12 Apr",
-    },
-    {
-      value: 10950,
-      date: "13 Apr 2022",
-      label: "13 Apr",
-    },
-    {
-      value: 10700,
-      date: "14 Apr 2022",
-      label: "14 Apr",
-    },
-    {
-      value: 19900,
-      date: "15 Apr 2022",
-      label: "15 Apr",
-    },
-    {
-      value: 16300,
-      date: "16 Apr 2022",
-      label: "16 Apr",
-    },
-  ];
-  const bus4 = [
-    {
-      value: 21600,
-      date: "11 Apr 2022",
-      label: "11 Apr",
-    },
-    {
-      value: 49500,
-      date: "12 Apr 2022",
-      label: "12 Apr",
-    },
-    {
-      value: 30950,
-      date: "13 Apr 2022",
-      label: "13 Apr",
-    },
-    {
-      value: 30700,
-      date: "14 Apr 2022",
-      label: "14 Apr",
-    },
-    {
-      value: 39900,
-      date: "15 Apr 2022",
-      label: "15 Apr",
-    },
-    {
-      value: 36300,
-      date: "16 Apr 2022",
-      label: "16 Apr",
-    },
-  ];
-
   return (
-      <View style={styles.mainBody}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            borderRadius: 20,
-            paddingVertical: 3,
-            paddingHorizontal: 5,
-            marginHorizontal: "10%",
-          }}
+    <View style={styles.mainBody}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderRadius: 20,
+          paddingVertical: 3,
+          paddingHorizontal: 5,
+          marginHorizontal: "10%",
+        }}
+      >
+        <ThemedText
+          type={"h4"}
+          lightColor={"#000"}
+          darkColor={"#fff"}
+          style={{ marginLeft: 5 }}
         >
-          <ThemedText
-            type={"h4"}
-            lightColor={"#000"}
-            darkColor={"#fff"}
-            style={{ marginLeft: 5 }}
-          >
-            Rs. {credits}
+          Rs. {credits}
+        </ThemedText>
+        <Pressable
+          style={[
+            styles.rechargeButton,
+            { borderColor: "#000", borderWidth: 2 },
+          ]}
+          onPress={() => router.replace("/index" as Href<string>)}
+        >
+          <ThemedText type="h6" lightColor={"#000"} darkColor={"#fff"}>
+            Recharge
           </ThemedText>
-          <Pressable
-            style={[
-              styles.rechargeButton,
-              {
-                borderColor: "#000",
-                borderWidth: 2,
-              },
-            ]}
-            onPress={() => router.replace("/index" as Href<string>)}
-          >
-            <ThemedText type="h6" lightColor={"#000"} darkColor={"#fff"}>
-              Recharge
-            </ThemedText>
-          </Pressable>
-        </View>
-
-        <ScrollView>
-          <View style={{ marginVertical: 20 }}>
-          <ThemedText
-            type="h4"
-            style={{ marginTop: 25, marginBottom: 10, marginHorizontal: 5 }}
-          >
-            NA-35678
-          </ThemedText>
-          <LineGraph
-            input={bus1}
-            lineColorDark="#0f8"
-            lineColorLight="#0d8"
-            startColorDark="#0f8"
-            startColorLight="#0d8"
-            endColorDark="#0f8"
-            endColorLight="#0d8"
-            xSpacing={55}
-            xLabelWidth={90}
-            yLabelWidth={45}
-          />
-        </View>
-        <View style={{ marginVertical: 20 }}>
-          <ThemedText
-            type="h4"
-            style={{ marginTop: 25, marginBottom: 10, marginHorizontal: 5 }}
-          >
-            NA-35678
-          </ThemedText>
-          <LineGraph
-            input={bus2}
-            lineColorDark="#0f8"
-            lineColorLight="#0d8"
-            startColorDark="#0f8"
-            startColorLight="#0d8"
-            endColorDark="#0f8"
-            endColorLight="#0d8"
-            xSpacing={55}
-            xLabelWidth={90}
-            yLabelWidth={45}
-          />
-        </View><View style={{ marginVertical: 20 }}>
-          <ThemedText
-            type="h4"
-            style={{ marginTop: 25, marginBottom: 10, marginHorizontal: 5 }}
-          >
-            NA-35678
-          </ThemedText>
-          <LineGraph
-            input={bus3}
-            lineColorDark="#0f8"
-            lineColorLight="#0d8"
-            startColorDark="#0f8"
-            startColorLight="#0d8"
-            endColorDark="#0f8"
-            endColorLight="#0d8"
-            xSpacing={55}
-            xLabelWidth={90}
-            yLabelWidth={45}
-          />
-        </View><View style={{ marginVertical: 20 }}>
-          <ThemedText
-            type="h4"
-            style={{ marginTop: 25, marginBottom: 10, marginHorizontal: 5 }}
-          >
-            NA-35678
-          </ThemedText>
-          <LineGraph
-            input={bus4}
-            lineColorDark="#0f8"
-            lineColorLight="#0d8"
-            startColorDark="#0f8"
-            startColorLight="#0d8"
-            endColorDark="#0f8"
-            endColorLight="#0d8"
-            xSpacing={55}
-            xLabelWidth={90}
-            yLabelWidth={45}
-          />
-        </View>
-        </ScrollView>
+        </Pressable>
       </View>
+      <ScrollView>
+        <Pressable
+          style={{
+            marginTop: 10,
+            marginHorizontal: 10,
+            flexDirection: "row",
+            gap: 5,
+            alignSelf: "flex-end",
+          }}
+          onPress={fetchIncomeData}
+        >
+          <FontAwesomeIcon
+            icon={faArrowRotateBack}
+            size={18}
+            color={iconColor}
+            style={{ alignSelf: "center" }}
+          />
+          <ThemedText type="s5" lightColor={iconColor} darkColor={iconColor}>
+            Refresh
+          </ThemedText>
+        </Pressable>
+        <View
+              style={{
+                flexDirection: "row",
+                gap: 10,
+                justifyContent: "flex-start",
+                marginHorizontal: 10
+              }}
+            >
+              <ThemedText style={styles.title}>Weekly</ThemedText>
+              <Dropdown
+                style={styles.inputDropdown}
+                placeholderStyle={{ color: "gray"}}
+                data={dropdownOptions}
+                labelField="label"
+                valueField="value"
+                placeholder="Select Data Type"
+                value={selectedWeeklyData}
+                onChange={(item) => {
+                  setSelectedWeeklyData(item.value); // Update selected data type for weekly
+                }}
+              />
+            </View>
+        {incomeData.map((vehicle) => (
+          <View key={vehicle.vehicleRegNo} style={{ marginHorizontal: 10, marginVertical: 15}}>
+            <ThemedText style={styles.title}>Reg No: {vehicle.vehicleRegNo}</ThemedText>
+            <EarningsGraph
+              data={getWeeklyData(
+                selectedWeeklyData as keyof IncomeData["weekly"]
+              )}
+            />
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -374,11 +184,6 @@ const styles = StyleSheet.create({
     padding: 10,
     flex: 1,
   },
-  flatList: {
-    margin: 10,
-    borderRadius: 12,
-    backgroundColor: "transparent",
-  },
   rechargeButton: {
     alignItems: "center",
     backgroundColor: "#fff2",
@@ -386,26 +191,19 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 20,
   },
-  cardBody: {
-    borderWidth: 0,
-    borderRadius: 10,
-    marginHorizontal: 10,
-    elevation: 3,
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 10,
   },
-  cardHeader: {
-    marginTop: 15,
-    marginBottom: 5,
-    marginHorizontal: 15,
-    backgroundColor: "transparent",
-  },
-  drawerHeader: {
-    flexDirection: "row",
-    backgroundColor: "transparent",
-    gap: 10,
-  },
-  logo: {
-    height: 60,
-    width: 60,
-    borderRadius: 15,
+  inputDropdown: {
+    width: 130,
+    height: 40,
+    borderColor: "#aaa",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    borderRadius: 20,
   },
 });

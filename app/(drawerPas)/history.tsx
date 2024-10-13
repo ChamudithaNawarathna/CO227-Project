@@ -16,7 +16,7 @@
 //   Pressable,
 //   ScrollView,
 //   StyleSheet,
-//   Text,
+//   ThemedText,
 //   useColorScheme,
 //   View,
 // } from "react-native";
@@ -88,26 +88,26 @@
 //     cancel: boolean;
 //   }
 
-//   const renderTicket = ({ item }: { item: newTicket }) => {
+//   const renderTicket = ({ ticket }: { ticket: newTicket }) => {
 //     return (
 //       <NewTicketView
-//         refNo={item.refNo}
-//         date={item.date}
-//         from={item.from}
-//         to={item.to}
-//         departure={item.departure}
-//         fromT={item.fromT}
-//         toT={item.toT}
-//         seats={item.seats}
-//         full={item.full}
-//         half={item.half}
-//         price={item.price}
-//         regNo={item.regNo}
-//         org={item.org}
-//         service={item.service}
-//         route={item.route}
-//         tracking={item.tracking}
-//         cancel={item.cancel}
+//         refNo={ticket.refNo}
+//         date={ticket.date}
+//         from={ticket.from}
+//         to={ticket.to}
+//         departure={ticket.departure}
+//         fromT={ticket.fromT}
+//         toT={ticket.toT}
+//         seats={ticket.seats}
+//         full={ticket.full}
+//         half={ticket.half}
+//         price={ticket.price}
+//         regNo={ticket.regNo}
+//         org={ticket.org}
+//         service={ticket.service}
+//         route={ticket.route}
+//         tracking={ticket.tracking}
+//         cancel={ticket.cancel}
 //       />
 //     );
 //   };
@@ -115,9 +115,9 @@
 //   return (
 //     <ScreenWrapper>
 //       <View style={styles.mainBody}>
-//         <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
+//         <ThemedText style={{ fontSize: 24, fontWeight: "bold", marginBottom: 20 }}>
 //           Available Tickets
-//         </Text>
+//         </ThemedText>
 
 //         {loading ? (
 //           <ActivityIndicator size="large" color="#0000ff" />
@@ -125,10 +125,10 @@
 //           <FlatList
 //             data={tickets}
 //             renderItem={renderTicket}
-//             keyExtractor={(item) => item.refNo}
+//             keyExtractor={(ticket) => ticket.refNo}
 //           />
 //         ) : (
-//           <Text>No tickets available</Text>
+//           <ThemedText>No tickets available</ThemedText>
 //         )}
 
 //         <Button title="Refresh Tickets" onPress={fetchTickets} />
@@ -186,107 +186,202 @@ import {
   View,
   ScrollView,
   ActivityIndicator,
+  Alert,
+  useColorScheme,
+  Pressable,
 } from "react-native";
 import axios from "axios";
 import { useAppContext } from "@/context/AppContext";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
 
-interface TicketDetails {
-  ticketNo: string;
-  customerName: string;
-  customerEmail: string;
-  customerMobile: string;
-  issuedDate: string;
-  issuedTime: string;
-  vehicleNo: string;
-  type: string;
-  routeNo: string;
-  route: string;
+type Ticket = {
+  id: string;
   date: string;
-  time: string;
   from: string;
   to: string;
-  distance: number;
-  price: string;
-  full: number;
-  half: number;
-  seatNos: string;
   status: string;
-  discount: number;
-  unitPrice: string;
-  transID: string;
-}
+  amount: string;
+};
 
 const TicketDetailsComponent: React.FC = () => {
-  const { baseURL } = useAppContext();
-  const [ticket, setTicket] = useState<TicketDetails | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const refNo = "0000054";
+  const { baseURL, id } = useAppContext();
+  const theme = useColorScheme() ?? "light";
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const fetchTicketDetails = async () => {
+  // Fetch ticket history from the backend API
+  const fetchTicketHistory = async () => {
+    //setLoading(true);
+
+    const demoTickets = [
+      {
+        id: "000076",
+        date: "2024-05-12",
+        from: "Kurunduwatta,Kandy,Srilanka",
+        to: "Peradeniya,Kandy,SriLanka",
+        status: "Available",
+        amount: "30.50",
+      },
+      {
+        id: "000056",
+        date: "2024-05-23",
+        from: "Kandy Hospital,Kandy,Srilanka",
+        to: "Peradeniya,Kandy,SriLanka",
+        status: "Refunded",
+        amount: "80.00",
+      },
+      {
+        id: "000077",
+        date: "2024-06-01",
+        from: "Colombo Fort,Colombo,SriLanka",
+        to: "Galle Face,Colombo,SriLanka",
+        status: "Booked",
+        amount: "50.00",
+      },
+      {
+        id: "000078",
+        date: "2024-06-15",
+        from: "Nugegoda,Colombo,SriLanka",
+        to: "Bambalapitiya,Colombo,SriLanka",
+        status: "Cancelled",
+        amount: "45.00",
+      },
+      {
+        id: "000079",
+        date: "2024-07-10",
+        from: "Matara,Matara,SriLanka",
+        to: "Galle,Galle,SriLanka",
+        status: "Available",
+        amount: "60.00",
+      },
+      {
+        id: "000080",
+        date: "2024-07-20",
+        from: "Jaffna,Jaffna,SriLanka",
+        to: "Kilinochchi,Kilinochchi,SriLanka",
+        status: "Booked",
+        amount: "75.00",
+      },
+    ];
+    console.log(demoTickets);
+    setTickets(demoTickets);
+    return;
+
     try {
-      const response = await axios.get(`${baseURL}/tickets/tkt2`, {
-        params: { refNo },
+      const response = await axios.post(`${baseURL}/tickets/tkt1`, {
+        data: id,
       });
-      setTicket(response.data);
-    } catch (err) {
-      setError("Error fetching ticket details");
-      console.error(err);
+      console.log(response);
+      //setTicketHistory(response.data);
+      setTickets(response.data.tickets);
+    } catch (error) {
+      console.error("Error fetching ticket history:", error);
+      Alert.alert("Error", "Failed to fetch ticket history");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTicketDetails();
+    fetchTicketHistory();
   }, []);
 
   if (loading) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading ticket details...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
+        <ThemedText>Loading ticket details...</ThemedText>
       </View>
     );
   }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Ticket Details</Text>
-      {ticket && (
-        <View>
-          <Text style={styles.label}>Ticket No: {ticket.ticketNo}</Text>
-          <Text style={styles.label}>Customer Name: {ticket.customerName}</Text>
-          <Text style={styles.label}>Email: {ticket.customerEmail}</Text>
-          <Text style={styles.label}>Mobile: {ticket.customerMobile}</Text>
-          <Text style={styles.label}>Issued Date: {ticket.issuedDate}</Text>
-          <Text style={styles.label}>Issued Time: {ticket.issuedTime}</Text>
-          <Text style={styles.label}>Vehicle No: {ticket.vehicleNo}</Text>
-          <Text style={styles.label}>Service Type: {ticket.type}</Text>
-          <Text style={styles.label}>Route No: {ticket.routeNo}</Text>
-          <Text style={styles.label}>Route: {ticket.route}</Text>
-          <Text style={styles.label}>Journey Date: {ticket.date}</Text>
-          <Text style={styles.label}>Departure Time: {ticket.time}</Text>
-          <Text style={styles.label}>From: {ticket.from}</Text>
-          <Text style={styles.label}>To: {ticket.to}</Text>
-          <Text style={styles.label}>Distance: {ticket.distance} km</Text>
-          <Text style={styles.label}>Price: {ticket.price} LKR</Text>
-          <Text style={styles.label}>Full Seats: {ticket.full}</Text>
-          <Text style={styles.label}>Half Seats: {ticket.half}</Text>
-          <Text style={styles.label}>Seat Numbers: {ticket.seatNos}</Text>
-          <Text style={styles.label}>Status: {ticket.status}</Text>
-          <Text style={styles.label}>Discount: {ticket.discount} LKR</Text>
-          <Text style={styles.label}>Unit Price: {ticket.unitPrice} LKR</Text>
-          <Text style={styles.label}>Transaction ID: {ticket.transID}</Text>
-        </View>
+      <ThemedText style={styles.title}>Ticket Details</ThemedText>
+      <Pressable
+        style={{
+          backgroundColor: "green",
+          alignItems: "center",
+          paddingVertical: 10,
+          marginBottom: 10,
+        }}
+        onPress={fetchTicketHistory}
+      >
+        <ThemedText type="h6">Refresh</ThemedText>
+      </Pressable>
+      {tickets.length > 0 ? (
+        tickets.map((ticket) => (
+          <View
+            key={ticket.id}
+            style={{
+              marginBottom: 15,
+              borderRadius: 10,
+              backgroundColor: theme === "dark" ? "#555" : "#fff",
+              elevation: 5,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: theme === "dark" ? "#f91" : "#f91",
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 10,
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{paddingHorizontal: 10, paddingVertical: 10, borderRadius: 20, backgroundColor: '#0003'}}>
+              <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                {ticket.status}
+              </ThemedText>
+              </View>
+
+              <View>
+                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                  Reference No: {ticket.id}
+                </ThemedText>
+                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                  Booked on: {ticket.date}
+                </ThemedText>
+              </View>
+            </View>
+
+            <View
+              style={{
+                paddingHorizontal: 10,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginVertical: 10,
+              }}
+            >
+              <View>
+                <ThemedText type="h6">Origin</ThemedText>
+
+                <ThemedText type="h4">
+                  {ticket.from?.split(",")[0]?.trim()}
+                </ThemedText>
+              </View>
+              <View>
+                <ThemedText type="h6">Destination</ThemedText>
+
+                <ThemedText type="h4">
+                  {ticket.to?.split(",")[0]?.trim()}
+                </ThemedText>
+              </View>
+            </View>
+            <View
+              style={{
+                paddingHorizontal: 10,
+                marginBottom: 10
+              }}
+            >
+              <ThemedText type="h4">Price: LKR {ticket.amount}</ThemedText>
+            </View>
+          </View>
+        ))
+      ) : (
+        <ThemedText>No tickets found</ThemedText>
       )}
     </ScrollView>
   );
@@ -318,6 +413,13 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 18,
+  },
+  ticketBody: {
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    marginBottom: 10,
   },
 });
 

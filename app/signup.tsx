@@ -4,6 +4,7 @@ import {
   Pressable,
   Keyboard,
   ImageBackground,
+  Alert,
 } from "react-native";
 import { Href, Link, router } from "expo-router";
 import { useState, useEffect } from "react";
@@ -29,6 +30,7 @@ import FontAwesome from "@expo/vector-icons/build/FontAwesome";
 import { Switch } from "react-native-switch";
 import { useAppContext } from "@/context/AppContext";
 import axios from "axios";
+import { DateToString } from "@/components/CommonModules/DateTimeToString";
 
 var formPageCount = 3; // Excluding the common "Sign up as a passenger, operator or owner" form page
 const formPageWidth = 300;
@@ -48,7 +50,6 @@ export default function SignUp() {
     ntcLicenseNo,
     driverLicenseNo,
     occupation,
-    setID,
     setFName,
     setLName,
     setPhoneNo,
@@ -61,12 +62,6 @@ export default function SignUp() {
     setNTCLicenseNo,
     setDriverLicenseNo,
     setOccupation,
-    setMyAccTypes,
-    setProfileImage,
-    setAccountType,
-    setSeatStatus,
-    setMyBusLocations,
-    setMyTickets,
   } = useAppContext();
 
   const [passenger, setPassenger] = useState(true);
@@ -80,13 +75,88 @@ export default function SignUp() {
   const [currentPos, setCurrentPos] = useState(0);
   const [backVisible, setBackVisible] = useState(false);
   const [nextVisible, setNextVisible] = useState(false);
+  let otpRequested = false; // Add a flag to track OTP request status
 
-  function scrollForward() {
+  const handleCheckAvailability = async () => {
+    if (!email || !phoneNo) {
+      Alert.alert("Error", "Please enter both email and phone number.");
+      return false; // Return false if required fields are missing
+    }
+
+    try {
+      const requestData = {
+        data: {
+          email,
+          phoneNo,
+        },
+      };
+
+      // Sending data to the backend
+      const response = await axios.post(`${baseURL}/users/req7`, requestData);
+
+      if (response.data === "true") {
+        Alert.alert("Available", "The email and phone number can be used.");
+        return true;
+      } else if (response.data === "false") {
+        Alert.alert(
+          "Unavailable",
+          "The email or phone number is already in use."
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking availability: ", error);
+      Alert.alert("Error", "Failed to check user availability.");
+      return false;
+    }
+  };
+
+  // Function to request OTP
+  const requestOTP = async () => {
+    try {
+      const response = await axios.post(`${baseURL}/otp/request`, {
+        data: { email, mobile: phoneNo, origin: "Verify email & mobile" },
+      });
+      if (response.status === 201) {
+        Alert.alert("OTP sent", "Please check your email or mobile");
+        scrollForward();
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to request OTP");
+    }
+  };
+
+  async function scrollForward() {
     if (scrollRef.current) {
+      if (currentPos === 0) {
+        const isNewUser = await handleCheckAvailability(); // Await the result of availability check
+
+        if (!isNewUser) {
+          return; // Prevent scrolling if the user is already registered
+        }
+      }
+
+      if (
+        ((passenger && currentPos == 0) ||
+          (owner && currentPos == 300) ||
+          (operator && currentPos == 0)) &&
+        !otpRequested
+      ) {
+        try {
+          await requestOTP(); // Await requestOTP to ensure it completes
+          otpRequested = true; // Set the flag to true after requesting OTP
+        } catch (error) {
+          console.error("Failed to send OTP:", error);
+          return; // Stop scrolling if OTP request fails
+        }
+      }
+
       let newPos =
         currentPos < formPageCount * formPageWidth
           ? currentPos + formPageWidth
           : formPageCount * formPageWidth;
+
       scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
       setCurrentPos(newPos);
     }
@@ -116,6 +186,7 @@ export default function SignUp() {
   }
 
   function passengerSignUp() {
+    otpRequested = false;
     clearInputFields();
     setPassenger(true);
     setOperator(false);
@@ -125,6 +196,7 @@ export default function SignUp() {
   }
 
   function operatorSignUp() {
+    otpRequested = false;
     clearInputFields();
     setPassenger(false);
     setOperator(true);
@@ -134,6 +206,7 @@ export default function SignUp() {
   }
 
   function ownerSignUp() {
+    otpRequested = false;
     clearInputFields();
     setPassenger(false);
     setOperator(false);
@@ -143,7 +216,7 @@ export default function SignUp() {
   }
 
   function submitForm() {
-    insertNewUser;
+    insertNewUser();
     if (operator) {
       router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
     } else if (owner) {
@@ -178,17 +251,29 @@ export default function SignUp() {
     }
   }, [currentPos]);
 
+  function calculateBirthday(): string {
+    let year = parseInt(nic.substring(0, 4), 10); // Extract year
+    let days = parseInt(nic.substring(4, 7), 10); // Extract days
+    // Create a date object for January 1 of the given year
+    const startDate = new Date(year, 0, 1); // January is month 0 in JavaScript
+    // Add the number of days
+    const birthday = new Date(startDate);
+    birthday.setDate(startDate.getDate() + days);
+
+    return DateToString(birthday);
+  }
+
   // Function to insert a new user
   const insertNewUser = async () => {
     const userData = {
-      userType: operator ? "Operator" : owner ? "Owner" : "Passenger",
+      userType: operator ? "employee" : owner ? "owner" : "passenger",
       empType: occupation,
       fName: fName,
       lName: lName,
       email: email,
-      mobile: phoneNo,
+      phoneNo: phoneNo,
       nic: nic,
-      birthday: "null", // Replace with actual birthday
+      birthday: calculateBirthday(),
       ntc: ntcLicenseNo,
       licence: driverLicenseNo,
       accName: accHolderName,
@@ -198,18 +283,16 @@ export default function SignUp() {
     };
 
     try {
-      const response = await axios.post(`${baseURL}/mobileAPI/user/add`, {
-        type: "newUser", // Specify the request type for inserting a new user
-        data: userData, // User data to insert
+      const response = await axios.post(`${baseURL}/users/req3`, {
+        data: { userData },
       });
 
-      if (response.data.error) {
-        console.error("Error inserting new user:", response.data.error);
-      } else {
-        console.log("New user inserted successfully:", response.data);
+      if (response.status === 201) {
+        Alert.alert("Success", "User registered successfully!");
       }
     } catch (error) {
-      console.error("Error inserting new user:", error);
+      console.error("Registration error:", error);
+      Alert.alert("Error", "Failed to register user. Please try again.");
     }
   };
 

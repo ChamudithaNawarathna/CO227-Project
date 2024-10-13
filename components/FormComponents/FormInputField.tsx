@@ -206,7 +206,7 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
         setFilteredData(
           busStops.filter((item) => {
             // Split the bus stop name by comma and take the first word
-            const firstWord = item.split(",")[0].trim().toLowerCase();
+            const firstWord = item.split(",")[0]?.trim().toLowerCase();
             return firstWord.includes(text.toLowerCase());
           })
         );
@@ -265,10 +265,10 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
             >
               <Pressable style={{flexDirection: 'row'}} onPress={() => selectResult(item)}>
                 <ThemedText type="s5" lightColor="#000" darkColor="#fff">
-                  {item.split(",")[0].trim()}
+                  {item.split(",")[0]?.trim()}
                 </ThemedText>
                 <ThemedText lightColor="#aaa" darkColor="#fff">
-                  {', '+item.split(",")[1].trim()}{', '+item.split(",")[2].trim()}
+                  {', '+item.split(",")[1].trim()}{', '+item.split(",")[2]?.trim()}
                 </ThemedText>
               </Pressable>
             </ThemedView>
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 20,
+    marginHorizontal: 5,
     marginVertical: 5,
     color: "#333",
     borderRadius: 12,

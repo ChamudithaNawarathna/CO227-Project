@@ -16,42 +16,9 @@ import {
   import { Ticket } from "@/controller/Ticket";
   
   export default function QuickTicketModal() {
-    const theme = useColorScheme() ?? "light";
-    const [modalVisible, setModalVisible] = useState(true);
-    const { seatNo, myTickets, setMyTickets } = useAppContext();
-  
-    const closeModal = () => {
-      setModalVisible(false);
-      router.back();
-    };
-  
-    function buyTicket() {
-      const newTicketId = 'QTicket12';
-      const newTicket = new Ticket(newTicketId);
-      const updatedMyTickets = new Map(myTickets);
-      updatedMyTickets.set(newTicketId, newTicket);
-      setMyTickets(updatedMyTickets);
-      closeModal();
-    }
-  
+    
     return (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
-          <Pressable
-            style={styles.cancelIcon}
-            onPress={() => {
-              closeModal();
-            }}
-          >
-            <FontAwesomeIcon icon={faXmark} size={32} color={"gray"} />
-          </Pressable>
-        </ThemedView>
-      </Modal>
+      <View></View>
     );
   }
   

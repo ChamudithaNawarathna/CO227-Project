@@ -37,7 +37,6 @@ export default function LogIn() {
     setAccHolderName,
     setBankName,
     setBranchName,
-    setNameOnLicense,
     setNTCLicenseNo,
     setDriverLicenseNo,
     setOccupation,
@@ -137,7 +136,6 @@ export default function LogIn() {
         setAccHolderName(userInfo.accName || "");
         setBankName(userInfo.bank || "");
         setBranchName(userInfo.branch || "");
-        setNameOnLicense(userInfo.nameOnLicense || "");
         setNTCLicenseNo(userInfo.ntc || "");
         setDriverLicenseNo(userInfo.licence || "");
         setOccupation(userInfo.empType || "");

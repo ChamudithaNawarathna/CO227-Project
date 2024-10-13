@@ -18,7 +18,6 @@ import { faHome, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { accountType, useAppContext } from "@/context/AppContext";
 import { Dropdown } from "react-native-element-dropdown";
-import { Passenger } from "@/controller/Passenger";
 import { Owner } from "@/controller/Owner";
 
 export default function CustomDrawerContent(props: any) {

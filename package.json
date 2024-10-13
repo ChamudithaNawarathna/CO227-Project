@@ -29,6 +29,7 @@
     "axios": "^1.7.7",
     "credit-card-type": "^10.0.1",
     "expo": "^51.0.22",
+    "expo-blur": "^13.0.2",
     "expo-camera": "^15.0.16",
     "expo-constants": "~16.0.2",
     "expo-file-system": "~17.0.1",
@@ -56,11 +57,13 @@
     "react-native-maps-directions": "^1.9.0",
     "react-native-modal": "^13.0.1",
     "react-native-qrcode-svg": "^6.3.1",
+    "react-native-ratings": "^8.1.0",
     "react-native-reanimated": "~3.10.1",
     "react-native-safe-area-context": "^4.11.0",
     "react-native-screens": "3.31.1",
     "react-native-svg": "15.2.0",
     "react-native-switch": "^1.5.1",
+    "react-native-tab-view": "^3.5.2",
     "react-native-web": "^0.19.12"
   },
   "devDependencies": {

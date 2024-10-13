@@ -10,50 +10,119 @@ export function SeatLegend() {
     ["Reserved", "#f90"],
   ]);
   return (
-    <View style={{ flex: 2, marginTop: 20 }}>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <View
-          style={{
-            height: 20,
-            width: 20,
-            backgroundColor: seatColors.get("Available"),
-            borderRadius: 10,
-          }}
-        ></View>
-        <ThemedText>Available</ThemedText>
+    <View style={{ marginHorizontal: 20, marginVertical: 20 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Available"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Available</ThemedText>
+          </View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Selected"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Selected</ThemedText>
+          </View>
+        </View>
+        <View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Not-Available"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Not-Available</ThemedText>
+          </View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Reserved"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Reserved</ThemedText>
+          </View>
+        </View>
       </View>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <View
-          style={{
-            height: 20,
-            width: 20,
-            backgroundColor: seatColors.get("Selected"),
-            borderRadius: 10,
-          }}
-        ></View>
-        <ThemedText>Selected</ThemedText>
-      </View>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <View
-          style={{
-            height: 20,
-            width: 20,
-            backgroundColor: seatColors.get("Not-Available"),
-            borderRadius: 10,
-          }}
-        ></View>
-        <ThemedText>Not-Available</ThemedText>
-      </View>
-      <View style={{ flexDirection: "row", gap: 10 }}>
-        <View
-          style={{
-            height: 20,
-            width: 20,
-            backgroundColor: seatColors.get("Reserved"),
-            borderRadius: 10,
-          }}
-        ></View>
-        <ThemedText>Reserved</ThemedText>
+    </View>
+  );
+}
+
+export function OperatorSeatLegend() {
+  const seatColors = new Map<String, string>([
+    ["Available", "#999a"],
+    ["Booked", "#0af"],
+    ["Canceled", "#f30e"],
+    ["Reserved", "#f90"],
+  ]);
+  return (
+    <View style={{ marginHorizontal: 20, marginVertical: 20 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Available"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Available</ThemedText>
+          </View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Booked"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Booked</ThemedText>
+          </View>
+        </View>
+        <View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Canceled"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Canceled</ThemedText>
+          </View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View
+              style={{
+                height: 20,
+                width: 20,
+                backgroundColor: seatColors.get("Reserved"),
+                borderRadius: 10,
+              }}
+            ></View>
+            <ThemedText>Reserved</ThemedText>
+          </View>
+        </View>
       </View>
     </View>
   );
