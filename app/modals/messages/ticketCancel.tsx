@@ -40,7 +40,7 @@ export const TicketCancelModal = ({
   refund,
 }: Props) => {
 
-  const { baseURL, busData } = useAppContext();
+  const { baseURL} = useAppContext();
 
     // Function to handle refund confirmation
     const handleRefundConfirmation = async () => {

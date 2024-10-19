@@ -1,6 +1,4 @@
-import { Owner } from "@/controller/Owner";
 import { Ticket } from "@/controller/Ticket";
-import { Transaction } from "@/controller/Transaction";
 import React, {
   createContext,
   useState,
@@ -16,7 +14,7 @@ type grapData = {
   label?: string;
 };
 
-type VehicleDetails = {
+export type VehicleDetails = {
   vehicleRegNo: string;
   seats: number;
   date: string;
@@ -96,7 +94,7 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const baseURL = "http://192.168.54.221:20240";
+  const baseURL = "http://192.168.71.221:20240";
   const [profileImage, setProfileImage] = useState("");
   const [id, setID] = useState("12");
   const [accountType, setAccountType] = useState<accountType>("Passenger");
@@ -109,8 +107,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [credits, setCredits] = useState(500);
   const [fName, setFName] = useState<string>("Chamuditha");
   const [lName, setLName] = useState<string>("Nawarathna");
-  const [phoneNo, setPhoneNo] = useState<string>("0767601948");
-  const [email, setEmail] = useState<string>("e20035@eng.pdn.ac.lk");
+  const [phoneNo, setPhoneNo] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [nic, setNIC] = useState<string>("200109808082");
   const [accountNo, setAccountNo] = useState<string>("123-456-789-012");
   const [accHolderName, setAccHolderName] = useState<string>("C. Nawarathna");

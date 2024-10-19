@@ -1,51 +1,114 @@
 import {
-  Modal,
+  Alert,
+  GestureResponderEvent,
   Pressable,
   StyleSheet,
   TextInput,
 } from "react-native";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import React from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
+
 import { useAppContext } from "@/context/AppContext";
-import React from "react";
-import {
-  FormInput,
-} from "@/components/FormComponents/FormInputField";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { FormInput } from "@/components/FormComponents/FormInputField";
 import {
   validateAccountNo,
   validateName,
   validateNIC,
 } from "@/components/FormComponents/FormFunctions";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import calculateBirthday from "@/components/CommonModules/CalculateBirthday";
+import axios from "axios";
+import Modal from "react-native-modal";
 
-export default function SignupModal() {
-  const [nic, setNIC] = useState("");
-  const [accountNo, setAccountNo] = useState("");
-  const [accHolderName, setAccHolderName] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [branchName, setBranchName] = useState("");
+type Props = {
+  isVisible: boolean;
+  onClose: (event?: GestureResponderEvent) => void;
+};
+
+export default function SignupModal({ isVisible, onClose }: Props) {
+  const {
+    baseURL,
+    id,
+    fName,
+    lName,
+    phoneNo,
+    email,
+    nic,
+    accountNo,
+    accHolderName,
+    bankName,
+    branchName,
+    ntcLicenseNo,
+    driverLicenseNo,
+    occupation,
+    setNIC,
+    setAccountNo,
+    setAccHolderName,
+    setBankName,
+    setBranchName,
+  } = useAppContext();
   const [nicError, setNICError] = useState(false);
   const [accNoError, setAccNoError] = useState(false);
   const [accHolderNameError, setAccHolderNameError] = useState(false);
   const [bankNameError, setBankNameError] = useState(false);
   const [branchNameError, setBranchNameError] = useState(false);
-
-  const [agree, setAgree] = useState(false);
-
+  const [filled, setFilled] = useState(false);
   const inputRefs = useRef(
     Array.from({ length: 7 }, () => React.createRef<TextInput>())
   );
-  const [modalVisible, setModalVisible] = useState(true);
-  useAppContext();
 
-  const closeModal = () => {
-    setModalVisible(false);
-    router.back();
+  //================================================ Functions ===============================================//
+
+  // Update user data in the database and redirect to the correct dashboard
+  const pressSubmit = () => {
+    updateUserInfo();
+    router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+    onClose();
   };
 
+  //================================================ Backend Calls ===============================================//
+
+  // Function to insert a new user
+  const updateUserInfo = async () => {
+    const userData = {
+      userType: "owner",
+      empType: occupation,
+      fName: fName,
+      lName: lName,
+      email: email,
+      phoneNo: phoneNo,
+      nic: nic,
+      birthday: calculateBirthday(nic),
+      ntc: ntcLicenseNo,
+      licence: driverLicenseNo,
+      accName: accHolderName,
+      accNo: accountNo,
+      bank: bankName,
+      branch: branchName,
+      userID: id,
+    };
+
+    try {
+      const response = await axios.post(`${baseURL}/users/req7`, {
+        data: { userData },
+      });
+
+      if (response.status === 201) {
+        Alert.alert("Success", "User registered successfully!");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      Alert.alert("Error", "Failed to register user. Please try again.");
+    }
+  };
+
+  //================================================ Use Effects ===============================================//
+
+  // Check if all the fields are filled
   useEffect(() => {
     if (
       !nicError &&
@@ -59,30 +122,18 @@ export default function SignupModal() {
       bankName != "" &&
       branchName != ""
     ) {
-      setAgree(true);
+      setFilled(true);
     } else {
-      setAgree(false);
+      setFilled(false);
     }
   }, [nic, accHolderName, accountNo, bankName, branchName]);
 
-  function submitForm() {
-    router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
-  }
+  //================================================ UI Control ===============================================//
 
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={closeModal}
-    >
+    <Modal isVisible={isVisible}>
       <GestureHandlerRootView style={styles.pageBody}>
-        <Pressable
-          style={styles.cancelIcon}
-          onPress={() => {
-            closeModal();
-          }}
-        >
+        <Pressable style={styles.cancelIcon} onPress={onClose}>
           <FontAwesomeIcon icon={faXmark} size={32} color={"gray"} />
         </Pressable>
         <FormInput
@@ -149,9 +200,12 @@ export default function SignupModal() {
           placeholder="Branch name"
         />
         <Pressable
-          style={[styles.submitButton, agree && { backgroundColor: "#1eceda" }]}
-          disabled={!agree}
-          onPress={submitForm}
+          style={[
+            styles.submitButton,
+            filled && { backgroundColor: "#1eceda" },
+          ]}
+          disabled={!filled}
+          onPress={pressSubmit}
         >
           <ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">
             Sign Up

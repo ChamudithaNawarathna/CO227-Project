@@ -127,17 +127,6 @@ export default function DrawerLayout() {
             }}
           />
           <Drawer.Screen
-            name="settings"
-            options={{
-              drawerLabel: "Settings",
-              drawerIcon: ({ color }) => (
-                <FontAwesomeIcon icon={faCog} size={iconSize} color={color} />
-              ),
-              headerTitle: "Settings",
-              headerTintColor: "#fff",
-            }}
-          />
-          <Drawer.Screen
             name="about"
             options={{
               drawerLabel: "About",

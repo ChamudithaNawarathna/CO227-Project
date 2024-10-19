@@ -6,10 +6,14 @@ import {
   ImageBackground,
   Alert,
 } from "react-native";
+import FontAwesome from "@expo/vector-icons/build/FontAwesome";
+import { Switch } from "react-native-switch";
+import axios from "axios";
 import { Href, Link, router } from "expo-router";
 import { useState, useEffect } from "react";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 
+import { useAppContext } from "@/context/AppContext";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
 import {
@@ -26,11 +30,9 @@ import {
   OwnerFormPage2,
   OwnerFormPage3,
 } from "@/components/FormComponents/OwnerForm";
-import FontAwesome from "@expo/vector-icons/build/FontAwesome";
-import { Switch } from "react-native-switch";
-import { useAppContext } from "@/context/AppContext";
-import axios from "axios";
-import { DateToString } from "@/components/CommonModules/DateTimeToString";
+import calculateBirthday from "@/components/CommonModules/CalculateBirthday";
+import PrivacyModal from "./modals/privacyModal";
+import TermsModal from "./modals/termsModal";
 
 var formPageCount = 3; // Excluding the common "Sign up as a passenger, operator or owner" form page
 const formPageWidth = 300;
@@ -63,19 +65,117 @@ export default function SignUp() {
     setDriverLicenseNo,
     setOccupation,
   } = useAppContext();
-
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [passenger, setPassenger] = useState(true);
   const [operator, setOperator] = useState(false);
   const [owner, setOwner] = useState(false);
   const [otp, setOTP] = useState("");
   const [agree, setAgree] = useState(false);
   const [showSubmit, setShowSubmit] = useState(false);
-
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [currentPos, setCurrentPos] = useState(0);
   const [backVisible, setBackVisible] = useState(false);
   const [nextVisible, setNextVisible] = useState(false);
-  let otpRequested = false; // Add a flag to track OTP request status
+  const [displayPrivacyModal, setDisplayPrivacyModal] = useState(false);
+  const [displayTermsModal, setDisplayTermsModal] = useState(false);
+  const [otpRequested, setOTPRequested] = useState(false);
+
+  //================================================ Functions ===============================================//
+
+  // Scroll to the next form page
+  async function scrollForward() {
+    if (scrollRef.current) {
+      if (currentPos === 2) {
+        const isNewUser = await handleCheckAvailability(); // Await the result of availability check
+
+        if (!isNewUser) {
+          Alert.alert(
+            "Already Registered",
+            "The phone number and email is already used"
+          );
+          return; // Prevent scrolling if the user is already registered
+        }
+      }
+
+      let otpSendingPosition = (formPageCount - 2) * formPageWidth;
+
+      if (currentPos == otpSendingPosition && !otpRequested) {
+        try {
+          await requestOTP(); // Await requestOTP to ensure it completes
+          setOTPRequested(true); // Set the flag to true after requesting OTP
+        } catch (error) {
+          console.error("Failed to request an OTP:", error);
+          Alert.alert("Error", "Failed to request an OTP");
+          return; // Stop scrolling if OTP request fails
+        }
+      }
+
+      let newPos =
+        currentPos < formPageCount * formPageWidth
+          ? currentPos + formPageWidth
+          : formPageCount * formPageWidth;
+
+      scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
+      setCurrentPos(newPos);
+    }
+  }
+
+  // Scroll to the previous form page
+  function scrollBack() {
+    if (scrollRef.current) {
+      let newPos = currentPos > 0 ? currentPos - formPageWidth : 0;
+      scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
+      setCurrentPos(newPos);
+    }
+  }
+
+  // Prepare for a new sign up
+  function pressSignUpType(signUptype: string) {
+    setOTPRequested(false); // Reset OTP flag
+    setFName(""); // Reset input fields
+    setLName("");
+    setPhoneNo("");
+    setNIC("");
+    setAccountNo("");
+    setAccHolderName("");
+    setBankName("");
+    setBranchName("");
+    setNTCLicenseNo("");
+    setDriverLicenseNo("");
+    setOccupation("");
+    setOTP("");
+
+    setPassenger(false);
+    setOperator(false);
+    setOwner(false);
+
+    switch (signUptype) {
+      case "passenger":
+        setPassenger(true);
+        formPageCount = 3;
+      case "operator":
+        setOperator(true);
+        formPageCount = 4;
+      case "owner":
+        setOwner(true);
+        formPageCount = 4;
+
+        scrollForward();
+    }
+  }
+
+  // Redirect to the correct dashboard
+  function pressSubmit() {
+    insertNewUser();
+    if (operator) {
+      router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
+    } else if (owner) {
+      router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+    } else {
+      router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
+    }
+  }
+
+  //================================================ Backend Calls ===============================================//
 
   const handleCheckAvailability = async () => {
     if (!email || !phoneNo) {
@@ -92,7 +192,7 @@ export default function SignUp() {
       };
 
       // Sending data to the backend
-      const response = await axios.post(`${baseURL}/users/req7`, requestData);
+      const response = await axios.post(`${baseURL}/users/req2`, requestData);
 
       if (response.data === "true") {
         Alert.alert("Available", "The email and phone number can be used.");
@@ -127,142 +227,6 @@ export default function SignUp() {
     }
   };
 
-  async function scrollForward() {
-    if (scrollRef.current) {
-      if (currentPos === 0) {
-        const isNewUser = await handleCheckAvailability(); // Await the result of availability check
-
-        if (!isNewUser) {
-          return; // Prevent scrolling if the user is already registered
-        }
-      }
-
-      if (
-        ((passenger && currentPos == 0) ||
-          (owner && currentPos == 300) ||
-          (operator && currentPos == 0)) &&
-        !otpRequested
-      ) {
-        try {
-          await requestOTP(); // Await requestOTP to ensure it completes
-          otpRequested = true; // Set the flag to true after requesting OTP
-        } catch (error) {
-          console.error("Failed to send OTP:", error);
-          return; // Stop scrolling if OTP request fails
-        }
-      }
-
-      let newPos =
-        currentPos < formPageCount * formPageWidth
-          ? currentPos + formPageWidth
-          : formPageCount * formPageWidth;
-
-      scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
-      setCurrentPos(newPos);
-    }
-  }
-
-  function scrollBack() {
-    if (scrollRef.current) {
-      let newPos = currentPos > 0 ? currentPos - formPageWidth : 0;
-      scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
-      setCurrentPos(newPos);
-    }
-  }
-
-  function clearInputFields() {
-    setFName("");
-    setLName("");
-    setPhoneNo("");
-    setNIC("");
-    setAccountNo("");
-    setAccHolderName("");
-    setBankName("");
-    setBranchName("");
-    setNTCLicenseNo("");
-    setDriverLicenseNo("");
-    setOccupation("");
-    setOTP("");
-  }
-
-  function passengerSignUp() {
-    otpRequested = false;
-    clearInputFields();
-    setPassenger(true);
-    setOperator(false);
-    setOwner(false);
-    formPageCount = 3;
-    scrollForward();
-  }
-
-  function operatorSignUp() {
-    otpRequested = false;
-    clearInputFields();
-    setPassenger(false);
-    setOperator(true);
-    setOwner(false);
-    formPageCount = 4;
-    scrollForward();
-  }
-
-  function ownerSignUp() {
-    otpRequested = false;
-    clearInputFields();
-    setPassenger(false);
-    setOperator(false);
-    setOwner(true);
-    formPageCount = 4;
-    scrollForward();
-  }
-
-  function submitForm() {
-    insertNewUser();
-    if (operator) {
-      router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
-    } else if (owner) {
-      router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
-    } else {
-      router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
-    }
-  }
-
-  function acceptTerms() {
-    setAgree(!agree);
-  }
-
-  function openTermsAndConditions() {
-    router.navigate("/modals/termsModal" as Href<string>);
-  }
-
-  function openPrivacyPolicy() {
-    router.navigate("/modals/privacyModal" as Href<string>);
-  }
-
-  // Hide form navigation button at first and last page
-  useEffect(() => {
-    if (currentPos == 0) {
-      setBackVisible(false);
-      setNextVisible(false);
-    } else if (currentPos == formPageCount * formPageWidth) {
-      Keyboard.dismiss();
-      setBackVisible(false);
-      setNextVisible(false);
-      setShowSubmit(true);
-    }
-  }, [currentPos]);
-
-  function calculateBirthday(): string {
-    let year = parseInt(nic.substring(0, 4), 10); // Extract year
-    let days = parseInt(nic.substring(4, 7), 10); // Extract days
-    // Create a date object for January 1 of the given year
-    const startDate = new Date(year, 0, 1); // January is month 0 in JavaScript
-    // Add the number of days
-    const birthday = new Date(startDate);
-    birthday.setDate(startDate.getDate() + days);
-
-    return DateToString(birthday);
-  }
-
   // Function to insert a new user
   const insertNewUser = async () => {
     const userData = {
@@ -273,7 +237,7 @@ export default function SignUp() {
       email: email,
       phoneNo: phoneNo,
       nic: nic,
-      birthday: calculateBirthday(),
+      birthday: calculateBirthday(nic),
       ntc: ntcLicenseNo,
       licence: driverLicenseNo,
       accName: accHolderName,
@@ -295,6 +259,23 @@ export default function SignUp() {
       Alert.alert("Error", "Failed to register user. Please try again.");
     }
   };
+
+  //================================================ Use Effects ===============================================//
+
+  // Hide form navigation button at first and last page
+  useEffect(() => {
+    if (currentPos == 0) {
+      setBackVisible(false);
+      setNextVisible(false);
+    } else if (currentPos == formPageCount * formPageWidth) {
+      Keyboard.dismiss();
+      setBackVisible(false);
+      setNextVisible(false);
+      setShowSubmit(true);
+    }
+  }, [currentPos]);
+
+  //================================================ UI Control ===============================================//
 
   return (
     <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
@@ -332,7 +313,7 @@ export default function SignUp() {
                     { backgroundColor: "#a9afff" },
                   ]}
                   onTouchStart={() => {}}
-                  onPress={passengerSignUp}
+                  onPress={() => pressSignUpType("passenger")}
                   pointerEvents={"auto"}
                 >
                   <ThemedText
@@ -348,7 +329,7 @@ export default function SignUp() {
                     styles.signInTypeButton,
                     { backgroundColor: "#8fafff" },
                   ]}
-                  onPress={operatorSignUp}
+                  onPress={() => pressSignUpType("operator")}
                   pointerEvents={"auto"}
                 >
                   <ThemedText
@@ -364,7 +345,7 @@ export default function SignUp() {
                     styles.signInTypeButton,
                     { backgroundColor: "#6fafff" },
                   ]}
-                  onPress={ownerSignUp}
+                  onPress={() => pressSignUpType("owner")}
                   pointerEvents={"auto"}
                 >
                   <ThemedText
@@ -514,7 +495,7 @@ export default function SignUp() {
               >
                 <Pressable
                   style={styles.modelButton}
-                  onPress={openTermsAndConditions}
+                  onPress={() => setDisplayTermsModal(true)}
                 >
                   <ThemedText
                     type="subtitle"
@@ -526,7 +507,7 @@ export default function SignUp() {
                 </Pressable>
                 <Pressable
                   style={styles.modelButton}
-                  onPress={openPrivacyPolicy}
+                  onPress={() => setDisplayPrivacyModal(true)}
                 >
                   <ThemedText
                     type="subtitle"
@@ -554,7 +535,7 @@ export default function SignUp() {
                   switchWidthMultiplier={1.8}
                   circleSize={25}
                   value={agree}
-                  onValueChange={acceptTerms}
+                  onValueChange={() => setAgree(!agree)}
                   activeText=""
                   inActiveText=""
                   backgroundActive="#11aadd"
@@ -589,7 +570,6 @@ export default function SignUp() {
                 lightColor="#a1aadd"
                 darkColor="#a1aadd"
               >
-                {" "}
                 Next <FontAwesome name="chevron-right" size={20} />
               </ThemedText>
             </Pressable>
@@ -605,7 +585,7 @@ export default function SignUp() {
                 agree && { backgroundColor: "#1eceda" },
               ]}
               disabled={!agree}
-              onPress={submitForm}
+              onPress={pressSubmit}
             >
               <ThemedText type="subtitle" lightColor="#fff" darkColor="#fff">
                 Sign Up
@@ -628,6 +608,15 @@ export default function SignUp() {
           </ThemedView>
         )}
       </ImageBackground>
+
+      <PrivacyModal
+        isVisible={displayPrivacyModal}
+        onClose={() => setDisplayPrivacyModal(false)}
+      />
+      <TermsModal
+        isVisible={displayTermsModal}
+        onClose={() => setDisplayTermsModal(false)}
+      />
     </ThemedView>
   );
 }

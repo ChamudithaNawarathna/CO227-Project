@@ -1,42 +1,28 @@
 import {
-  Modal,
+  GestureResponderEvent,
   Pressable,
   ScrollView,
   StyleSheet,
-  useColorScheme,
 } from "react-native";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { router } from "expo-router";
-import { useState } from "react";
 import TermsAndConditions from "@/assets/docs/TermsAndConditions.json";
+import Modal from "react-native-modal";
 
-export default function TermsModal() {
-  const theme = useColorScheme() ?? "light";
-  const [modalVisible, setModalVisible] = useState(true);
+type Props = {
+  isVisible: boolean;
+  onClose: (event: GestureResponderEvent) => void;
+};
+
+export default function TermsModal({ isVisible, onClose }: Props) {
   const { termsAndConditions: terms } = TermsAndConditions;
 
-  const closeModal = () => {
-    setModalVisible(false);
-    router.back();
-  };
-
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={closeModal}
-    >
+    <Modal isVisible={isVisible}>
       <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
-        <Pressable
-          style={styles.cancelIcon}
-          onPress={() => {
-            closeModal();
-          }}
-        >
+        <Pressable style={styles.cancelIcon} onPress={onClose}>
           <FontAwesomeIcon icon={faXmark} size={32} color={"gray"} />
         </Pressable>
 

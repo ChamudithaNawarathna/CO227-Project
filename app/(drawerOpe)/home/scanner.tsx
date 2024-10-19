@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, Button, Alert, Pressable } from "react-native";
+import { StyleSheet, View, Pressable } from "react-native";
 import { Camera, CameraView } from "expo-camera";
 import { BarCodeScanningResult } from "expo-camera/build/legacy/Camera.types";
+
+import { useAppContext } from "@/context/AppContext";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import TicketScan from "@/app/modals/messages/ticketScan";
-import { useAppContext } from "@/context/AppContext";
+import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
+import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
 
 export default function Scanner() {
   const { busScheduleDetails } = useAppContext();
@@ -12,15 +15,18 @@ export default function Scanner() {
   const [scannedData, setScannedData] = useState<string[]>([]);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [valid, setValid] = useState(false);
+  const [error, setError] = useState<string>("");
 
-  useEffect(() => {
-    const getCameraPermission = async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === "granted");
-    };
-    getCameraPermission();
-  }, []);
+  //================================================ Functions ===============================================//
 
+  // Request camera permission
+  const getCameraPermission = async () => {
+    setError("");
+    const { status } = await Camera.requestCameraPermissionsAsync();
+    setHasPermission(status === "granted");
+  };
+
+  // Check and display data in the QR code
   const handleBarCodeScanned = (result: BarCodeScanningResult) => {
     const data: string = result.data;
     const splitData = data.split("|");
@@ -40,16 +46,10 @@ export default function Scanner() {
 
       // If bus is found, check if the seat numbers match
       if (bus) {
-        // Log individual items for debugging
-        console.log("Scanned Seat Nos (as Numbers):");
-        scannedSeatNos.forEach((seat, index) => {
-          console.log(`Index ${index}: ${seat}`);
-        });
-
-        console.log("Booked Seats in Bus (as Numbers):");
         const bookedSeatNumbers = bus.bookedSeats.map((seat) =>
           parseInt(seat, 10)
         ); // Convert booked seats to numbers
+        console.log("Booked Seats in Bus:");
         bookedSeatNumbers.forEach((seat, index) => {
           console.log(`Index ${index}: ${seat}`); // Log actual booked seat numbers
         });
@@ -73,24 +73,22 @@ export default function Scanner() {
     }
   };
 
+  //================================================ Use Effects ===============================================//
+
+  // Request camera permission on component mount
+  useEffect(() => {
+    getCameraPermission();
+  }, []);
+
+  //================================================ UI Control ===============================================//
+
   if (hasPermission === null) {
-    return (
-      <View style={{ alignItems: "center", marginTop: 200 }}>
-        <ThemedText type="h5" lightColor="#666" darkColor="#ccc">
-          Requesting camera permission...
-        </ThemedText>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   if (hasPermission === false) {
-    return (
-      <View style={{ alignItems: "center", marginTop: 200 }}>
-        <ThemedText type="h5" lightColor="#666" darkColor="#ccc">
-          No access to camera
-        </ThemedText>
-      </View>
-    );
+    setError("Camera permission is not granted");
+    return <ErrorScreen error={error} retry={getCameraPermission} />;
   }
 
   return (

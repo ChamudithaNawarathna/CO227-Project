@@ -1,25 +1,24 @@
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Href, router } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
   Button,
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  useColorScheme,
   View,
 } from "react-native";
+
+import { useAppContext } from "@/context/AppContext";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { Ticket } from "@/controller/Ticket";
 import ScreenWrapper from "@/components/ScreenWrapper";
-import { useAppContext } from "@/context/AppContext";
-import { useEffect, useState } from "react";
-import axios from "axios";
 import { AvailableTicketView } from "@/components/UIComponents/AvailableTicketView";
-import FullTicketView from "@/components/UIComponents/FullTicketView";
 import StringToDate from "@/components/CommonModules/StringToDateTime";
+import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
 
 type AvailableTicket = {
   refNo: string;
@@ -42,79 +41,38 @@ type AvailableTicket = {
 };
 
 export default function Dashboard() {
-  const [availableTickets, setAvailableTickets] = useState<AvailableTicket[]>(
-    []
-  );
-  // const [availableTickets, setAvailableTickets] = useState<AvailableTicket[]>([
-  //   {
-  //     ticketNo: "001",
-  //     date: "2024-10-06",
-  //     from: "Colombo",
-  //     to: "Galle",
-  //     departure: "08:00",
-  //     fromT: "20:15",
-  //     toT: "1:30",
-  //     seats: "A1, A2",
-  //     full: "1",
-  //     half: "0",
-  //     price: "1500",
-  //     regNo: "AB1234",
-  //     org: "SLTB",
-  //     service: "Luxury",
-  //     route: "E01 Colombo - Galle",
-  //     tracking: false,
-  //     cancel: false,
-  //   },
-  //   {
-  //     ticketNo: "002",
-  //     date: "2024-10-06",
-  //     from: "Galle",
-  //     to: "Colombo",
-  //     departure: "18:00",
-  //     fromT: "12:45",
-  //     toT: "2:51",
-  //     seats: "B1, B2",
-  //     full: "2",
-  //     half: "1",
-  //     price: "1200",
-  //     regNo: "CD5678",
-  //     org: "SLTB",
-  //     service: "Standard",
-  //     route: "E01 Colombo - Galle",
-  //     tracking: true,
-  //     cancel: true,
-  //   },
-  // ]);
-  const [loading, setLoading] = useState(false);
   const { baseURL, credits, myTickets, setMyTickets, id } = useAppContext();
-  const [ticket, setTicket] = useState<Ticket>();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
 
-  // Function to fetch available tickets
+  //================================================ Backend Calls ===============================================//
+
+  // Fetch available tickets
   const fetchAvailableTickets = async () => {
     setLoading(true);
+    setError("");
     try {
       const response = await axios.post(`${baseURL}/tickets/tkt4`, {
         data: id,
       });
 
       if (response.status === 200) {
-        const fetchedTickets: AvailableTicket[] = response.data; // Ensure the response data matches the Ticket interface
-        setAvailableTickets(fetchedTickets);
+        const fetchedTickets: AvailableTicket[] = response.data;
         console.log(fetchedTickets);
-        // Fetch details for each available ticket concurrently
-        await fetchTicketDetailsForAll(fetchedTickets);
+        await fetchTicketDetailsForAll(fetchedTickets); // Fetch details for each available ticket concurrently
       } else {
         Alert.alert("Error", "Failed to fetch tickets");
       }
     } catch (error) {
       console.error(error);
+      setError(String(error));
       Alert.alert("Error", "An error occurred while fetching tickets");
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to fetch detailed ticket information for all available tickets
+  // Fetch detailed ticket information for all available tickets
   const fetchTicketDetailsForAll = async (tickets: AvailableTicket[]) => {
     const updatedTickets = new Map(myTickets); // Create a copy of myTickets
     const fetchPromises = tickets.map(async (availableTicket) => {
@@ -148,99 +106,40 @@ export default function Dashboard() {
           tracking,
           cancel
         );
-        updatedTickets.set(refNo, ticket); // Add the fetched ticket
+        updatedTickets.set(refNo, ticket);
       } catch (err) {
         console.error("Error fetching ticket details:", err);
+        setError(String(error));
         Alert.alert(
           "Error",
           "An error occurred while fetching ticket details for " +
             availableTicket.refNo
         );
+      } finally {
+        setLoading(false);
       }
     });
 
-    // Wait for all fetch requests to complete
-    await Promise.all(fetchPromises);
+    await Promise.all(fetchPromises); // Wait for all fetch requests to complete
     setMyTickets(updatedTickets); // Update the state with the new map after all tickets have been fetched
   };
 
-  // Function to fetch recentTicket details by reference string
-  // const fetchTicketDetails = async (
-  //   ticketNo: string,
-  //   org: string,
-  //   fromT: string,
-  //   toT: string,
-  //   tracking: boolean,
-  //   cancel: boolean
-  // ) => {
-  //   setLoading(true);
-  //   try {
-  //     const response = await axios.get(`${baseURL}/tickets/tkt2`, {
-  //       params: { ticketNo },
-  //     });
-  //     const ticket = new Ticket(
-  //       response.data.ticketNo,
-  //       StringToDate(response.data.issuedDate, response.data.issuedTime),
-  //       response.data.vehicleNo, // Corrected typo
-  //       org,
-  //       response.data.type,
-  //       response.data.routeNo,
-  //       response.data.route,
-  //       StringToDate(response.data.date, response.data.time),
-  //       response.data.from,
-  //       response.data.to,
-  //       fromT,
-  //       toT,
-  //       response.data.distance,
-  //       response.data.price,
-  //       response.data.discount,
-  //       response.data.unitPrice,
-  //       response.data.transID,
-  //       response.data.full,
-  //       response.data.half,
-  //       response.data.seatNos,
-  //       response.data.status,
-  //       tracking,
-  //       cancel
-  //     );
-  //     const updatedTickets = new Map(myTickets); // Create a copy of myTickets
-  //     updatedTickets.set(ticketNo, ticket); // Add the fetched ticket
-  //     setMyTickets(updatedTickets); // Update the state with the new map
-  //   } catch (err) {
-  //     console.error("Error fetching ticket details:", err); // Updated error message
-  //     Alert.alert(
-  //       "Error",
-  //       "An error occurred while fetching the ticket details" // Updated error message
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  //================================================ Use Effects ===============================================//
 
-  // // UseEffect to fetch tickets on component mount
-  // useEffect(() => {
-  //   fetchAvailableTickets(); // Fetch available tickets when the component mounts
-  // }, []);
+  // Fetch tickets on component mount
+  useEffect(() => {
+    fetchAvailableTickets();
+  }, []);
 
-  // // UseEffect to fetch ticket details when availableTickets updates
-  // useEffect(() => {
-  //   const fetchDetailsForAvailableTickets = async () => {
-  //     if (availableTickets.length > 0) {
-  //       for (const ticket of availableTickets) {
-  //         await fetchTicketDetails(
-  //           ticket.ticketNo,
-  //           ticket.org || "",
-  //           ticket.fromT || "",
-  //           ticket.toT || "",
-  //           ticket.tracking || false,
-  //           ticket.cancel || false
-  //         );
-  //       }
-  //     }
-  //   };
+  //================================================ UI Control ===============================================//
 
-  //   fetchDetailsForAvailableTickets();
-  // }, [availableTickets]);
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (error !== "" && !loading) {
+    return <ErrorScreen error={error} retry={fetchAvailableTickets} />;
+  }
 
   return (
     <ScreenWrapper>
@@ -293,19 +192,18 @@ export default function Dashboard() {
           <View style={{ padding: 12 }}>
             {loading ? (
               <ActivityIndicator size="large" color="#0000ff" />
-            ) : myTickets ? ( // Check if there are tickets in myTickets
-              Array.from(myTickets.entries()).map(
-                (
-                  [ticketNo, ticket] // Use entries to get key-value pairs
-                ) => (
-                  <AvailableTicketView
-                    key={ticketNo} // Use ticketNo as the unique key
-                    ticket={ticket}
-                  />
-                )
-              )
+            ) : myTickets ? (
+              Array.from(myTickets.entries()).map(([ticketNo, ticket]) => (
+                <AvailableTicketView key={ticketNo} ticket={ticket} />
+              ))
             ) : (
-              <ThemedText type="s5" lightColor={'#777'} style={{alignSelf: 'center', marginVertical: 50}}>No tickets are available</ThemedText>
+              <ThemedText
+                type="s5"
+                lightColor={"#777"}
+                style={{ alignSelf: "center", marginVertical: 50 }}
+              >
+                No tickets are available
+              </ThemedText>
             )}
 
             <Button title="Refresh Tickets" onPress={fetchAvailableTickets} />

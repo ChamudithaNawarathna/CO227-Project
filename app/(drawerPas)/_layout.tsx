@@ -14,10 +14,13 @@ import CustomDrawerContent from "@/components/CustomDrawerContent";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBars,
+  faBell,
   faBusAlt,
   faChartLine,
+  faCircleDollarToSlot,
   faClockRotateLeft,
   faCog,
+  faDollarSign,
   faHome,
   faInfoCircle,
   faMoneyBillTransfer,
@@ -90,6 +93,25 @@ export default function DrawerLayout() {
               />
             </Pressable>
           ),
+          headerRight: () => (
+            <View style={{flexDirection: 'row'}}>
+              <Pressable
+                style={{
+                  backgroundColor: "transparent",
+                  borderWidth: 0,
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                }}
+                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+              >
+                <FontAwesomeIcon
+                  icon={faBell}
+                  size={24}
+                  color={theme === "dark" ? "#fff" : "#fff"}
+                />
+              </Pressable>
+            </View>
+          ),
         }}
       >
         <Drawer.Screen
@@ -101,7 +123,6 @@ export default function DrawerLayout() {
             ),
           }}
         />
-
         <Drawer.Screen
           name="profile"
           options={{
@@ -129,6 +150,21 @@ export default function DrawerLayout() {
           }}
         />
         <Drawer.Screen
+          name="recharge"
+          options={{
+            drawerLabel: "Recharge",
+            drawerIcon: ({ color }) => (
+              <FontAwesomeIcon
+                icon={faCircleDollarToSlot}
+                size={iconSize}
+                color={color}
+              />
+            ),
+            headerTitle: "Recharge",
+            headerTintColor: "#fff",
+          }}
+        />
+        <Drawer.Screen
           name="transactions"
           options={{
             drawerLabel: "Transactions",
@@ -140,32 +176,6 @@ export default function DrawerLayout() {
               />
             ),
             headerTitle: "Transactions",
-            headerTintColor: "#fff",
-          }}
-        />
-        <Drawer.Screen
-          name="settings"
-          options={{
-            drawerLabel: "Settings",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon icon={faCog} size={iconSize} color={color} />
-            ),
-            headerTitle: "Settings",
-            headerTintColor: "#fff",
-          }}
-        />
-        <Drawer.Screen
-          name="feedback"
-          options={{
-            drawerLabel: "Feedback",
-            drawerIcon: ({ color }) => (
-              <FontAwesomeIcon
-                icon={faThumbsUp}
-                size={iconSize}
-                color={color}
-              />
-            ),
-            headerTitle: "Feedback",
             headerTintColor: "#fff",
           }}
         />

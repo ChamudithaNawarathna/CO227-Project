@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   StyleSheet,
   Pressable,
@@ -5,16 +6,15 @@ import {
   Keyboard,
   Alert,
 } from "react-native";
+import FontAwesome from "@expo/vector-icons/build/FontAwesome";
 import { Href, Link, router } from "expo-router";
 import { useState, useEffect } from "react";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 
+import { useAppContext } from "@/context/AppContext";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
-import FontAwesome from "@expo/vector-icons/build/FontAwesome";
 import { LogInFormPage1 } from "@/components/FormComponents/LoginForm";
-import { useAppContext } from "@/context/AppContext";
-import axios from "axios";
 import { OTPPage } from "@/components/FormComponents/OTPPage";
 
 var formPageCount = 2;
@@ -49,16 +49,14 @@ export default function LogIn() {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   let otpRequested = false; // Add a flag to track OTP request status
 
-  interface RequestOTPResponse {
-    error?: string;
-    success?: string;
-  }
+  //================================================ Functions ===============================================//
 
+  // Scroll to the next form page
   const scrollForward = async () => {
     if (scrollRef.current) {
       if (currentPos === 0 && !otpRequested) {
         // Check the flag before requesting OTP
-        const userInfo = await getUserInfo(phoneNo);
+        const userInfo = await fetchUserInfo(phoneNo);
         if (!userInfo) {
           console.error("Failed to retrieve user info, stopping scroll.");
           return; // Stop scrolling if user info retrieval fails
@@ -81,6 +79,7 @@ export default function LogIn() {
     }
   };
 
+  // Scroll to the previous form page
   function scrollBack() {
     if (scrollRef.current) {
       let newPos = currentPos > 0 ? currentPos - formPageWidth : 0;
@@ -89,6 +88,7 @@ export default function LogIn() {
     }
   }
 
+  // Redirect to the correct dashboard
   function goToDashboard() {
     if (myAccTypes.get("Owner")) {
       router.replace("/(drawerOwn)/home/dashboard" as Href<string>);
@@ -99,19 +99,10 @@ export default function LogIn() {
     }
   }
 
-  // Hide form navigation button at first and last page
-  useEffect(() => {
-    if (currentPos == 0) {
-      setBackVisible(false);
-    } else if (currentPos == formPageCount * formPageWidth) {
-      Keyboard.dismiss();
-      setBackVisible(false);
-      setNextVisible(false);
-    }
-  }, [currentPos]);
+  //================================================ Backend Calls ===============================================//
 
-  // Function to get user data by phone number
-  const getUserInfo = async (phoneNumber: string): Promise<any | null> => {
+  // Fetch user data by phone number
+  const fetchUserInfo = async (phoneNumber: string): Promise<any | null> => {
     try {
       const response = await axios.post(`${baseURL}/mobileAPI/user/info`, {
         type: "reqestInfo",
@@ -125,7 +116,6 @@ export default function LogIn() {
         console.log("User info retrieved successfully:", response.data);
         const userInfo = response.data;
 
-        // Update app context state variables with the retrieved user info
         setID(userInfo.userID || "");
         setFName(userInfo.fName || "");
         setLName(userInfo.lName || "");
@@ -149,15 +139,16 @@ export default function LogIn() {
           myAccTypes.set("Passenger", true);
         }
 
-        return userInfo; // Return the user info
+        return userInfo;
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-      return null; // Return null in case of an error
+      Alert.alert("Error", "Failed to fetch user details");
+      return null;
     }
   };
 
-  // Function to request OTP
+  // Request an OTP
   const requestOTP = async () => {
     try {
       const response = await axios.post(`${baseURL}/otp/request`, {
@@ -173,43 +164,20 @@ export default function LogIn() {
     }
   };
 
-  // Function to get an OTP
-  // const requestOTP = async (email: string, mobile: string): Promise<void> => {
-  //   try {
-  //     const response = await axios.post<RequestOTPResponse>(
-  //       `${baseURL}/mobileAPI/entry/otp`,
-  //       {
-  //         type: "requestOTP", // Request type for generating OTP
-  //         data: {
-  //           email,
-  //           mobile,
-  //         },
-  //       }
-  //     );
+  //================================================ Use Effects ===============================================//
 
-  //     if (response.data.error) {
-  //       console.error("Error requesting OTP:", response.data.error);
-  //     } else {
-  //       console.log("OTP requested successfully:", response.data.success);
-  //       scrollForward();
-  //     }
-  //   } catch (error) {
-  //     if (axios.isAxiosError(error)) {
-  //       console.error("Axios error:", error.message);
-  //       if (error.response) {
-  //         console.error("Response data:", error.response.data);
-  //         console.error("Response status:", error.response.status);
-  //         console.error("Response headers:", error.response.headers);
-  //       } else if (error.request) {
-  //         console.error("Request data:", error.request);
-  //       } else {
-  //         console.error("Error message:", error.message);
-  //       }
-  //     } else {
-  //       console.error("Unexpected error:", error);
-  //     }
-  //   }
-  // };
+  // Hide form navigation button at first and last page
+  useEffect(() => {
+    if (currentPos == 0) {
+      setBackVisible(false);
+    } else if (currentPos == formPageCount * formPageWidth) {
+      Keyboard.dismiss();
+      setBackVisible(false);
+      setNextVisible(false);
+    }
+  }, [currentPos]);
+
+  //================================================ UI Control ===============================================//
 
   return (
     <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">

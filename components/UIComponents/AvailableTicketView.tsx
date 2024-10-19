@@ -2,22 +2,10 @@ import { View, Text, Pressable, useColorScheme, Alert } from "react-native";
 import FullTicketView from "./FullTicketView";
 import { useState } from "react";
 import {
-  faCancel,
   faCircleInfo,
-  faDeleteLeft,
-  faDumpster,
   faEye,
-  faInfo,
-  faInfoCircle,
-  faLocationDot,
-  faMagnifyingGlassLocation,
   faMapLocationDot,
-  faRightFromBracket,
   faTrash,
-  faTrashAlt,
-  faTrashArrowUp,
-  faTrashCan,
-  faTrashRestore,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { useAppContext } from "@/context/AppContext";
@@ -44,7 +32,7 @@ interface RefundData {
 }
 
 export const AvailableTicketView = ({ ticket }: Props) => {
-  const { baseURL, busData } = useAppContext();
+  const { baseURL } = useAppContext();
   const [displayFullTicket, setDisplayFullTicket] = useState(false);
   const [displayTicketCancel, setDisplayTicketCancel] = useState(false);
   const theme = useColorScheme() ?? "light";
@@ -52,11 +40,10 @@ export const AvailableTicketView = ({ ticket }: Props) => {
   const disabledIconColor = theme === "dark" ? "#666" : "#ccc";
   const iconSize = 20;
   const iconTitleSize = 10;
-  const [refundData, setRefundData] = useState<RefundData | null>(null); // Refund Info
-  const [loading, setLoading] = useState<boolean>(false); // Loading State
+  const [refundData, setRefundData] = useState<RefundData | null>(null);
 
   const handleRefundRequest = async () => {
-    setLoading(true);
+    setDisplayTicketCancel(true);
     let cancelDate = DateToString(new Date());
     let cancelTime = TimeToString(new Date());
 
@@ -70,13 +57,8 @@ export const AvailableTicketView = ({ ticket }: Props) => {
       });
       setRefundData(response.data);
     } catch (err) {
-      Alert.alert(
-        "Error",
-        "There was an issue processing the refund. Please try again."
-      );
+      Alert.alert("Error", "There was an issue processing the refund");
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 

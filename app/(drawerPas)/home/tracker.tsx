@@ -1,34 +1,33 @@
 import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  View,
-  Pressable,
-  useColorScheme,
-} from "react-native";
+import { StyleSheet, View, useColorScheme } from "react-native";
 import * as Location from "expo-location";
+
 import PasBusLocation from "@/components/UIComponents/PasBusLocation";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
+import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
 
 export default function Tracker() {
   const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#aaa" : "#777";
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Track loading state
+  const [errorPermission, setErrorPermission] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
 
+  //================================================ Functions ===============================================//
+
+  // Request location permission
   const requestPermissions = async (): Promise<boolean> => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
-      setErrorMsg("Permission to access location was denied");
+      setErrorPermission("Permission to access location was denied");
       return false;
     }
     return true;
   };
 
+  // Get your current location
   const getLocation = async (): Promise<void> => {
     try {
       let loc = await Location.getCurrentPositionAsync({
@@ -36,17 +35,30 @@ export default function Tracker() {
       });
       setLocation(loc);
     } catch (error) {
-      setErrorMsg("Error getting location: " + error);
+      setErrorPermission("Error getting location: " + error);
     } finally {
-      setLoading(false); // Stop loading once location is fetched or failed
+      setLoading(false);
     }
   };
 
+  // Reload your current location
   const reloadLocation = async (): Promise<void> => {
-    setLoading(true);
-    setErrorMsg(null);
-    await getLocation();
+    (async () => {
+      const hasPermission = await requestPermissions();
+      if (hasPermission) {
+        // Adding a slight delay before getting the location
+        setTimeout(async () => {
+          await getLocation();
+        }, 1000);
+      } else {
+        setLoading(false);
+      }
+    })();
   };
+
+  //================================================ Use Effects ===============================================//
+
+  // Request permission and start tracking on component mount
 
   useEffect(() => {
     (async () => {
@@ -57,50 +69,22 @@ export default function Tracker() {
           await getLocation();
         }, 1000);
       } else {
-        setLoading(false); // Stop loading if permissions are denied
+        setLoading(false);
       }
     })();
   }, []);
 
-  const customMapStyle = [
-    {
-      elementType: "geometry",
-      stylers: [
-        { color: "#e5e5e5" }, // Change this to your preferred background color
-      ],
-    },
-  ];
+  //================================================ UI Control ===============================================//
 
-  return (
-    <View style={styles.container}>
-      {loading ? (
-        <View style={{ alignSelf: "center", marginTop: 250 }}>
-          <ThemedText type="s5" lightColor="#666" darkColor="#ddd">
-            Loading...
-          </ThemedText>
-        </View>
-      ) : errorMsg ? (
-        <View style={{ alignSelf: "center", marginTop: 250 }}>
-          <ThemedText type="s5" lightColor={"#555"} darkColor={"#ccc"}>
-            Something went wrong. Please try again
-          </ThemedText>
-          <Pressable style={styles.reloadButton} onPress={reloadLocation}>
-            <FontAwesomeIcon
-              icon={faArrowRotateBack}
-              size={18}
-              color={iconColor}
-              style={{ alignSelf: "center" }}
-            />
-            <ThemedText type="s5" lightColor={iconColor} darkColor={iconColor}>
-              Tap to Retry
-            </ThemedText>
-          </Pressable>
-        </View>
-      ) : (
-        location && <PasBusLocation />
-      )}
-    </View>
-  );
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (error !== "" && !loading) {
+    return <ErrorScreen error={error} retry={reloadLocation} />;
+  }
+
+  return <View style={styles.container}>{location && <PasBusLocation />}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -121,12 +105,6 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
-
-
-
-
 // import { Image, StyleSheet, Pressable } from "react-native";
 // import { Link } from "expo-router";
 
@@ -141,10 +119,9 @@ const styles = StyleSheet.create({
 //     <ParallaxScrollView
 //       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
 //       headerImage={
-       
+
 //          require("@/assets/images/partial-react-logo.png")
-       
-        
+
 //       }
 //     >
 //       <ThemedView style={styles.titleContainer}>
@@ -187,13 +164,6 @@ const styles = StyleSheet.create({
 //     position: "absolute",
 //   },
 // });
-
-
-
-
-
-
-
 
 // import { Image, StyleSheet, Pressable } from "react-native";
 // import { Link } from "expo-router";

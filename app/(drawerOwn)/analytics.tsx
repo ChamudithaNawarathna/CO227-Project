@@ -1,21 +1,23 @@
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { Dropdown } from "react-native-element-dropdown";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
   useColorScheme,
   View,
 } from "react-native";
-import { AppContext, useAppContext } from "@/context/AppContext";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { EarningsGraph } from "@/components/UIComponents/EarningGraph";
-import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Dropdown } from "react-native-element-dropdown"; // Ensure to install this or another dropdown package
 
-// Define the income data structure for type safety
+import { useAppContext } from "@/context/AppContext";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { EarningsGraph } from "@/components/UIComponents/EarningGraph";
+import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+
 interface IncomeData {
   weekly: {
     receivedData: number[];
@@ -37,43 +39,26 @@ interface IncomeData {
   };
 }
 
-// Define the dropdown options
-const dropdownOptions = [
-  { label: "Total Earnings", value: "earningData" },
-  { label: "Total Refunds", value: "refundData" },
-  { label: "Total Received", value: "receivedData" },
-];
-
 export default function Analytics() {
   const { baseURL, id } = useAppContext();
   const theme = useColorScheme() ?? "light";
   const iconColor = theme === "dark" ? "#aaa" : "#777";
-
+  const dropdownOptions = [
+    { label: "Total Earnings", value: "earningData" },
+    { label: "Total Refunds", value: "refundData" },
+    { label: "Total Received", value: "receivedData" },
+  ];
   const [incomeData, setIncomeData] = useState<IncomeData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // State for selected data types for each graph
   const [selectedWeeklyData, setSelectedWeeklyData] =
     useState<string>("earningData");
   const [selectedMonthlyData, setSelectedMonthlyData] =
     useState<string>("earningData");
   const [selectedAnnualData, setSelectedAnnualData] =
     useState<string>("earningData");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
 
-  const fetchIncomeData = async () => {
-    try {
-      const response = await axios.post(`${baseURL}/bus/incomeTotal`, { id });
-      setIncomeData(response.data);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error fetching bus income data:", error);
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchIncomeData();
-  }, []);
+  //============================================== Functions ===============================================//
 
   // Function to get data for weekly graph
   const getWeeklyData = (dataType: keyof IncomeData["weekly"]) => {
@@ -85,7 +70,7 @@ export default function Analytics() {
     }));
   };
 
-  // Function to get data for monthly and annual graphs
+  // Function to transform data for monthly graph
   const getMonthlyData = (dataType: keyof IncomeData["monthly"]) => {
     if (!incomeData) return [];
     const earningData = incomeData.monthly[dataType];
@@ -95,6 +80,7 @@ export default function Analytics() {
     }));
   };
 
+  // Function to transform data for annual graph
   const getAnnualData = (dataType: keyof IncomeData["annual"]) => {
     if (!incomeData) return [];
     const earningData = incomeData.annual[dataType];
@@ -104,8 +90,39 @@ export default function Analytics() {
     }));
   };
 
+  //============================================== Backend Calls ===============================================//
+
+  // Fetch total income data
+  const fetchIncomeData = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(`${baseURL}/bus/incomeTotal`, { id });
+      setIncomeData(response.data);
+    } catch (error) {
+      console.error("Error fetching total bus income data:", error);
+      setError(String(error));
+      Alert.alert("Error", "Failed to fetch total income data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //================================================ Use Effects ===============================================//
+
+  // Fetch total income data on component mount
+  useEffect(() => {
+    fetchIncomeData();
+  }, []);
+
+  //================================================ UI Control ===============================================//
+
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
+  if (error !== "" && !loading) {
+    return <ErrorScreen error={error} retry={fetchIncomeData} />;
   }
 
   return (

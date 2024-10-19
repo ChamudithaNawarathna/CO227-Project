@@ -1,4 +1,3 @@
-import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -9,7 +8,6 @@ import {
   faUserCircle,
   faBank,
   faDriversLicense,
-  faN,
   faEdit,
   faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
@@ -22,23 +20,23 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import ScreenWrapper from "@/components/ScreenWrapper";
+
 import { useAppContext } from "@/context/AppContext";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
+import ScreenWrapper from "@/components/ScreenWrapper";
 import { InfoCard } from "@/components/UIComponents/InfoCard";
-import { useState } from "react";
 
 export default function ProfileScreen() {
-  const { myAccTypes, profileImage, setProfileImage } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#ddd" : "#777";
   const {
+    myAccTypes,
+    profileImage,
+    setProfileImage,
     credits,
     fName,
     lName,
     phoneNo,
     email,
     nic,
-
     accountNo,
     accHolderName,
     bankName,
@@ -46,6 +44,10 @@ export default function ProfileScreen() {
     driverLicenseNo,
     occupation,
   } = useAppContext();
+  const theme = useColorScheme() ?? "light";
+  const iconColor = theme === "dark" ? "#ddd" : "#777";
+
+  //================================================ Functions ===============================================//
 
   const pickImage = async () => {
     // Request permission to access the media library
@@ -69,6 +71,8 @@ export default function ProfileScreen() {
       setProfileImage(result.assets[0].uri);
     }
   };
+
+  //================================================ UI Control ===============================================//
 
   return (
     <ScreenWrapper>

@@ -1,5 +1,4 @@
 import {
-  View,
   Image,
   StyleSheet,
   Pressable,
@@ -7,23 +6,23 @@ import {
   ImageBackground,
   StatusBar,
 } from "react-native";
-import { Href, Link, router } from "expo-router";
+import { Href, router } from "expo-router";
 import React, { useEffect } from "react";
-import {
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
-import { useRef } from "react";
 
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
 
 export default function Index() {
   const theme = useColorScheme() ?? "light";
-  // useEffect(() => {
-  //   StatusBar.setHidden(true);
-  // }, []);
+
+  //================================================ Use Effects ===============================================//
+
+  // Hide statusbar on component mount
+  useEffect(() => {
+    StatusBar.setHidden(false);
+  }, []);
+
+  //================================================ UI Control ===============================================//
 
   return (
     <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
@@ -78,8 +77,8 @@ export default function Index() {
           <Pressable
             style={styles.loginButton}
             onPress={() => {
-              router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
-              //router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
+              //router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+              router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
             }}
           >
             <ThemedText type="buttonText" lightColor="#fff" darkColor="#fff">

@@ -6,18 +6,13 @@ import { useColorScheme } from "react-native";
 import { useAppContext } from "@/context/AppContext";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
+import { Dropdown } from "react-native-element-dropdown";
 
 export default function OwnBusLocation() {
-  const { baseURL, myBuses, myBusLocations} = useAppContext();
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
+  const { baseURL, myBuses } = useAppContext();
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [selectedBusId, setSelectedBusId] = useState<string | null>(null);
   const [selectedBusLocation, setSelectedBusLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [busLocation, setBusLocation] = useState<{
     latitude: number;
     longitude: number;
     speed: number;
@@ -26,6 +21,17 @@ export default function OwnBusLocation() {
   const theme = useColorScheme() ?? "light";
   const iconColor = theme === "dark" ? "#eee" : "#777";
   const iconSize = 20;
+
+  // Format the dropdown data, ensuring unique regNo
+const dropdownData = myBuses.reduce((acc, bus) => {
+  acc.push({
+    label: bus.regNo,
+    value: bus.regNo, // Set the entire bus object as the value
+  });
+  return acc;
+}, [] as { label: string; value: string }[]);
+
+  // Request location permissions
   const requestPermissions = async (): Promise<void> => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -34,6 +40,7 @@ export default function OwnBusLocation() {
     }
   };
 
+  // Get user's current location
   const getLocation = async (): Promise<Location.LocationObject | null> => {
     try {
       let location = await Location.getCurrentPositionAsync({
@@ -46,48 +53,38 @@ export default function OwnBusLocation() {
     }
   };
 
- // Fetch bus location
- const fetchBusLocation = async (regNo: string) => {
-  try {
-    const response = await axios.get(`${baseURL}/tracking/trk1`, {
-      params: { data: regNo },
-    });
+  // Fetch the selected bus location
+  const fetchBusLocation = async (regNo: string) => {
+    try {
+      const response = await axios.get(`${baseURL}/tracking/trk1`, {
+        params: { data: regNo },
+      });
 
-    const { lat, lng, speed } = response.data;
-    setBusLocation({
-      latitude: parseFloat(lat),
-      longitude: parseFloat(lng),
-      speed: parseFloat(speed),
-    });
-    console.log(response.data);
-  } catch (err) {
-    console.error("Failed to fetch bus location", err)
-    setBusLocation(null);
-  }
-};
+      const { lat, lng, speed } = response.data;
+      setSelectedBusLocation({
+        latitude: parseFloat(lat),
+        longitude: parseFloat(lng),
+        speed: parseFloat(speed),
+      });
+    } catch (err) {
+      console.error("Failed to fetch bus location", err);
+      setSelectedBusLocation(null);
+    }
+  };
 
+  // On mount, request permissions and get user location
   useEffect(() => {
     (async () => {
       await requestPermissions();
       let loc = await getLocation();
       setLocation(loc);
     })();
-
-    const interval = setInterval(fetchBusLocation, 1000); // Update every 5 seconds
-    return () => clearInterval(interval);
   }, []);
 
+  // Fetch bus location whenever the selected bus changes
   useEffect(() => {
     if (selectedBusId) {
-      const selectedBus = myBusLocations.find(
-        (bus) => bus.id === selectedBusId
-      );
-      if (selectedBus) {
-        setSelectedBusLocation({
-          latitude: selectedBus.latitude,
-          longitude: selectedBus.longitude,
-        });
-      }
+      fetchBusLocation(selectedBusId);
     }
   }, [selectedBusId]);
 
@@ -98,26 +95,19 @@ export default function OwnBusLocation() {
       ) : (
         location && (
           <View style={StyleSheet.absoluteFillObject}>
-            <Picker
-              selectedValue={selectedBusId}
-              onValueChange={(itemValue: any) => setSelectedBusId(itemValue)}
-              style={{
-                position: "absolute",
-                zIndex: 2,
-                height: 20,
-                width: 200,
-                backgroundColor: "#fffd",
-                margin: 12,
+             <Dropdown
+              style={styles.inputDropdown}
+              placeholderStyle={[{ color: "gray" }]}
+              data={dropdownData}
+              labelField={"label"}
+              valueField={"value"}
+              placeholder="Select a bus"
+              value={selectedBusId ? selectedBusId : null} // Show regNo when selected
+              onChange={(item) => {
+                setSelectedBusId(item.value); // Update selected bus id
               }}
-            >
-              {myBusLocations.map((bus) => (
-                <Picker.Item
-                  key={bus.id}
-                  label={myBuses.find((myBus) => myBus.id === bus.id)?.regNo}
-                  value={bus.id}
-                />
-              ))}
-            </Picker>
+            />
+           
             <MapView
               style={StyleSheet.absoluteFillObject}
               initialRegion={{
@@ -138,12 +128,11 @@ export default function OwnBusLocation() {
               }
               showsUserLocation
             >
-              {myBusLocations.map((bus) => (
+              {selectedBusLocation && (
                 <Marker
-                  key={bus.id}
                   coordinate={{
-                    latitude: bus.latitude,
-                    longitude: bus.longitude,
+                    latitude: selectedBusLocation.latitude,
+                    longitude: selectedBusLocation.longitude,
                   }}
                   pinColor="blue"
                 >
@@ -152,7 +141,7 @@ export default function OwnBusLocation() {
                     style={{ width: 50, height: 50 }}
                   />
                 </Marker>
-              ))}
+              )}
             </MapView>
           </View>
         )
@@ -166,5 +155,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  }, inputDropdown: {
+    width: 300,
+    color: "#333",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    marginBottom: 10,
+    backgroundColor: "#fff",
+    elevation: 3,
+    zIndex: 2,
+    margin: 12
   },
 });

@@ -1,138 +1,177 @@
+import { ScrollView } from "react-native-gesture-handler";
+import React, { useEffect, useState } from "react";
+import { Alert, StyleSheet, useColorScheme, View } from "react-native";
+import axios from "axios";
+
+import { useAppContext } from "@/context/AppContext";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { Href, router } from "expo-router";
-import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from "react-native";
-import { useAppContext } from "@/context/AppContext";
-import MyBusView from "@/components/UIComponents/MyBusView";
-import axios from "axios";
-import { AirbnbRating } from "react-native-ratings";
-import { ScrollView } from "react-native-gesture-handler";
-
-interface Bus {
-  id: string;
-  regNo: string;
-  service: string;
-  seats: number;
-  rides: number;
-  ridesIncrement: number;
-  earning: number;
-  earningIncrement: number;
-  rating: number;
-  insuranceExp: string;
-  VRL_Exp: string;
-}
+import StarRating from "@/components/UIComponents/StarRating";
+import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
+import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
 
 export default function Buses() {
-  const { myBuses } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const [buses, setBuses] = useState<Bus[]>([]);
-  const [loading, setLoading] = useState(false);
   const { baseURL, id } = useAppContext();
+  const theme = useColorScheme() ?? "light";
+  const { myBuses, setMyBuses } = useAppContext();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function openAddBusForm() {
-    router.navigate("/modals/addBusModal" as Href<string>);
-  }
-
-  useEffect(() => {
-    fetchBuses();
-  }, []);
+  //================================================ Backend Calls ===============================================//
 
   const fetchBuses = async () => {
+    setError("");
     setLoading(true);
     try {
       const response = await axios.post(`${baseURL}/bus/mybuses`, { id });
       console.log(response.data);
-      setBuses(response.data);
+      setMyBuses(response.data);
     } catch (error) {
-      console.error("Error fetching buses:", error);
-      Alert.alert("Error", "Failed to retrieve bus data!");
+      console.error("Error fetching myBuses:", error);
+      setError(String(error));
+      Alert.alert("Error", "Failed to fetch bus data");
     } finally {
       setLoading(false);
     }
   };
 
+  //================================================ Use Effects ===============================================//
+
+  // Fetch owned buses' details on component mount
+  useEffect(() => {
+    fetchBuses();
+  }, []);
+
+  //================================================ UI Control ===============================================//
+
   if (loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator
-          size="large"
-          color={theme == "dark" ? "#ddd" : "#555"}
-        />
-        <ThemedText>Loading bus details...</ThemedText>
-      </View>
-    );
+    return <LoadingScreen />;
+  }
+
+  if (error !== "" && !loading) {
+    return <ErrorScreen error={error} retry={fetchBuses} />;
   }
 
   return (
     <ScrollView>
       <ThemedView style={styles.mainBody}>
-        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-          <Pressable
-            style={[styles.addButton, { backgroundColor: "#19e" }]}
-            onPress={openAddBusForm}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-around",
-                gap: 10,
-              }}
-            >
-              <FontAwesomeIcon
-                icon={faPlus}
-                size={25}
-                color={theme === "dark" ? "#fff" : "#fff"}
-                style={{ alignSelf: "center" }}
-              />
-              <ThemedText type="s4" lightColor={"#fff"} darkColor={"#fff"}>
-                Add
-              </ThemedText>
-            </View>
-          </Pressable>
-        </View>
-        {buses.length > 0 ? (
-          buses.map((bus) => (
+        {myBuses.length > 0 ? (
+          myBuses.map((bus) => (
             <View
               key={bus.regNo}
-              style={{ margin: 10, backgroundColor: "#0005" }}
+              style={{
+                marginBottom: 15,
+                borderRadius: 10,
+                backgroundColor: theme === "dark" ? "#555" : "#fff",
+                elevation: 5,
+              }}
             >
-              <ThemedText>
-                Bus: {bus.regNo} ({bus.service})
-              </ThemedText>
-              <ThemedText>Seats: {bus.seats}</ThemedText>
-              <ThemedText>
-                Rides: {bus.rides} ({bus.ridesIncrement >= 0 ? "+" : ""}
-                {bus.ridesIncrement}%)
-              </ThemedText>
-              <ThemedText>
-                Earnings: Rs. {bus.earning.toFixed(2)} (
-                {bus.earningIncrement >= 0 ? "+" : ""}
-                {bus.earningIncrement}%)
-              </ThemedText>
-              <AirbnbRating
-                count={5}
-                defaultRating={bus.rating}
-                size={20}
-                showRating={false}
-                isDisabled={true}
-              />
-              <ThemedText>Insurance Exp: {bus.insuranceExp}</ThemedText>
-              <ThemedText>VRL Exp: {bus.VRL_Exp}</ThemedText>
+              <View
+                style={{
+                  backgroundColor: "#966",
+                  borderTopLeftRadius: 10,
+                  borderTopRightRadius: 10,
+                  paddingVertical: 5,
+                  paddingHorizontal: 10,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <View>
+                  <ThemedText type="h5" lightColor="#fff" darkColor="#fff">
+                    {bus.regNo}
+                  </ThemedText>
+                  <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                    {bus.service}
+                  </ThemedText>
+                  <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                    {bus.seats} Seats
+                  </ThemedText>
+                </View>
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 10,
+                    alignItems: "center",
+                  }}
+                >
+                  <StarRating rating={bus.rating} />
+                  <ThemedText type="h5" lightColor="#eee" darkColor="#eee">
+                    {bus.rating}
+                  </ThemedText>
+                </View>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                  marginBottom: 10,
+                  paddingTop: 10,
+                }}
+              >
+                <View style={{ alignItems: "center" }}>
+                  <ThemedText type="h5">Rides</ThemedText>
+                  <ThemedText type="h6" lightColor="#888" darkColor="#ccc">
+                    {bus.rides}
+                  </ThemedText>
+                  <ThemedText
+                    type="h6"
+                    lightColor={bus.ridesIncrement >= 0 ? "#2fbf0f" : "#ff2f0f"}
+                    darkColor={bus.ridesIncrement >= 0 ? "#2fff5f" : "#ff500f"}
+                  >
+                    {bus.ridesIncrement >= 0 ? "+" : ""}
+                    {bus.ridesIncrement}%
+                  </ThemedText>
+                </View>
+                <View style={{ alignItems: "center" }}>
+                  <ThemedText type="h5">Earnings</ThemedText>
+                  <ThemedText type="h6" lightColor="#888" darkColor="#ccc">
+                    LKR. {bus.earning.toFixed(2)}
+                  </ThemedText>
+                  <ThemedText
+                    type="h6"
+                    lightColor={
+                      bus.earningIncrement >= 0 ? "#2fbf0f" : "#ff2f0f"
+                    }
+                    darkColor={
+                      bus.earningIncrement >= 0 ? "#2fff5f" : "#ff500f"
+                    }
+                  >
+                    {bus.earningIncrement >= 0 ? "+" : ""}
+                    {bus.earningIncrement}%
+                  </ThemedText>
+                </View>
+              </View>
+              <View style={{ padding: 10 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 5,
+                  }}
+                >
+                  <ThemedText type="h6">Insurance Exp:</ThemedText>
+                  <ThemedText type="h6" lightColor="#888" darkColor="#ccc">
+                    {bus.insuranceExp}
+                  </ThemedText>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 5,
+                  }}
+                >
+                  <ThemedText type="h6">VRL Exp:</ThemedText>
+                  <ThemedText type="h6" lightColor="#888" darkColor="#ccc">
+                    {bus.VRL_Exp}
+                  </ThemedText>
+                </View>
+              </View>
             </View>
           ))
         ) : (
-          <ThemedText>No buses found</ThemedText>
+          <ThemedText>No myBuses found</ThemedText>
         )}
       </ThemedView>
     </ScrollView>
@@ -155,7 +194,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 10,
-    backgroundColor: "#aac4",
+    backgroundColor: "#aaf",
   },
   addButton: {
     alignItems: "center",
@@ -175,10 +214,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  stars: {
-    backgroundColor: "#55a",
-    borderRadius: 10,
-    color: "#ddd",
   },
 });

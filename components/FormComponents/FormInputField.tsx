@@ -1,4 +1,10 @@
-import React, { Dispatch, RefObject, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import {
   TextInput,
   StyleSheet,
@@ -49,6 +55,8 @@ type InputProps = {
   maxLength?: number;
   placeholder?: string;
   nextFocus?: RefObject<TextInput>;
+  multiline?: boolean;
+  numberOfLines?: number;
 };
 
 export const FormInput = React.forwardRef<TextInput, InputProps>(
@@ -65,6 +73,8 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
       validation = defaultValidation,
       maxLength = 125,
       placeholder = "",
+      multiline = false,
+      numberOfLines = 1,
     },
     ref
   ) => {
@@ -81,9 +91,13 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
             styles.inputField,
             error && { borderColor: "red" },
             theme === "dark" && { backgroundColor: "#444", color: "#fff" },
+            multiline && { height: numberOfLines * 40 },
           ]}
           value={input}
+          multiline={multiline}
+          numberOfLines={numberOfLines}
           maxLength={maxLength}
+          textAlignVertical={'top'}
           keyboardType={keyboardType}
           placeholder={placeholder}
           placeholderTextColor={theme === "dark" ? "#bbb" : "gray"}
@@ -199,7 +213,7 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
 
     const updateSearch = (text: string) => {
       setInput(text);
-      
+
       if (text === "") {
         setFilteredData([]);
       } else {
@@ -212,13 +226,11 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
         );
       }
     };
-    
 
     const selectResult = (input: string) => {
       setInput(input);
       setFilteredData([]);
     };
-
 
     return (
       <View style={{ zIndex: layer, position: "relative" }}>
@@ -263,12 +275,16 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
                 },
               ]}
             >
-              <Pressable style={{flexDirection: 'row'}} onPress={() => selectResult(item)}>
+              <Pressable
+                style={{ flexDirection: "row" }}
+                onPress={() => selectResult(item)}
+              >
                 <ThemedText type="s5" lightColor="#000" darkColor="#fff">
                   {item.split(",")[0]?.trim()}
                 </ThemedText>
                 <ThemedText lightColor="#aaa" darkColor="#fff">
-                  {', '+item.split(",")[1].trim()}{', '+item.split(",")[2]?.trim()}
+                  {", " + item.split(",")[1].trim()}
+                  {", " + item.split(",")[2]?.trim()}
                 </ThemedText>
               </Pressable>
             </ThemedView>

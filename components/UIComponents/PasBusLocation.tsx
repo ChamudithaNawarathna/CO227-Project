@@ -26,9 +26,7 @@ type Bus = {
 };
 
 export default function PasBusLocation() {
-  const googleMapsApiKey =
-    Constants.expoConfig?.android?.config?.googleMaps?.apiKey ||
-    Constants.expoConfig?.ios?.config?.googleMapsApiKey;
+  const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY
   const { baseURL, myTickets } = useAppContext();
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -148,31 +146,11 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
               labelField={"label"}
               valueField={"value"}
               placeholder="Select a bus"
-              value={selectedBus ? selectedBus.regNo : null} // Show regNo when selected
+              value={selectedBus ? selectedBus.regNo : null}
               onChange={(item) => {
-                setSelectedBus(item.value); // Update selected bus with the Bus object
+                setSelectedBus(item.value); 
               }}
             />
-            {/* <Picker
-              selectedValue={selectedBus}
-              onValueChange={(itemValue: any) => setSelectedBus(itemValue)}
-              style={{
-                position: "absolute",
-                zIndex: 2,
-                height: 20,
-                width: 200,
-                backgroundColor: "#fffd",
-                margin: 12,
-              }}
-            >
-              {availableBuses.map((ticket, index) => (
-                <Picker.Item
-                  key={index}
-                  label={`${ticket.vehicalNo} - ${ticket.route}`}
-                  value={ticket.vehicalNo}
-                />
-              ))}
-            </Picker> */}
             <MapView
               style={StyleSheet.absoluteFillObject}
               initialRegion={{
@@ -203,7 +181,7 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
                       style={{ width: 50, height: 50 }}
                     />
                   </Marker>
-                  {googleMapsApiKey && (
+                  {GOOGLE_MAPS_API_KEY && (
                     <MapViewDirections
                       origin={{
                         latitude: location.coords.latitude,
@@ -213,7 +191,7 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
                         latitude: busLocation.latitude,
                         longitude: busLocation.longitude,
                       }}
-                      apikey={googleMapsApiKey}
+                      apikey={GOOGLE_MAPS_API_KEY}
                       strokeWidth={6}
                       strokeColor="#d17"
                       onError={(errorMessage) => {

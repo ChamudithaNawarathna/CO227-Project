@@ -1,56 +1,36 @@
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import {
-  faLocationDot,
-  faLocationCrosshairs,
-} from "@fortawesome/free-solid-svg-icons";
-import { Href, router } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import React from "react";
+import * as FileSystem from "expo-file-system";
 import {
   ActivityIndicator,
   Alert,
-  Button,
   FlatList,
-  ScrollView,
   StyleSheet,
   TextInput,
   View,
   Text,
   Pressable,
 } from "react-native";
-import { useEffect, useRef, useState } from "react";
+import {
+  faLocationDot,
+  faLocationCrosshairs,
+} from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import axios from "axios";
+
+import { useAppContext } from "@/context/AppContext";
+import { ThemedText } from "@/components/CommonModules/ThemedText";
 import {
   DateTimeInputSquare,
   BusStopSearchInput,
 } from "@/components/FormComponents/FormInputField";
-import React from "react";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
-import { useAppContext } from "@/context/AppContext";
-import BusView from "@/components/UIComponents/BusView";
-import axios from "axios";
-import * as FileSystem from "expo-file-system";
 import SeatsModal from "@/app/modals/seatsModal";
 import { DateToString } from "@/components/CommonModules/DateTimeToString";
-
-interface TicketData {
-  userID: number;
-  issuedDate: string;
-  issuedTime: string;
-  date: string;
-  aproxDepT: string;
-  aproxAriT: string;
-  from: { id: number };
-  to: { id: number };
-  journey: number;
-  half: number;
-  full: number;
-  unitPrice: number;
-  totalPrice: number;
-  seatNos: string[];
-  scheduleId: number;
-  discount: number;
-}
+import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
 
 interface Schedule {
   id: string;
@@ -84,74 +64,31 @@ type BusStopIDs = {
 };
 
 export default function Tickets() {
-  const { baseURL} = useAppContext();
+  const { baseURL } = useAppContext();
   const iconSize = 20;
+  const folderUri = FileSystem.documentDirectory + "docs";
+  const fileUri = folderUri + "/busStops.json";
   const [displaySeatsModel, setDisplaySeatsModel] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-
   const [date, setDate] = useState(new Date());
   const [openDate, setOpenDate] = useState(false);
-
-  const inputRefs = useRef(
-    Array.from({ length: 2 }, () => React.createRef<TextInput>())
-  );
-
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule>();
   const [busStops, setBusStops] = useState<BusStop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const folderUri = FileSystem.documentDirectory + "docs";
-  const fileUri = folderUri + "/busStops.json";
+  const [error, setError] = useState<string>("");
   const [busStopIDs, setBusStopIDs] = useState<BusStopIDs>({
     fromID: "",
     toID: "",
   });
+  const inputRefs = useRef(
+    Array.from({ length: 2 }, () => React.createRef<TextInput>())
+  );
 
-  const TicketBookingScreen = () => {
-    const [ticketData, setTicketData] = useState<TicketData>({
-      userID: 1, // Replace with actual user ID
-      issuedDate: "",
-      issuedTime: "",
-      date: "",
-      aproxDepT: "",
-      aproxAriT: "",
-      from: { id: 0 },
-      to: { id: 0 },
-      journey: 0,
-      half: 0,
-      full: 0,
-      unitPrice: 0,
-      totalPrice: 0,
-      seatNos: [],
-      scheduleId: 0,
-      discount: 0,
-    });
+  //================================================ Functions ===============================================//
 
-    const handleInputChange = (field: keyof TicketData, value: any) => {
-      setTicketData((prevState) => ({
-        ...prevState,
-        [field]: value,
-      }));
-    };
-
-    const handleSubmit = async () => {
-      try {
-        const response = await axios.post(`${baseURL}/tickets/tkt3`, {
-          data: ticketData,
-        });
-        if (response.data === "success") {
-          Alert.alert("Success", "Ticket booked successfully!");
-        } else if (response.data === "insufficient") {
-          Alert.alert("Error", "Insufficient credits for booking.");
-        }
-      } catch (error) {
-        Alert.alert("Error", "Failed to book ticket.");
-      }
-    };
-  };
-
+  // Find bus stop ID of a given two bus stops
   const findBusStopID = async (from: string, to: string) => {
     try {
       const fileContent = await FileSystem.readAsStringAsync(fileUri, {
@@ -184,63 +121,20 @@ export default function Tickets() {
     }
   };
 
-  const fetchSchedules = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      await findBusStopID(from, to);
-      const response = await axios.post(`${baseURL}/schedule/sdl1`, {
-        data: {
-          from: busStopIDs?.fromID,
-          to: busStopIDs?.toID,
-          date: date.toISOString().split("T")[0], // format date as YYYY-MM-DD
-        },
-      });
-
-      setSchedules(response.data);
-      setLoading(false);
-    } catch (error) {
-      setError("Failed to load schedules. Please try again.");
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = () => {
-    if (!from || !to || !date) {
-      Alert.alert(
-        "Error",
-        "Please choose 'from' and 'to' locations and the date."
-      );
-      return;
-    }
-    fetchSchedules();
-  };
-
-  const fetchBusStops = async () => {
-    try {
-      const response = await axios.get(`${baseURL}/busstops/names`);
-      setBusStops(response.data);
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to load bus stop names.");
-      setLoading(false);
-    }
-  };
-
+  // Save fetched bus stops in a JSON file
   const saveToFile = async () => {
     try {
-      // Step 1: Check if the 'docs' folder exists, if not, create it
+      // Check if the 'docs' folder exists, if not, create it
       const folderInfo = await FileSystem.getInfoAsync(folderUri);
       if (!folderInfo.exists) {
         await FileSystem.makeDirectoryAsync(folderUri, { intermediates: true });
         console.log("Docs folder created");
       }
 
-      // Step 2: Convert bus stop data to JSON string
+      // Convert bus stop data to JSON string
       const jsonString = JSON.stringify(busStops, null, 2);
 
-      // Step 3: Write the JSON string to a file inside the 'docs' folder
+      // Write the JSON string to a file inside the 'docs' folder
       await FileSystem.writeAsStringAsync(fileUri, jsonString, {
         encoding: FileSystem.EncodingType.UTF8,
       });
@@ -253,24 +147,93 @@ export default function Tickets() {
     }
   };
 
+  // Fetch bus schedules if the inputs are given
+  const handleSearch = () => {
+    if (!from || !to || !date) {
+      Alert.alert(
+        "Error",
+        "Please choose 'from' and 'to' locations and the date."
+      );
+      return;
+    }
+    fetchSchedules();
+  };
+
+  // Display seat layout to choose seat(s)
   const pressBuy = (schedule: Schedule) => {
     setSelectedSchedule(schedule);
     setDisplaySeatsModel(true);
   };
 
-  // Log the updated busStops after they are set
+  //================================================ Backend Calls ===============================================//
+
+  // Fetch bus schedules that satisfy input conditions
+  const fetchSchedules = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      await findBusStopID(from, to);
+      const response = await axios.post(`${baseURL}/schedule/sdl1`, {
+        data: {
+          from: busStopIDs?.fromID,
+          to: busStopIDs?.toID,
+          date: date.toISOString().split("T")[0],
+        },
+      });
+
+      setSchedules(response.data);
+    } catch (error) {
+      console.error("Error fetching bus schedules:", error);
+      setError(String(error));
+      Alert.alert("Error", "Failed to fetch bus schedule data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch bus stops
+  const fetchBusStops = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await axios.get(`${baseURL}/busstops/names`);
+      setBusStops(response.data);
+    } catch (err) {
+      console.error("Error fetching bus stops:", error);
+      setError(String(error));
+      Alert.alert("Error", "Failed to fetch bus stop data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //================================================ Use Effects ===============================================//
+
+  // Save the busStops in a file when busStops updates
   useEffect(() => {
     if (busStops.length > 0) {
       saveToFile();
     }
   }, [busStops]);
 
-  // Fetch the bus stops
+  // Fetch the bus stop names on component mount
   useEffect(() => {
     if (busStops.length == 0) {
       fetchBusStops();
     }
   }, []);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (error !== "" && !loading) {
+    return <ErrorScreen error={error} retry={fetchBusStops} />;
+  }
+
+  //================================================ UI Control ===============================================//
 
   return (
     <View style={styles.mainBody}>
@@ -328,7 +291,7 @@ export default function Tickets() {
           borderRadius: 10,
           paddingVertical: 10,
           marginVertical: 7,
-          marginHorizontal: 7
+          marginHorizontal: 7,
         }}
       >
         <ThemedText type="h5" lightColor="#fff">
