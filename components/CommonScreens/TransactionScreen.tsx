@@ -35,6 +35,7 @@ export default function TransactionScreen() {
   const fetchTransactionHistory = async () => {
     setLoading(true);
     setError("");
+    setTransactions([]); // Reset transactions before fetching
 
     try {
       const response = await axios.get(`${baseURL}/transactions/trans1`, {
@@ -42,13 +43,34 @@ export default function TransactionScreen() {
           data: id,
         },
       });
+
       if (response.status === 200) {
-        setTransactions(response.data.transaction);
+        // Set transactions only if available
+        if (response.data.transaction && response.data.transaction.length > 0) {
+          setTransactions(response.data.transaction);
+        } else {
+          setTransactions([]); // No transactions available
+        }
       }
-    } catch (error) {
-      console.error("Error fetching transaction history:", error);
-      setError(String(error));
-      Alert.alert("Error", "Failed to fetch transaction history");
+    } catch (error: unknown) {
+      // Explicitly type the error
+      if (axios.isAxiosError(error)) {
+        // Handle specific Axios errors
+        if (error.response && error.response.status === 404) {
+          // Handle "no transactions" case
+          setTransactions([]); // Ensure empty state is handled in UI
+        } else {
+          // Handle other Axios errors (like network issues)
+          console.error("Error fetching transaction history:", error);
+          setError("Failed to fetch transaction history");
+          Alert.alert("Error", "Failed to fetch transaction history");
+        }
+      } else {
+        // Handle non-Axios errors
+        console.error("Unexpected error:", error);
+        setError("Failed to fetch transaction history");
+        Alert.alert("Error", "Failed to fetch transaction history");
+      }
     } finally {
       setLoading(false);
     }
@@ -136,7 +158,11 @@ export default function TransactionScreen() {
             </View>
           ))
         ) : (
-          <ThemedText>No transactions found</ThemedText>
+          <View style={{ flex: 1, alignItems: "center", marginTop: 250 }}>
+            <ThemedText type="h5" lightColor="#777" darkColor="#ddd">
+              No transactions found
+            </ThemedText>
+          </View>
         )}
       </View>
     </ScrollView>

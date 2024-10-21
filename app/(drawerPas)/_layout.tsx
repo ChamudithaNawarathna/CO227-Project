@@ -2,12 +2,11 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
 import { Drawer } from "expo-router/drawer";
-import React from "react";
+import React, { useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import CustomDrawerContent from "@/components/CustomDrawerContent";
@@ -15,28 +14,22 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBars,
   faBell,
-  faBusAlt,
-  faChartLine,
   faCircleDollarToSlot,
   faClockRotateLeft,
-  faCog,
-  faDollarSign,
   faHome,
   faInfoCircle,
   faMoneyBillTransfer,
-  faTable,
-  faThumbsUp,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { color } from "react-native-elements/dist/helpers";
-import { AppContext, AppProvider } from "@/context/AppContext";
+import MessageModal from "../modals/messageModal";
 
 export default function DrawerLayout() {
   const navigation = useNavigation();
   const theme = useColorScheme() ?? "light";
   const iconSize = 24;
+  const [displayMessageModal, setDisplayMessageModal] = useState(false);
 
   return (
     <GestureHandlerRootView>
@@ -94,7 +87,7 @@ export default function DrawerLayout() {
             </Pressable>
           ),
           headerRight: () => (
-            <View style={{flexDirection: 'row'}}>
+            <View style={{ flexDirection: "row" }}>
               <Pressable
                 style={{
                   backgroundColor: "transparent",
@@ -102,7 +95,7 @@ export default function DrawerLayout() {
                   paddingHorizontal: 10,
                   paddingVertical: 5,
                 }}
-                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                onPress={() => setDisplayMessageModal(!displayMessageModal)}
               >
                 <FontAwesomeIcon
                   icon={faBell}
@@ -110,6 +103,10 @@ export default function DrawerLayout() {
                   color={theme === "dark" ? "#fff" : "#fff"}
                 />
               </Pressable>
+              <MessageModal
+                isVisible={displayMessageModal}
+                onClose={() => setDisplayMessageModal(false)}
+              />
             </View>
           ),
         }}

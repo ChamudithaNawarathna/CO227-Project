@@ -29,7 +29,6 @@ export default function CustomDropdown({
   data,
   onSelect,
 }: CustomDropdownProps) {
-const { fName, lName, accountType, setAccountType } = useAppContext();
   const [visible, setVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<DateType>({
     label: "",

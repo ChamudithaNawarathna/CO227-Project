@@ -18,15 +18,17 @@ import { LogInFormPage1 } from "@/components/FormComponents/LoginForm";
 import { OTPPage } from "@/components/FormComponents/OTPPage";
 
 var formPageCount = 2;
-const formPageWidth = 300;
+const formPageWidth = 320;
 
 export default function LogIn() {
   const {
     baseURL,
     phoneNo,
     email,
-    myAccTypes,
-    occupation,
+    operatorAcc,
+    setOperatorAcc,
+    ownerAcc,
+    setOwnerAcc,
     setID,
     setFName,
     setLName,
@@ -40,6 +42,8 @@ export default function LogIn() {
     setNTCLicenseNo,
     setDriverLicenseNo,
     setOccupation,
+    setCredits,
+    setDiscount,
   } = useAppContext();
 
   const [otp, setOTP] = useState("");
@@ -56,7 +60,7 @@ export default function LogIn() {
     if (scrollRef.current) {
       if (currentPos === 0 && !otpRequested) {
         // Check the flag before requesting OTP
-        const userInfo = await fetchUserInfo(phoneNo);
+        const userInfo = await fetchUserInfo();
         if (!userInfo) {
           console.error("Failed to retrieve user info, stopping scroll.");
           return; // Stop scrolling if user info retrieval fails
@@ -90,57 +94,59 @@ export default function LogIn() {
 
   // Redirect to the correct dashboard
   function goToDashboard() {
-    if (myAccTypes.get("Owner")) {
-      router.replace("/(drawerOwn)/home/dashboard" as Href<string>);
-    } else if (myAccTypes.get("Operator")) {
-      router.replace("/(drawerOpe)/home/dashboard" as Href<string>);
-    } else {
-      router.replace("/(drawerPas)/home/dashboard" as Href<string>);
-    }
+    router.replace("/(drawerPas)/home/dashboard" as Href<string>);
   }
 
   //================================================ Backend Calls ===============================================//
 
-  // Fetch user data by phone number
-  const fetchUserInfo = async (phoneNumber: string): Promise<any | null> => {
+  // Fetch user data by user ID
+  const fetchUserInfo = async (): Promise<any | null> => {
     try {
-      const response = await axios.post(`${baseURL}/mobileAPI/user/info`, {
-        type: "reqestInfo",
-        data: phoneNumber,
+      const response = await axios.post(`${baseURL}/users/req5`, {
+        data: phoneNo,
       });
 
       if (response.data.error) {
         console.error("Error fetching user info:", response.data.error);
+        Alert.alert("Error", "User not found or an error occurred");
         return null;
-      } else {
-        console.log("User info retrieved successfully:", response.data);
-        const userInfo = response.data;
-
-        setID(userInfo.userID || "");
-        setFName(userInfo.fName || "");
-        setLName(userInfo.lName || "");
-        setPhoneNo(userInfo.mobile || "");
-        setEmail(userInfo.email || "");
-        setNIC(userInfo.nic || "");
-        setAccountNo(userInfo.accNo || "");
-        setAccHolderName(userInfo.accName || "");
-        setBankName(userInfo.bank || "");
-        setBranchName(userInfo.branch || "");
-        setNTCLicenseNo(userInfo.ntc || "");
-        setDriverLicenseNo(userInfo.licence || "");
-        setOccupation(userInfo.empType || "");
-
-        if (occupation != "" && userInfo.userType == "owner") {
-          myAccTypes.set("Owner", true);
-          myAccTypes.set("Operator", true);
-        } else if (userInfo.userType == "employee") {
-          myAccTypes.set("Operator", true);
-        } else {
-          myAccTypes.set("Passenger", true);
-        }
-
-        return userInfo;
       }
+
+      const userInfo = response.data;
+
+      // Check if userInfo exists and has expected fields
+      if (!userInfo || !userInfo.userID) {
+        console.warn("User does not exist or invalid user data returned");
+        Alert.alert("Error", "User does not exist");
+        return null;
+      }
+
+      // Set user info safely using optional chaining in case fields are missing
+      setID(userInfo.userID || "");
+      setFName(userInfo.fName || "");
+      setLName(userInfo.lName || "");
+      setPhoneNo(userInfo.mobile || "");
+      setEmail(userInfo.email || "");
+      setNIC(userInfo.nic || "");
+      setAccountNo(userInfo.accNo || "");
+      setAccHolderName(userInfo.accName || "");
+      setBankName(userInfo.bank || "");
+      setBranchName(userInfo.branch || "");
+      setNTCLicenseNo(userInfo.ntc || "");
+      setDriverLicenseNo(userInfo.licence || "");
+      setOccupation(userInfo.empType || "");
+      setCredits(userInfo.credits || 0);
+      setDiscount(userInfo.discountPercentage || 0);
+
+      // Account type settings
+      if (userInfo.userType === "owner") {
+        setOwnerAcc(true);
+      }
+      if (userInfo.empType || userInfo.empType == "None") {
+        setOperatorAcc(true);
+      }
+
+      return userInfo;
     } catch (error) {
       console.error("Error fetching user data:", error);
       Alert.alert("Error", "Failed to fetch user details");
@@ -170,7 +176,11 @@ export default function LogIn() {
   useEffect(() => {
     if (currentPos == 0) {
       setBackVisible(false);
-    } else if (currentPos == formPageCount * formPageWidth) {
+    } else if (currentPos == (formPageCount - 1) * formPageWidth) {
+      Keyboard.dismiss();
+      setBackVisible(true);
+      setNextVisible(false);
+    } else if (currentPos >= (formPageCount - 1) * formPageWidth) {
       Keyboard.dismiss();
       setBackVisible(false);
       setNextVisible(false);
@@ -256,7 +266,10 @@ export default function LogIn() {
           <ThemedView style={styles.footer}>
             <ThemedText lightColor="#aaa" darkColor="#aaa">
               Don't have an account?{" "}
-              <Link href={"/signup"}>
+              <Link
+                href={"/signup"}
+                onPress={() => router.replace("/login" as Href<string>)}
+              >
                 <ThemedText lightColor="#28b1de" darkColor="#2eccff">
                   Sign Up
                 </ThemedText>

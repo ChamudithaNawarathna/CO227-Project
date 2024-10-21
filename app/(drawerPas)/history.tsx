@@ -72,7 +72,7 @@ const TicketDetailsComponent: React.FC = () => {
 
   // Fetch ticket history on component mount
   useEffect(() => {
-    //fetchTicketHistory();
+    fetchTicketHistory();
   }, []);
 
   //================================================ UI Control ===============================================//
@@ -87,7 +87,6 @@ const TicketDetailsComponent: React.FC = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <ThemedText style={styles.title}>Ticket Details</ThemedText>
       <Pressable
         style={{
           backgroundColor: "green",
@@ -237,7 +236,11 @@ const TicketDetailsComponent: React.FC = () => {
           </View>
         ))
       ) : (
-        <ThemedText>No tickets found</ThemedText>
+        <View style={{ flex: 1, alignItems: "center", marginTop: 250 }}>
+          <ThemedText type="h5" lightColor="#777" darkColor="#ddd">
+            No tickets found
+          </ThemedText>
+        </View>
       )}
     </ScrollView>
   );

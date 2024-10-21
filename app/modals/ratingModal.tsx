@@ -120,6 +120,7 @@ export default function RatingModal({ isVisible, onClose, refNo }: Props) {
           multiline={true}
           numberOfLines={8}
           maxLength={500}
+          textAlignVerticle="top"
           placeholder="Enter comments"
         />
         <Pressable

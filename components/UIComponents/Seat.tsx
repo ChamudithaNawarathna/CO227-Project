@@ -47,7 +47,7 @@ export default function Seat({ index, reserved = false }: SeatProps) {
 
   return (
     <Pressable
-      pointerEvents={accountType === "Passenger" ? "auto" : "none"}
+      pointerEvents={accountType === "passenger" ? "auto" : "none"}
       style={[
         styles.seatButton,
         {

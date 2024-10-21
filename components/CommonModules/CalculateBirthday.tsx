@@ -7,7 +7,7 @@ export default function calculateBirthday(nic: string): string {
     const startDate = new Date(year, 0, 1); // January is month 0 in JavaScript
     // Add the number of days
     const birthday = new Date(startDate);
-    birthday.setDate(startDate.getDate() + days);
+    birthday.setDate(startDate.getDate() + days-1);
 
     return DateToString(birthday);
   }

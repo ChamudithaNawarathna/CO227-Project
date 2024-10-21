@@ -46,7 +46,8 @@ export default function Index() {
           </ThemedText>
           <ThemedText
             style={{ textAlign: "center" }}
-            lightColor="#000a"
+            type="h6"
+            lightColor="#777d"
             darkColor="#fffa"
           >
             Experience the convenience of instant ticket booking with our quick

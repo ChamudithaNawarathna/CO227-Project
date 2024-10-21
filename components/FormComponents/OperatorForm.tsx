@@ -22,6 +22,8 @@ import React from "react";
 
 /********************************************************** Personal Info Page ***********************************************************/
 
+const formPageWidth = 320;
+
 export const OperatorFormPage1 = ({
   fname,
   setFName,
@@ -43,7 +45,7 @@ export const OperatorFormPage1 = ({
   const [nicError, setNICError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const inputRefs = useRef(
-    Array.from({ length: 4 }, () => React.createRef<TextInput>())
+    Array.from({ length: 5 }, () => React.createRef<TextInput>())
   );
 
   // Make "Next" button visible
@@ -68,7 +70,7 @@ export const OperatorFormPage1 = ({
 
   // Make "Back" button visible
   useEffect(() => {
-    if (currentPos == 300) {
+    if (currentPos == formPageWidth) {
       setBackVisible(true);
     }
   }, [currentPos]);
@@ -194,7 +196,7 @@ export const OperatorFormPage2 = ({
 
   // Make "Back" button visible
   useEffect(() => {
-    if (currentPos == 600) {
+    if (currentPos == formPageWidth * 2) {
       setBackVisible(true);
     }
   }, [currentPos]);
@@ -271,7 +273,7 @@ export const OperatorFormPage3 = ({
 
   // Make "Back" button visible and hide "Next" button
   useEffect(() => {
-    if (currentPos == 900) {
+    if (currentPos == formPageWidth * 3) {
       sendOTP();
       setBackVisible(true);
       setNextVisible(false);

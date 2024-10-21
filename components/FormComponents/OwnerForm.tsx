@@ -23,6 +23,8 @@ import React from "react";
 
 /********************************************************** Personal Info Page ***********************************************************/
 
+const formPageWidth = 320;
+
 export const OwnerFormPage1 = ({
   fname,
   setFName,
@@ -44,7 +46,7 @@ export const OwnerFormPage1 = ({
   const [nicError, setNICError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const inputRefs = useRef(
-    Array.from({ length: 4 }, () => React.createRef<TextInput>())
+    Array.from({ length: 5 }, () => React.createRef<TextInput>())
   );
 
   // Make "Next" button visible
@@ -69,7 +71,7 @@ export const OwnerFormPage1 = ({
 
   // Make "Back" button visible
   useEffect(() => {
-    if (currentPos == 300) {
+    if (currentPos == formPageWidth) {
       setBackVisible(true);
     }
   }, [currentPos]);
@@ -188,7 +190,7 @@ export const OwnerFormPage2 = ({
 
   // Make "Back" button visible
   useEffect(() => {
-    if (currentPos == 600) {
+    if (currentPos == formPageWidth * 2) {
       setBackVisible(true);
     }
   }, [currentPos]);
@@ -230,7 +232,7 @@ export const OwnerFormPage2 = ({
         error={bankNameError}
         setError={setBankNameError}
         errorMessage={"Invalid bank name"}
-        validation={validateName}
+        validation={validateBankName}
         maxLength={256}
         placeholder="Bank name"
       />
@@ -242,7 +244,7 @@ export const OwnerFormPage2 = ({
         error={branchNameError}
         setError={setBranchNameError}
         errorMessage={"Invalid branch name"}
-        validation={validateName}
+        validation={validateBranchName}
         maxLength={256}
         placeholder="Branch name"
       />
@@ -267,7 +269,7 @@ export const OwnerFormPage3 = ({
 
   // Make "Back" button visible and hide "Next" button
   useEffect(() => {
-    if (currentPos == 900) {
+    if (currentPos == formPageWidth * 3) {
       sendOTP();
       setBackVisible(true);
       setNextVisible(false);

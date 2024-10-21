@@ -57,6 +57,7 @@ type InputProps = {
   nextFocus?: RefObject<TextInput>;
   multiline?: boolean;
   numberOfLines?: number;
+  textAlignVerticle?: string;
 };
 
 export const FormInput = React.forwardRef<TextInput, InputProps>(
@@ -75,6 +76,7 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
       placeholder = "",
       multiline = false,
       numberOfLines = 1,
+      textAlignVerticle = "center",
     },
     ref
   ) => {
@@ -97,7 +99,14 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
           multiline={multiline}
           numberOfLines={numberOfLines}
           maxLength={maxLength}
-          textAlignVertical={'top'}
+          textAlignVertical={
+            textAlignVerticle as
+              | "center"
+              | "auto"
+              | "top"
+              | "bottom"
+              | undefined
+          }
           keyboardType={keyboardType}
           placeholder={placeholder}
           placeholderTextColor={theme === "dark" ? "#bbb" : "gray"}
@@ -137,7 +146,7 @@ export const FormDropdown = ({
   const theme = useColorScheme() ?? "light";
   return (
     <View>
-      <ThemedText lightColor="#777" darkColor="#777">
+      <ThemedText lightColor="#777" darkColor="#eee">
         {title}
       </ThemedText>
       <ThemedView
@@ -148,7 +157,7 @@ export const FormDropdown = ({
           style={styles.inputDropdown}
           placeholderStyle={[
             { color: "gray" },
-            theme === "dark" && { color: "#444" },
+            theme === "dark" && { backgroundColor: "#444" },
           ]}
           data={dataList}
           labelField="label"
@@ -421,7 +430,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     backgroundColor: "#fff",
-    elevation: 3,
+    elevation: 5,
   },
   searchInputContainer: {
     flexDirection: "row",

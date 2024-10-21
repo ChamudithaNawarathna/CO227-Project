@@ -19,43 +19,96 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { accountType, useAppContext } from "@/context/AppContext";
 import { Dropdown } from "react-native-element-dropdown";
 import { Owner } from "@/controller/Owner";
+import { useState } from "react";
+import OwnSignupModal from "@/app/modals/ownSignupModal";
+import OpeSignupModal from "@/app/modals/opeSignupModal";
 
 export default function CustomDrawerContent(props: any) {
-  const { myAccTypes, profileImage } = useAppContext();
+  const {
+    baseURL,
+operatorAcc, ownerAcc,
+    profileImage,
+    accountType,
+    fName,
+    lName,
+    phoneNo,
+    email,
+    nic,
+    accountNo,
+    accHolderName,
+    bankName,
+    branchName,
+    ntcLicenseNo,
+    driverLicenseNo,
+    occupation,
+    setOperatorAcc, setOwnerAcc,
+    setAccountType,
+    setFName,
+    setLName,
+    setPhoneNo,
+    setEmail,
+    setNIC,
+    setAccountNo,
+    setAccHolderName,
+    setBankName,
+    setBranchName,
+    setNTCLicenseNo,
+    setDriverLicenseNo,
+    setOccupation,
+    setCredits
+  } = useAppContext();
   const theme = useColorScheme() ?? "light";
   const iconColor = theme === "dark" ? "#eee" : "#777";
   const iconSize = 24;
-  const router = useRouter();
-  const { fName, lName, accountType, setAccountType } = useAppContext();
   const dataList = [
-    { label: "Passenger Account", value: "Passenger" as accountType },
-    { label: "Bus Operator Account", value: "Operator" as accountType },
-    { label: "Bus Owner Account", value: "Owner" as accountType },
+    { label: "Passenger Account", value: "passenger" as accountType },
+    { label: "Bus Operator Account", value: "employee" as accountType },
+    { label: "Bus Owner Account", value: "owner" as accountType },
   ];
+  const router = useRouter();
+  const [displayOwnSignupModal, setOwnSignupModal] = useState(false);
+  const [displayOpeSignupModal, setOpeSignupModal] = useState(false);
 
   function changeAccount(accType: accountType) {
     switch (accType) {
-      case "Passenger":
+      case "passenger":
         setAccountType(accType);
         router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
         return null;
-      case "Operator":
-        if (myAccTypes.get(accType) == true) {
+      case "employee":
+        if (operatorAcc) {
           setAccountType(accType);
           router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
         } else {
-          router.navigate("/modals/opeSignupModal" as Href<string>);
+          setOpeSignupModal(true);
         }
         return null;
-      case "Owner":
-        if (myAccTypes.get(accType) == true) {
+      case "owner":
+        if (ownerAcc) {
           setAccountType(accType);
           router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
         } else {
-          router.navigate("/modals/ownSignupModal" as Href<string>);
+          setOwnSignupModal(true);
         }
         return null;
     }
+  }
+
+  function pressLogout () {
+    setFName("");
+    setLName("");
+    setPhoneNo("");
+    setEmail("");
+    setNIC("");
+    setAccountNo("");
+    setAccHolderName("");
+    setBankName("");
+    setBranchName("");
+    setNTCLicenseNo("");
+    setDriverLicenseNo("");
+    setOccupation("");
+    setCredits(0);
+    router.replace("/")
   }
 
   return (
@@ -96,7 +149,11 @@ export default function CustomDrawerContent(props: any) {
           onChange={(item) => {
             changeAccount(item.value);
           }}
-          itemContainerStyle={{ backgroundColor: "#d17", margin: -1, borderWidth: 0 }}
+          itemContainerStyle={{
+            backgroundColor: "#d17",
+            margin: -1,
+            borderWidth: 0,
+          }}
           activeColor="#d17"
           itemTextStyle={{ color: "#fff", textAlign: "center" }}
           iconColor="#fff"
@@ -118,10 +175,18 @@ export default function CustomDrawerContent(props: any) {
                 color={iconColor}
               />
             )}
-            onPress={() => router.replace("/")}
+            onPress={pressLogout}
           />
         </View>
       </DrawerContentScrollView>
+      <OwnSignupModal
+        isVisible={displayOwnSignupModal}
+        onClose={() => setOwnSignupModal(false)}
+      />
+      <OpeSignupModal
+        isVisible={displayOpeSignupModal}
+        onClose={() => setOpeSignupModal(false)}
+      />
     </View>
   );
 }

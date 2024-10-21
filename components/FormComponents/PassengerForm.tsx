@@ -1,4 +1,4 @@
-import { Pressable } from "react-native";
+import { Alert, Pressable } from "react-native";
 import { useState, useEffect, useRef } from "react";
 import {
   GestureHandlerRootView,
@@ -19,6 +19,9 @@ import { FormInput } from "./FormInputField";
 import React from "react";
 
 /********************************************************** Personal Info Page ***********************************************************/
+
+
+const formPageWidth = 320;
 
 export const PassengerFormPage1 = ({
   fname,
@@ -61,7 +64,7 @@ export const PassengerFormPage1 = ({
 
   // Make "Back" button visible
   useEffect(() => {
-    if (currentPos == 300) {
+    if (currentPos == formPageWidth) {
       setBackVisible(true);
     }
   }, [currentPos]);
@@ -103,7 +106,7 @@ export const PassengerFormPage1 = ({
         error={phoneNoError}
         setError={setPhoneNoError}
         errorMessage={"Invalid phone number"}
-        keyboardType={"number-pad"}
+        keyboardType="number-pad"
         validation={validatePhoneNo}
         maxLength={10}
         placeholder="Phone number"
@@ -141,7 +144,7 @@ export const PassengerFormPage2 = ({
 
   // Make "Back" button visible and hide "Next" button
   useEffect(() => {
-    if (currentPos == 600) {
+    if (currentPos == formPageWidth * 2) {
       sendOTP();
       setBackVisible(true);
       setNextVisible(false);

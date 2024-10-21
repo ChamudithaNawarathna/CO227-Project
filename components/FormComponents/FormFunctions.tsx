@@ -67,12 +67,10 @@ export function validateAccountNo (text: string, setAccountNo: Function, setErro
 
 export function validateBankName (text: string, setBankName: Function, setError: Function) {
     setBankName(text);
-    const regex = /^[a-z ]+$/i;
-    if (text === '' || regex.test(text)) {
-        setError(false);
-    }
-    else {
+    if (text === '') {
         setError(true);
+    } else {
+        setError(false);
     }
 };
 
@@ -104,7 +102,7 @@ export function validateNTCNo (text: string, setNTC: Function, setError: Functio
 
     validFormat = (textLength == 7);
     setNTC(text);
-    const regex = /^[0-9dc-]+$/i;
+    const regex = /^[0-9a-z-]+$/i;
     if (text === '' || (regex.test(text) && validFormat)) {
         setError(false);
     }

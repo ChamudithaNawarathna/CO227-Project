@@ -231,7 +231,7 @@ const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
           >
             <ThemedText type="h5">Discount:</ThemedText>
             <ThemedText type="h5" lightColor="#666" darkColor="#c0c0c0">
-              {ticket.discount} %
+              {ticket.discount}
             </ThemedText>
           </View>
           <View

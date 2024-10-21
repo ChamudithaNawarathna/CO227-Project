@@ -28,7 +28,7 @@ import { InfoCard } from "@/components/UIComponents/InfoCard";
 
 export default function ProfileScreen() {
   const {
-    myAccTypes,
+    operatorAcc, ownerAcc,
     profileImage,
     setProfileImage,
     credits,
@@ -166,7 +166,7 @@ export default function ProfileScreen() {
                 iconColor={iconColor}
               />
 
-              {(myAccTypes.get("Owner") || myAccTypes.get("Operator")) && (
+              {(ownerAcc || operatorAcc) && (
                 <InfoCard
                   title="NIC"
                   iconName={faIdCard}
@@ -183,7 +183,7 @@ export default function ProfileScreen() {
                 }}
               />
             </View>
-            {myAccTypes.get("Owner") && (
+            {ownerAcc && (
               <View>
                 <ThemedText
                   type="h5"
@@ -212,7 +212,7 @@ export default function ProfileScreen() {
                   info={accHolderName}
                   iconColor={iconColor}
                 />
-                {myAccTypes.get("Operator") && (
+                {operatorAcc && (
                   <View
                     style={{
                       height: 1,
@@ -223,7 +223,7 @@ export default function ProfileScreen() {
                 )}
               </View>
             )}
-            {myAccTypes.get("Operator") && (
+            {operatorAcc && (
               <View>
                 <ThemedText
                   type="h5"

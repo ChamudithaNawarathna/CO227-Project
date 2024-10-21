@@ -19,7 +19,7 @@ import { ThemedView } from "@/components/CommonModules/ThemedView";
 import {
   PassengerFormPage1,
   PassengerFormPage2,
-} from "@/components/FormComponents/PassengrForm";
+} from "@/components/FormComponents/PassengerForm";
 import {
   OperatorFormPage1,
   OperatorFormPage2,
@@ -33,13 +33,15 @@ import {
 import calculateBirthday from "@/components/CommonModules/CalculateBirthday";
 import PrivacyModal from "./modals/privacyModal";
 import TermsModal from "./modals/termsModal";
+import { OTPPage } from "@/components/FormComponents/OTPPage";
 
-var formPageCount = 3; // Excluding the common "Sign up as a passenger, operator or owner" form page
-const formPageWidth = 300;
+var formPageCount = 2; // Excluding the common "Sign up as a passenger, operator or owner" form page
+const formPageWidth = 320;
 
 export default function SignUp() {
   const {
     baseURL,
+    accountType,
     fName,
     lName,
     phoneNo,
@@ -52,6 +54,7 @@ export default function SignUp() {
     ntcLicenseNo,
     driverLicenseNo,
     occupation,
+    setAccountType,
     setFName,
     setLName,
     setPhoneNo,
@@ -84,19 +87,15 @@ export default function SignUp() {
   // Scroll to the next form page
   async function scrollForward() {
     if (scrollRef.current) {
-      if (currentPos === 2) {
+      if (currentPos == formPageWidth) {
         const isNewUser = await handleCheckAvailability(); // Await the result of availability check
 
         if (!isNewUser) {
-          Alert.alert(
-            "Already Registered",
-            "The phone number and email is already used"
-          );
-          return; // Prevent scrolling if the user is already registered
+          return;
         }
       }
 
-      let otpSendingPosition = (formPageCount - 2) * formPageWidth;
+      let otpSendingPosition = (formPageCount - 1) * formPageWidth;
 
       if (currentPos == otpSendingPosition && !otpRequested) {
         try {
@@ -110,7 +109,7 @@ export default function SignUp() {
       }
 
       let newPos =
-        currentPos < formPageCount * formPageWidth
+        currentPos <= formPageCount * formPageWidth
           ? currentPos + formPageWidth
           : formPageCount * formPageWidth;
 
@@ -122,6 +121,7 @@ export default function SignUp() {
   // Scroll to the previous form page
   function scrollBack() {
     if (scrollRef.current) {
+      setOTPRequested(false);
       let newPos = currentPos > 0 ? currentPos - formPageWidth : 0;
       scrollRef.current.scrollTo({ x: newPos, y: 0, animated: true });
       setCurrentPos(newPos);
@@ -130,10 +130,11 @@ export default function SignUp() {
 
   // Prepare for a new sign up
   function pressSignUpType(signUptype: string) {
-    setOTPRequested(false); // Reset OTP flag
-    setFName(""); // Reset input fields
+    setOTPRequested(false);
+    setFName("");
     setLName("");
     setPhoneNo("");
+    setEmail("");
     setNIC("");
     setAccountNo("");
     setAccHolderName("");
@@ -151,27 +152,41 @@ export default function SignUp() {
     switch (signUptype) {
       case "passenger":
         setPassenger(true);
-        formPageCount = 3;
+        setAccountType("passenger");
+        formPageCount = 2;
+        break;
       case "operator":
         setOperator(true);
-        formPageCount = 4;
+        setAccountType("employee");
+        formPageCount = 3;
+        break;
       case "owner":
         setOwner(true);
-        formPageCount = 4;
-
-        scrollForward();
+        setAccountType("owner");
+        formPageCount = 3;
+        break;
     }
+
+    scrollForward();
   }
 
-  // Redirect to the correct dashboard
-  function pressSubmit() {
-    insertNewUser();
-    if (operator) {
-      router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
-    } else if (owner) {
-      router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
-    } else {
-      router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
+  async function pressSubmit() {
+    try {
+      const response = await insertNewUser(); // Ensure insertNewUser is async and returns a promise
+
+      if (response && response.status === 201) {
+        // Only navigate on successful registration
+        router.replace("/login" as Href<string>);
+      } else {
+        console.error("Registration error:", "Registration failed");
+        Alert.alert(
+          "Registration failed",
+          "Please check your details and try again."
+        );
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      Alert.alert("Error", "Failed to register user. Please try again.");
     }
   }
 
@@ -182,26 +197,23 @@ export default function SignUp() {
       Alert.alert("Error", "Please enter both email and phone number.");
       return false; // Return false if required fields are missing
     }
-
+  
     try {
       const requestData = {
         data: {
           email,
-          phoneNo,
+          mobile: phoneNo,  // Updated to match backend field 'mobile'
         },
       };
-
+  
       // Sending data to the backend
       const response = await axios.post(`${baseURL}/users/req2`, requestData);
-
-      if (response.data === "true") {
-        Alert.alert("Available", "The email and phone number can be used.");
+  
+      // Checking the response format with success and message
+      if (response.data.success) {
         return true;
-      } else if (response.data === "false") {
-        Alert.alert(
-          "Unavailable",
-          "The email or phone number is already in use."
-        );
+      } else {
+        Alert.alert("Unavailable", response.data.message);
         return false;
       }
     } catch (error) {
@@ -210,7 +222,7 @@ export default function SignUp() {
       return false;
     }
   };
-
+  
   // Function to request OTP
   const requestOTP = async () => {
     try {
@@ -219,7 +231,7 @@ export default function SignUp() {
       });
       if (response.status === 201) {
         Alert.alert("OTP sent", "Please check your email or mobile");
-        scrollForward();
+        setOTPRequested(true);
       }
     } catch (error) {
       console.error(error);
@@ -230,14 +242,14 @@ export default function SignUp() {
   // Function to insert a new user
   const insertNewUser = async () => {
     const userData = {
-      userType: operator ? "employee" : owner ? "owner" : "passenger",
+      userType: accountType,
       empType: occupation,
       fName: fName,
       lName: lName,
       email: email,
-      phoneNo: phoneNo,
+      mobile: phoneNo,
       nic: nic,
-      birthday: calculateBirthday(nic),
+      birthDay: calculateBirthday(nic),
       ntc: ntcLicenseNo,
       licence: driverLicenseNo,
       accName: accHolderName,
@@ -248,15 +260,12 @@ export default function SignUp() {
 
     try {
       const response = await axios.post(`${baseURL}/users/req3`, {
-        data: { userData },
+        data: userData,
       });
-
-      if (response.status === 201) {
-        Alert.alert("Success", "User registered successfully!");
-      }
+      return response; // Return the response
     } catch (error) {
       console.error("Registration error:", error);
-      Alert.alert("Error", "Failed to register user. Please try again.");
+      throw error; // Throw the error to handle it in pressSubmit
     }
   };
 
@@ -268,6 +277,11 @@ export default function SignUp() {
       setBackVisible(false);
       setNextVisible(false);
     } else if (currentPos == formPageCount * formPageWidth) {
+      Keyboard.dismiss();
+      setBackVisible(true);
+      setNextVisible(false);
+      setShowSubmit(false);
+    } else if (currentPos > formPageCount * formPageWidth) {
       Keyboard.dismiss();
       setBackVisible(false);
       setNextVisible(false);
@@ -379,7 +393,7 @@ export default function SignUp() {
             )}
             {passenger && (
               <Animated.View style={styles.formPage}>
-                <PassengerFormPage2
+                <OTPPage
                   otp={otp}
                   setOTP={setOTP}
                   nextAction={scrollForward}
@@ -427,7 +441,7 @@ export default function SignUp() {
             )}
             {operator && (
               <Animated.View style={styles.formPage}>
-                <OperatorFormPage3
+                <OTPPage
                   otp={otp}
                   setOTP={setOTP}
                   nextAction={scrollForward}
@@ -477,7 +491,7 @@ export default function SignUp() {
             )}
             {owner && (
               <Animated.View style={styles.formPage}>
-                <OwnerFormPage3
+                <OTPPage
                   otp={otp}
                   setOTP={setOTP}
                   nextAction={scrollForward}
@@ -599,7 +613,10 @@ export default function SignUp() {
           >
             <ThemedText lightColor="#aaa" darkColor="#aaa">
               Already have an account?{" "}
-              <Link href={"/login"}>
+              <Link
+                href={"/login"}
+                onPress={() => router.replace("/login" as Href<string>)}
+              >
                 <ThemedText lightColor="#28b1de" darkColor="#2eccff">
                   Log In
                 </ThemedText>
@@ -620,6 +637,7 @@ export default function SignUp() {
     </ThemedView>
   );
 }
+
 const styles = StyleSheet.create({
   pageBody: {
     flex: 1,
@@ -644,7 +662,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     borderRadius: 50,
     paddingVertical: 10,
-    paddingHorizontal: 40,
+    paddingHorizontal: 30,
     marginVertical: 5,
     backgroundColor: "#169af5",
     alignItems: "center",
@@ -654,7 +672,6 @@ const styles = StyleSheet.create({
     width: formPageWidth,
     alignItems: "center",
     backgroundColor: "transparent",
-    padding: 0,
   },
   formBackButton: {
     position: "absolute",
@@ -668,7 +685,7 @@ const styles = StyleSheet.create({
   },
   formBody: {
     backgroundColor: "transparent",
-    height: "55%",
+    height: "58%",
     margin: 10,
     borderRadius: 10,
     padding: 10,

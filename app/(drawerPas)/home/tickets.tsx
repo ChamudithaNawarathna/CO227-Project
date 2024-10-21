@@ -64,7 +64,7 @@ type BusStopIDs = {
 };
 
 export default function Tickets() {
-  const { baseURL } = useAppContext();
+  const { baseURL, discount } = useAppContext();
   const iconSize = 20;
   const folderUri = FileSystem.documentDirectory + "docs";
   const fileUri = folderUri + "/busStops.json";
@@ -139,7 +139,6 @@ export default function Tickets() {
         encoding: FileSystem.EncodingType.UTF8,
       });
 
-      Alert.alert("Success", `File saved successfully at: ${fileUri}`);
       console.log(`File saved successfully at: ${fileUri}`);
     } catch (error) {
       Alert.alert("Error", "Failed to save file.");
@@ -174,11 +173,14 @@ export default function Tickets() {
 
     try {
       await findBusStopID(from, to);
+
+      const localDate = date.toLocaleDateString('en-CA');
+
       const response = await axios.post(`${baseURL}/schedule/sdl1`, {
         data: {
           from: busStopIDs?.fromID,
           to: busStopIDs?.toID,
-          date: date.toISOString().split("T")[0],
+          date: localDate,
         },
       });
 
@@ -274,6 +276,7 @@ export default function Tickets() {
             onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
               if (event.type === "set" && selectedDate) {
                 setDate(selectedDate);
+                console.log(selectedDate.toLocaleString()); // Converts to local string
               }
               setOpenDate(false);
             }}
@@ -333,7 +336,7 @@ export default function Tickets() {
           fromID={busStopIDs.fromID}
           toID={busStopIDs.toID}
           unitPrice={Number(selectedSchedule.price)}
-          discount={0} // Change accordingly
+          discount={discount}
         />
       )}
 

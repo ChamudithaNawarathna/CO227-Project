@@ -87,6 +87,9 @@ export default function SeatsModal({
       return;
     }
 
+    let withoutDiscount = unitPrice * (half / 2 + full);
+    let discountValue = withoutDiscount * discount / 100;
+
     const ticket: TicketData = {
       userID: id,
       issuedDate: DateToString(new Date()),
@@ -100,11 +103,11 @@ export default function SeatsModal({
       half: half,
       full: full,
       unitPrice: unitPrice,
-      totalPrice: unitPrice * (half / 2 + full) * (1 - discount),
+      totalPrice: withoutDiscount - discountValue,
       seatNos: seatNos,
       status: "Available",
       scheduleId: scheduleId,
-      discount: discount,
+      discount: discountValue,
     };
 
     try {
