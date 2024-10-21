@@ -119,7 +119,7 @@ export default function ProfileScreen() {
             darkColor={"#fff"}
             style={{ marginLeft: 5 }}
           >
-            Rs. {credits}
+            Balance: LKR {credits}
           </ThemedText>
           <Pressable
             style={[

@@ -239,10 +239,6 @@ export default function Tickets() {
 
   //================================================ UI Control ===============================================//
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
-
   if (error !== "" && !loading) {
     return <ErrorScreen error={error} retry={fetchBusStops} />;
   }
@@ -312,87 +308,110 @@ export default function Tickets() {
         </ThemedText>
       </Pressable>
 
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
-      {error && <Text style={styles.errorText}>{error}</Text>}
-
-      <FlatList
-        data={schedules}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View
-            style={{
-              marginBottom: 15,
-              borderRadius: 10,
-              backgroundColor: theme === "dark" ? "#555" : "#fff",
-              elevation: 5,
-            }}
-          >
+      {loading ? (
+        <View style={{ marginTop: 200, alignItems: "center" }}>
+          <ActivityIndicator
+            size={70}
+            color={theme === "dark" ? "#ddd" : "#777"}
+          />
+        </View>
+      ) : (
+        <FlatList
+          data={schedules}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
             <View
               style={{
-                backgroundColor: theme === "dark" ? "#f91" : "#f91",
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
+                marginBottom: 15,
+                borderRadius: 10,
+                backgroundColor: theme === "dark" ? "#555" : "#fff",
+                elevation: 5,
               }}
             >
-              <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                Bus: {item.regNo}
-              </ThemedText>
-              <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                Departure: {item.departure}
-              </ThemedText>
-            </View>
-            <View style={{ margin: 10 }}>
               <View
                 style={{
+                  backgroundColor: theme === "dark" ? "#f91" : "#f91",
+                  borderTopLeftRadius: 10,
+                  borderTopRightRadius: 10,
+                  paddingVertical: 5,
                   paddingHorizontal: 10,
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginBottom: 10,
                 }}
               >
-                <View>
-                  <ThemedText type="h6">Origin</ThemedText>
-                  <ThemedText type="h4">
-                    {item.from?.split(",")[0]?.trim()}
-                  </ThemedText>
-                </View>
-                <View>
-                  <ThemedText type="h6">Destination</ThemedText>
-                  <ThemedText type="h4">
-                    {item.to?.split(",")[0]?.trim()}
-                  </ThemedText>
-                </View>
+                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                  Bus: {item.regNo}
+                </ThemedText>
+                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                  Departure: {item.departure}
+                </ThemedText>
               </View>
-
-              <View
-                style={{
-                  paddingHorizontal: 10,
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  gap: 5,
-                  marginBottom: 5,
-                }}
-              >
-                <View>
-                  <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
-                    Arrival: {item.arrival}
-                  </ThemedText>
-                  <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
-                    Journey: {item.journey} km
-                  </ThemedText>
-                  <ThemedText type="h4">Price: LKR {item.price}</ThemedText>
+              <View style={{ margin: 10 }}>
+                <View
+                  style={{
+                    paddingHorizontal: 10,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 10,
+                  }}
+                >
+                  <View>
+                    <ThemedText type="h6">Origin</ThemedText>
+                    <ThemedText type="h4">
+                      {item.from?.split(",")[0]?.trim()}
+                    </ThemedText>
+                  </View>
+                  <View>
+                    <ThemedText type="h6">Destination</ThemedText>
+                    <ThemedText type="h4">
+                      {item.to?.split(",")[0]?.trim()}
+                    </ThemedText>
+                  </View>
                 </View>
-                <View style={{ justifyContent: "space-between" }}>
-                  {enableQT && (
+
+                <View
+                  style={{
+                    paddingHorizontal: 10,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    gap: 5,
+                    marginBottom: 5,
+                  }}
+                >
+                  <View>
+                    <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
+                      Arrival: {item.arrival}
+                    </ThemedText>
+                    <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
+                      Journey: {item.journey} km
+                    </ThemedText>
+                    <ThemedText type="h4">Price: LKR {item.price}</ThemedText>
+                  </View>
+                  <View style={{ justifyContent: "space-between" }}>
+                    {enableQT && (
+                      <Pressable
+                        style={{
+                          flex: 1,
+                          alignSelf: "center",
+                          backgroundColor: "#107050",
+                          paddingHorizontal: 30,
+                          paddingVertical: 10,
+                          marginVertical: 10,
+                          borderRadius: 50,
+                          alignItems: "center",
+                        }}
+                        onPress={() => pressBuy(item)}
+                      >
+                        <ThemedText type="h4" lightColor="#fff">
+                          Quick Ticket
+                        </ThemedText>
+                      </Pressable>
+                    )}
                     <Pressable
                       style={{
                         flex: 1,
                         alignSelf: "center",
-                        backgroundColor: "#107050",
+                        backgroundColor: "#e28",
                         paddingHorizontal: 30,
                         paddingVertical: 10,
                         marginVertical: 10,
@@ -402,33 +421,16 @@ export default function Tickets() {
                       onPress={() => pressBuy(item)}
                     >
                       <ThemedText type="h4" lightColor="#fff">
-                        Quick Ticket
+                        Buy
                       </ThemedText>
                     </Pressable>
-                  )}
-                  <Pressable
-                    style={{
-                      flex: 1,
-                      alignSelf: "center",
-                      backgroundColor: "#e28",
-                      paddingHorizontal: 30,
-                      paddingVertical: 10,
-                      marginVertical: 10,
-                      borderRadius: 50,
-                      alignItems: "center",
-                    }}
-                    onPress={() => pressBuy(item)}
-                  >
-                    <ThemedText type="h4" lightColor="#fff">
-                      Buy
-                    </ThemedText>
-                  </Pressable>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        )}
-      />
+          )}
+        />
+      )}
       {selectedSchedule && (
         <SeatsModal
           isVisible={displaySeatsModel}
@@ -460,7 +462,7 @@ export default function Tickets() {
         />
       )}
 
-      {schedules.length == 0 && (
+      {schedules.length == 0 && !loading && (
         <View style={{ alignSelf: "center", marginBottom: 200 }}>
           <ThemedText type="s5" lightColor="#666" darkColor="#ccc">
             No buses are available

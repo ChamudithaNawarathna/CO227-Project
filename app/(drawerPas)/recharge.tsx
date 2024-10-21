@@ -75,7 +75,7 @@ export default function Recharge() {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 30,
+            marginVertical: 30,
             borderRadius: 20,
             paddingVertical: 3,
             paddingHorizontal: 5,
@@ -91,8 +91,7 @@ export default function Recharge() {
             Balance: LKR {credits}
           </ThemedText>
         </View>
-      <ThemedText type="h3">Google Pay Example</ThemedText>
-      <View style={{ margin: 60 }}>
+      <View style={{ margin: 40 }}>
         <Pressable
           style={{
             flexDirection: "row",

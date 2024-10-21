@@ -8,6 +8,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  useColorScheme,
   View,
 } from "react-native";
 
@@ -42,6 +43,7 @@ type AvailableTicket = {
 
 export default function Dashboard() {
   const { baseURL, credits, myTickets, setMyTickets, id } = useAppContext();
+  const theme = useColorScheme() ?? "light";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
@@ -161,7 +163,7 @@ export default function Dashboard() {
             darkColor={"#fff"}
             style={{ marginLeft: 5 }}
           >
-            Rs. {credits}
+            Balance: LKR {credits}
           </ThemedText>
           <Pressable
             style={[
@@ -188,28 +190,7 @@ export default function Dashboard() {
           Available Tickets
         </ThemedText>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={{ padding: 12 }}>
-            {loading ? (
-              <ActivityIndicator size="large" color="#0000ff" />
-            ) : myTickets ? (
-              Array.from(myTickets.entries()).map(([ticketNo, ticket]) => (
-                <AvailableTicketView key={ticketNo} ticket={ticket} />
-              ))
-            ) : (
-              <ThemedText
-                type="s5"
-                lightColor={"#777"}
-                style={{ alignSelf: "center", marginVertical: 50 }}
-              >
-                No tickets are available
-              </ThemedText>
-            )}
-
-            <Button title="Refresh Tickets" onPress={fetchAvailableTickets} />
-          </View>
-
-          <Pressable
+        <Pressable
             style={{
               backgroundColor: "#a8f",
               borderWidth: 0,
@@ -226,9 +207,32 @@ export default function Dashboard() {
               lightColor="#fff"
               darkColor="#fff"
             >
-              Quick Ticket
+              Refresh
             </ThemedText>
           </Pressable>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={{ padding: 12 }}>
+            {loading ? (
+              <View style={{ marginTop: 200, alignItems: "center" }}>
+              <ActivityIndicator
+                size={70}
+                color={theme === "dark" ? "#ddd" : "#777"}
+              />
+            </View>
+            ) : myTickets ? (
+              Array.from(myTickets.entries()).map(([ticketNo, ticket]) => (
+                <AvailableTicketView key={ticketNo} ticket={ticket} />
+              ))
+            ) : (
+              <ThemedText
+                type="s5"
+                lightColor={"#777"}
+                style={{ alignSelf: "center", marginTop: 250 }}
+              >
+                No tickets are available
+              </ThemedText>
+            )}
+          </View>
         </ScrollView>
       </View>
     </ScreenWrapper>
