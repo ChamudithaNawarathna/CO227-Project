@@ -138,7 +138,11 @@ export const AvailableTicketView = ({ ticket }: Props) => {
       >
         <View>
           <ThemedText type="h6">Price: LKR {ticket.price}</ThemedText>
-          <ThemedText type="h6">Seat No(s): {ticket.seatNos}</ThemedText>
+          {(ticket.seatNos == undefined || ticket.seatNos.length == 0) ? (
+            <ThemedText type="h6">Quick Ticket</ThemedText>
+          ) : (
+            <ThemedText type="h6">Seat No(s): {ticket.seatNos}</ThemedText>
+          )}
         </View>
         <View>
           <ThemedText type="h6">

@@ -10,8 +10,8 @@ export function SeatLegend() {
     ["Reserved", "#f90"],
   ]);
   return (
-    <View style={{ marginHorizontal: 20, marginVertical: 20 }}>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+    <View>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 70, margin: 5 }}>
         <View>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <View

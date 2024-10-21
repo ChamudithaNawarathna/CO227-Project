@@ -10,6 +10,7 @@ import {
   View,
   Text,
   Pressable,
+  useColorScheme,
 } from "react-native";
 import {
   faLocationDot,
@@ -31,6 +32,7 @@ import SeatsModal from "@/app/modals/seatsModal";
 import { DateToString } from "@/components/CommonModules/DateTimeToString";
 import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
 import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
+import QuickTicketModal from "@/app/modals/messages/quickTicketModal";
 
 interface Schedule {
   id: string;
@@ -65,6 +67,7 @@ type BusStopIDs = {
 
 export default function Tickets() {
   const { baseURL, discount } = useAppContext();
+  const theme = useColorScheme() ?? "light";
   const iconSize = 20;
   const folderUri = FileSystem.documentDirectory + "docs";
   const fileUri = folderUri + "/busStops.json";
@@ -78,6 +81,8 @@ export default function Tickets() {
   const [busStops, setBusStops] = useState<BusStop[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [displayQTModal, setDisplayQTModal] = useState(false);
+  const [enableQT, setEnableQT] = useState(false);
   const [busStopIDs, setBusStopIDs] = useState<BusStopIDs>({
     fromID: "",
     toID: "",
@@ -174,7 +179,7 @@ export default function Tickets() {
     try {
       await findBusStopID(from, to);
 
-      const localDate = date.toLocaleDateString('en-CA');
+      const localDate = date.toLocaleDateString("en-CA");
 
       const response = await axios.post(`${baseURL}/schedule/sdl1`, {
         data: {
@@ -227,6 +232,13 @@ export default function Tickets() {
     }
   }, []);
 
+  useEffect(() => {
+    let today = new Date();
+    setEnableQT(date == today);
+  }, []);
+
+  //================================================ UI Control ===============================================//
+
   if (loading) {
     return <LoadingScreen />;
   }
@@ -234,8 +246,6 @@ export default function Tickets() {
   if (error !== "" && !loading) {
     return <ErrorScreen error={error} retry={fetchBusStops} />;
   }
-
-  //================================================ UI Control ===============================================//
 
   return (
     <View style={styles.mainBody}>
@@ -309,18 +319,113 @@ export default function Tickets() {
         data={schedules}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.scheduleItem}>
-            <Text style={styles.scheduleText}>
-              {item.from} to {item.to}
-            </Text>
-            <Text style={styles.scheduleText}>Bus Reg: {item.regNo}</Text>
-            <Text style={styles.scheduleText}>Departure: {item.departure}</Text>
-            <Text style={styles.scheduleText}>Arrival: {item.arrival}</Text>
-            <Text style={styles.scheduleText}>Journey: {item.journey} km</Text>
-            <Text style={styles.scheduleText}>Price: {item.price} LKR</Text>
-            <Pressable onPress={() => pressBuy(item)}>
-              <Text>Buy</Text>
-            </Pressable>
+          <View
+            style={{
+              marginBottom: 15,
+              borderRadius: 10,
+              backgroundColor: theme === "dark" ? "#555" : "#fff",
+              elevation: 5,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: theme === "dark" ? "#f91" : "#f91",
+                borderTopLeftRadius: 10,
+                borderTopRightRadius: 10,
+                paddingVertical: 5,
+                paddingHorizontal: 10,
+                flexDirection: "row",
+                justifyContent: "space-between",
+              }}
+            >
+              <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                Bus: {item.regNo}
+              </ThemedText>
+              <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+                Departure: {item.departure}
+              </ThemedText>
+            </View>
+            <View style={{ margin: 10 }}>
+              <View
+                style={{
+                  paddingHorizontal: 10,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 10,
+                }}
+              >
+                <View>
+                  <ThemedText type="h6">Origin</ThemedText>
+                  <ThemedText type="h4">
+                    {item.from?.split(",")[0]?.trim()}
+                  </ThemedText>
+                </View>
+                <View>
+                  <ThemedText type="h6">Destination</ThemedText>
+                  <ThemedText type="h4">
+                    {item.to?.split(",")[0]?.trim()}
+                  </ThemedText>
+                </View>
+              </View>
+
+              <View
+                style={{
+                  paddingHorizontal: 10,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  gap: 5,
+                  marginBottom: 5,
+                }}
+              >
+                <View>
+                  <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
+                    Arrival: {item.arrival}
+                  </ThemedText>
+                  <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
+                    Journey: {item.journey} km
+                  </ThemedText>
+                  <ThemedText type="h4">Price: LKR {item.price}</ThemedText>
+                </View>
+                <View style={{ justifyContent: "space-between" }}>
+                  {enableQT && (
+                    <Pressable
+                      style={{
+                        flex: 1,
+                        alignSelf: "center",
+                        backgroundColor: "#107050",
+                        paddingHorizontal: 30,
+                        paddingVertical: 10,
+                        marginVertical: 10,
+                        borderRadius: 50,
+                        alignItems: "center",
+                      }}
+                      onPress={() => pressBuy(item)}
+                    >
+                      <ThemedText type="h4" lightColor="#fff">
+                        Quick Ticket
+                      </ThemedText>
+                    </Pressable>
+                  )}
+                  <Pressable
+                    style={{
+                      flex: 1,
+                      alignSelf: "center",
+                      backgroundColor: "#e28",
+                      paddingHorizontal: 30,
+                      paddingVertical: 10,
+                      marginVertical: 10,
+                      borderRadius: 50,
+                      alignItems: "center",
+                    }}
+                    onPress={() => pressBuy(item)}
+                  >
+                    <ThemedText type="h4" lightColor="#fff">
+                      Buy
+                    </ThemedText>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
           </View>
         )}
       />
@@ -328,6 +433,21 @@ export default function Tickets() {
         <SeatsModal
           isVisible={displaySeatsModel}
           onClose={() => setDisplaySeatsModel(false)}
+          scheduleId={selectedSchedule.id}
+          departureDate={DateToString(date)}
+          aproxDepT={selectedSchedule.departure}
+          aproxAriT={selectedSchedule.arrival}
+          journey={selectedSchedule.journey}
+          fromID={busStopIDs.fromID}
+          toID={busStopIDs.toID}
+          unitPrice={Number(selectedSchedule.price)}
+          discount={discount}
+        />
+      )}
+      {selectedSchedule && (
+        <QuickTicketModal
+          isVisible={displayQTModal}
+          onClose={() => setDisplayQTModal(false)}
           scheduleId={selectedSchedule.id}
           departureDate={DateToString(date)}
           aproxDepT={selectedSchedule.departure}
@@ -353,7 +473,8 @@ export default function Tickets() {
 
 const styles = StyleSheet.create({
   mainBody: {
-    padding: 10,
+    marginHorizontal: 15,
+    marginVertical: 5,
     flex: 1,
     zIndex: 1,
     position: "relative",

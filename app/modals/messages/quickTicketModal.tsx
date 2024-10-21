@@ -5,6 +5,7 @@ import {
   StyleSheet,
   useColorScheme,
   View,
+  Text,
 } from "react-native";
 import { ThemedView } from "@/components/CommonModules/ThemedView";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
@@ -61,7 +62,7 @@ type Props = {
   discount: number;
 };
 
-export default function SeatsModal({
+export default function QuickTicketModal({
   isVisible,
   onClose,
   scheduleId,
@@ -78,22 +79,15 @@ export default function SeatsModal({
   const [half, setHalf] = useState(0);
   const [full, setFull] = useState(0);
 
-  const { baseURL, id, credits, setCredits, seatNos, setSeatNos } =
-    useAppContext();
+  const { baseURL, id, credits, setCredits } = useAppContext();
 
   function pressCancel() {
-    setSeatNos([]);
     setFull(0);
     setHalf(0);
     onClose();
   }
 
   const handleBooking = async () => {
-    if (!seatNos) {
-      Alert.alert("Please choose atleat one seat");
-      return;
-    }
-
     let withoutDiscount: number = parseFloat(
       (unitPrice * (half / 2 + full)).toFixed(2)
     );
@@ -113,7 +107,7 @@ export default function SeatsModal({
       full: full,
       unitPrice: unitPrice,
       totalPrice: withoutDiscount - discountValue,
-      seatNos: seatNos,
+      seatNos: [],
       status: "Available",
       scheduleId: scheduleId,
       discount: discountValue,
@@ -126,7 +120,6 @@ export default function SeatsModal({
 
       if (response.data === "success") {
         Alert.alert("Booking successful!");
-        setSeatNos([]);
         setCredits(credits - withoutDiscount + discountValue);
         onClose();
       } else if (response.data === "insufficient") {
@@ -147,8 +140,13 @@ export default function SeatsModal({
       </Pressable>
       <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
         <ThemedView style={styles.titleContainer}>
-          <Seat54Layout />
-          <SeatLegend />
+          <Text
+            style={{ color: "#999", fontWeight: "600", fontStyle: "italic" }}
+          >
+            Please note that Quick Tickets allow you to purchase tickets via the
+            app even after the regular booking period (24 hours before
+            departure). However, Quick Tickets do not guarantee a reserved seat
+          </Text>
           <View style={{ flexDirection: "row", gap: 20, marginVertical: 10 }}>
             <View style={{ gap: 10 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -166,14 +164,11 @@ export default function SeatsModal({
             </View>
 
             <Pressable
-              disabled={seatNos.length == 0 && full == 0 && half == 0}
+              disabled={full == 0 && half == 0}
               style={{
                 flex: 1,
                 alignSelf: "center",
-                backgroundColor:
-                  seatNos.length != 0 && (full > 0 || half > 0)
-                    ? "#0eaedf"
-                    : "#999a",
+                backgroundColor: full > 0 || half > 0 ? "#0eaedf" : "#999a",
                 paddingHorizontal: 10,
                 paddingVertical: 20,
                 borderRadius: 50,
@@ -182,7 +177,7 @@ export default function SeatsModal({
               onPress={handleBooking}
             >
               <ThemedText type="h4" lightColor="#fff">
-                Book seat
+                Purchase Ticket
               </ThemedText>
             </Pressable>
           </View>

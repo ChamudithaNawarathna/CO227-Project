@@ -454,7 +454,8 @@ const styles = StyleSheet.create({
     top: 50, // Adjust this value based on the height of the search input
     left: 0,
     right: 0,
-    marginHorizontal: 20,
+    marginHorizontal: 5,
+    marginVertical: -2,
     zIndex: 10,
     borderRadius: 12,
     backgroundColor: "transparent",

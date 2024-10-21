@@ -38,6 +38,7 @@ type Props = {
   to: string;
   seatNos: string;
   full: string; half: string
+  isQuickTicket: boolean
 };
 
 export default function TicketScan({
@@ -50,7 +51,8 @@ export default function TicketScan({
   to,
   seatNos,
   full,
-  half
+  half,
+  isQuickTicket
 }: Props) {
   const theme = useColorScheme() ?? "light";
 
@@ -62,7 +64,7 @@ export default function TicketScan({
         </Pressable>
         <Image
           source={
-            valid
+            (valid || isQuickTicket)
               ? require("@/assets/icons/valid.png")
               : require("@/assets/icons/invalid.png")
           }
@@ -85,7 +87,11 @@ export default function TicketScan({
           </View>
         </View>
         <View style={{ alignItems: "center", marginVertical: 20, gap: 10 }}>
-          <ThemedText type="h3" lightColor="#fff">Seat No(s): {seatNos}</ThemedText>
+          {(seatNos == undefined || seatNos.length == 0) ? (
+            <ThemedText type="h3" lightColor="#fff">Quick Ticket</ThemedText>
+          ) : (
+            <ThemedText type="h3" lightColor="#fff">Seat No(s): {seatNos}</ThemedText>
+          )}
           <ThemedText type="h3" lightColor="#fff">Adult: {full} | Child: {half}</ThemedText>
         </View>
         <Pressable style={styles.scanButton} onPress={onClose}>

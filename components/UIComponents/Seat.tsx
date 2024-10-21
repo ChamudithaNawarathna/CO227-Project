@@ -70,8 +70,8 @@ export default function Seat({ index, reserved = false }: SeatProps) {
 const styles = StyleSheet.create({
   seatButton: {
     margin: 5,
-    paddingHorizontal: 11,
-    paddingVertical: 8,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
     borderRadius: 10,
     alignItems: "center",
   },

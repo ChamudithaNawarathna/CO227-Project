@@ -15,6 +15,7 @@ export default function Scanner() {
   const [scannedData, setScannedData] = useState<string[]>([]);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [valid, setValid] = useState(false);
+  const [isQuickTicket, setIsQuickTicket] = useState(false);
   const [error, setError] = useState<string>("");
 
   //================================================ Functions ===============================================//
@@ -28,6 +29,7 @@ export default function Scanner() {
 
   // Check and display data in the QR code
   const handleBarCodeScanned = (result: BarCodeScanningResult) => {
+    setIsQuickTicket(false);
     const data: string = result.data;
     const splitData = data.split("|");
 
@@ -60,6 +62,7 @@ export default function Scanner() {
         );
 
         setValid(seatsMatch);
+        setIsQuickTicket(!seatsMatch);
       } else {
         setValid(false);
       }
@@ -116,6 +119,7 @@ export default function Scanner() {
         seatNos={scannedData[4]}
         full={scannedData[5]}
         half={scannedData[6]}
+        isQuickTicket={isQuickTicket}
       />
     </View>
   );
