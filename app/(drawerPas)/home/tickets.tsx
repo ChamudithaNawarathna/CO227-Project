@@ -44,7 +44,8 @@ interface Schedule {
   routeNo: string;
   org: string;
   booked: string;
-  seats: string;
+  seats: number;
+  closing: string;
   departure: string;
   arrival: string;
   journey: string;
@@ -71,6 +72,7 @@ export default function Tickets() {
   const iconSize = 20;
   const folderUri = FileSystem.documentDirectory + "docs";
   const fileUri = folderUri + "/busStops.json";
+  const today = new Date().toLocaleDateString("en-CA");
   const [displaySeatsModel, setDisplaySeatsModel] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -79,10 +81,10 @@ export default function Tickets() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule>();
   const [busStops, setBusStops] = useState<BusStop[]>([]);
+  const [seats, setSeats] = useState(54);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   const [displayQTModal, setDisplayQTModal] = useState(false);
-  const [enableQT, setEnableQT] = useState(false);
   const [busStopIDs, setBusStopIDs] = useState<BusStopIDs>({
     fromID: "",
     toID: "",
@@ -163,10 +165,24 @@ export default function Tickets() {
     fetchSchedules();
   };
 
+  function checkQTAvailability(closingDate: string) {
+    if (closingDate <= today) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // Display seat layout to choose seat(s)
   const pressBuy = (schedule: Schedule) => {
     setSelectedSchedule(schedule);
+    setSeats(schedule.seats);
     setDisplaySeatsModel(true);
+  };
+
+  const pressQuickTicket = (schedule: Schedule) => {
+    setSelectedSchedule(schedule);
+    setDisplayQTModal(true);
   };
 
   //================================================ Backend Calls ===============================================//
@@ -232,11 +248,6 @@ export default function Tickets() {
     }
   }, []);
 
-  useEffect(() => {
-    let today = new Date();
-    setEnableQT(date == today);
-  }, []);
-
   //================================================ UI Control ===============================================//
 
   if (error !== "" && !loading) {
@@ -295,7 +306,7 @@ export default function Tickets() {
       <Pressable
         onPress={handleSearch}
         style={{
-          backgroundColor: "#77f",
+          backgroundColor: "#60c0ff",
           alignItems: "center",
           borderRadius: 10,
           paddingVertical: 10,
@@ -336,14 +347,11 @@ export default function Tickets() {
                   paddingVertical: 5,
                   paddingHorizontal: 10,
                   flexDirection: "row",
-                  justifyContent: "space-between",
+                  justifyContent: "flex-end",
                 }}
               >
                 <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                  Bus: {item.regNo}
-                </ThemedText>
-                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                  Departure: {item.departure}
+                  Booking Closing Date: {item.closing}
                 </ThemedText>
               </View>
               <View style={{ margin: 10 }}>
@@ -357,18 +365,25 @@ export default function Tickets() {
                 >
                   <View>
                     <ThemedText type="h6">Origin</ThemedText>
+                    <ThemedText type="h4">{item.departure}</ThemedText>
                     <ThemedText type="h4">
                       {item.from?.split(",")[0]?.trim()}
                     </ThemedText>
                   </View>
                   <View>
                     <ThemedText type="h6">Destination</ThemedText>
+                    <ThemedText type="h4">{item.arrival}</ThemedText>
                     <ThemedText type="h4">
                       {item.to?.split(",")[0]?.trim()}
                     </ThemedText>
                   </View>
                 </View>
-
+                <View style={{ marginVertical: 5, marginHorizontal: 10 }}>
+                  <ThemedText type="s6" lightColor="#999" darkColor="#ddd">
+                    {item.org} | {item.service} | {item.routeType} | Route:{" "}
+                    {item.routeNo}
+                  </ThemedText>
+                </View>
                 <View
                   style={{
                     paddingHorizontal: 10,
@@ -376,25 +391,38 @@ export default function Tickets() {
                     justifyContent: "space-between",
                     gap: 5,
                     marginBottom: 5,
+                    alignItems: "center",
                   }}
                 >
                   <View>
-                    <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
-                      Arrival: {item.arrival}
-                    </ThemedText>
-                    <ThemedText type="h6" lightColor="#888" darkColor="#aaa">
-                      Journey: {item.journey} km
-                    </ThemedText>
                     <ThemedText type="h4">Price: LKR {item.price}</ThemedText>
                   </View>
                   <View style={{ justifyContent: "space-between" }}>
-                    {enableQT && (
+                    {checkQTAvailability(item.closing) ? (
                       <Pressable
                         style={{
                           flex: 1,
                           alignSelf: "center",
-                          backgroundColor: "#107050",
-                          paddingHorizontal: 30,
+                          backgroundColor: "#59f",
+                          paddingHorizontal: 10,
+                          paddingVertical: 10,
+                          marginVertical: 10,
+                          borderRadius: 50,
+                          alignItems: "center",
+                        }}
+                        onPress={() => pressQuickTicket(item)}
+                      >
+                        <ThemedText type="h4" lightColor="#fff">
+                          Quick Ticket
+                        </ThemedText>
+                      </Pressable>
+                    ) : (
+                      <Pressable
+                        style={{
+                          flex: 1,
+                          alignSelf: "center",
+                          backgroundColor: "#e28",
+                          paddingHorizontal: 10,
                           paddingVertical: 10,
                           marginVertical: 10,
                           borderRadius: 50,
@@ -403,27 +431,10 @@ export default function Tickets() {
                         onPress={() => pressBuy(item)}
                       >
                         <ThemedText type="h4" lightColor="#fff">
-                          Quick Ticket
+                          Buy Ticket
                         </ThemedText>
                       </Pressable>
                     )}
-                    <Pressable
-                      style={{
-                        flex: 1,
-                        alignSelf: "center",
-                        backgroundColor: "#e28",
-                        paddingHorizontal: 30,
-                        paddingVertical: 10,
-                        marginVertical: 10,
-                        borderRadius: 50,
-                        alignItems: "center",
-                      }}
-                      onPress={() => pressBuy(item)}
-                    >
-                      <ThemedText type="h4" lightColor="#fff">
-                        Buy
-                      </ThemedText>
-                    </Pressable>
                   </View>
                 </View>
               </View>
@@ -436,6 +447,7 @@ export default function Tickets() {
           isVisible={displaySeatsModel}
           onClose={() => setDisplaySeatsModel(false)}
           scheduleId={selectedSchedule.id}
+          seats={seats}
           departureDate={DateToString(date)}
           aproxDepT={selectedSchedule.departure}
           aproxAriT={selectedSchedule.arrival}

@@ -1,6 +1,6 @@
 import { ScrollView } from "react-native-gesture-handler";
 import React, { useEffect, useState } from "react";
-import { Alert, StyleSheet, useColorScheme, View } from "react-native";
+import { Alert, Pressable, StyleSheet, useColorScheme, View } from "react-native";
 import axios from "axios";
 
 import { useAppContext } from "@/context/AppContext";
@@ -9,6 +9,8 @@ import { ThemedView } from "@/components/CommonModules/ThemedView";
 import StarRating from "@/components/UIComponents/StarRating";
 import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
 import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 
 export default function Buses() {
   const { baseURL, id } = useAppContext();
@@ -55,6 +57,25 @@ export default function Buses() {
   return (
     <ScrollView>
       <ThemedView style={styles.mainBody}>
+      <Pressable
+        style={{
+          backgroundColor: theme === "dark" ? "#555" : "#fff",
+          alignSelf: 'flex-end',
+          alignItems: "center",
+          paddingVertical: 10,
+          paddingHorizontal: 10,
+          marginBottom: 10,
+          borderRadius: 50,
+          elevation: 5
+        }}
+        onPress={fetchBuses}
+      >
+       <FontAwesomeIcon
+                icon={faArrowsRotate}
+                size={20}
+                color={theme === "dark" ? "#ccc" : "#444"}
+              />
+      </Pressable>
         {myBuses.length > 0 ? (
           myBuses.map((bus) => (
             <View
@@ -68,7 +89,7 @@ export default function Buses() {
             >
               <View
                 style={{
-                  backgroundColor: "#966",
+                  backgroundColor: "#38b",
                   borderTopLeftRadius: 10,
                   borderTopRightRadius: 10,
                   paddingVertical: 5,

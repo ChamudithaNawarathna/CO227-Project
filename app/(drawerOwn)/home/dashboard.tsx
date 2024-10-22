@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRotateBack, faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import {
   Alert,
@@ -146,26 +146,13 @@ export default function Dashboard() {
         </Pressable>
       </View>
       <ScrollView>
-        <Pressable
-          style={{
-            marginTop: 10,
-            marginHorizontal: 10,
+        <View style={{
             flexDirection: "row",
-            gap: 5,
-            alignSelf: "flex-end",
-          }}
-          onPress={fetchIncomeData}
-        >
-          <FontAwesomeIcon
-            icon={faArrowRotateBack}
-            size={18}
-            color={iconColor}
-            style={{ alignSelf: "center" }}
-          />
-          <ThemedText type="s5" lightColor={iconColor} darkColor={iconColor}>
-            Refresh
-          </ThemedText>
-        </Pressable>
+            justifyContent: 'space-between',
+            marginHorizontal: 10,
+            marginVertical: 10,
+            alignItems: 'center'
+          }}>
         <View
           style={{
             flexDirection: "row",
@@ -187,6 +174,25 @@ export default function Dashboard() {
               setSelectedWeeklyData(item.value); // Update selected data type for weekly
             }}
           />
+        </View>
+        <Pressable
+        style={{
+          backgroundColor: theme === "dark" ? "#555" : "#fff",
+          alignItems: "center",
+          paddingVertical: 10,
+          paddingHorizontal: 10,
+          marginTop: -20,
+          borderRadius: 50,
+          elevation: 5
+        }}
+        onPress={fetchIncomeData}
+      >
+       <FontAwesomeIcon
+                icon={faArrowsRotate}
+                size={20}
+                color={theme === "dark" ? "#ccc" : "#444"}
+              />
+      </Pressable>
         </View>
         {incomeData.map((vehicle) => (
           <View

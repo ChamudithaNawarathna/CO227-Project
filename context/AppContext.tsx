@@ -108,8 +108,8 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [profileImage, setProfileImage] = useState("");
   const [id, setID] = useState("");
   const [accountType, setAccountType] = useState<accountType>("passenger");
-  const [operatorAcc, setOperatorAcc] = useState(false);
-  const [ownerAcc, setOwnerAcc] = useState(false);
+  const [operatorAcc, setOperatorAcc] = useState(true);
+  const [ownerAcc, setOwnerAcc] = useState(true);
   const [credits, setCredits] = useState(500);
   const [fName, setFName] = useState<string>("");
   const [lName, setLName] = useState<string>("");

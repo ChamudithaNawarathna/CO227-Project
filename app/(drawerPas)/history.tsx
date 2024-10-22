@@ -20,6 +20,7 @@ import {
   faEye,
   faExclamationCircle,
   faThumbsUp,
+  faArrowsRotate,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import RatingModal from "../modals/ratingModal";
@@ -89,14 +90,22 @@ const TicketDetailsComponent: React.FC = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <Pressable
         style={{
-          backgroundColor: "green",
+          backgroundColor: theme === "dark" ? "#555" : "#fff",
+          alignSelf: 'flex-end',
           alignItems: "center",
           paddingVertical: 10,
+          paddingHorizontal: 10,
           marginBottom: 10,
+          borderRadius: 50,
+          elevation: 5
         }}
         onPress={fetchTicketHistory}
       >
-        <ThemedText type="h6">Refresh</ThemedText>
+       <FontAwesomeIcon
+                icon={faArrowsRotate}
+                size={20}
+                color={theme === "dark" ? "#ccc" : "#444"}
+              />
       </Pressable>
       {tickets.length > 0 ? (
         tickets.map((ticket) => (
@@ -248,7 +257,7 @@ const TicketDetailsComponent: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: 10,
   },
   title: {
     fontSize: 24,

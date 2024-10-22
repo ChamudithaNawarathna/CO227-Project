@@ -13,6 +13,8 @@ import { useAppContext } from "@/context/AppContext";
 import { ThemedText } from "@/components/CommonModules/ThemedText";
 import ErrorScreen from "./ErrorScreen";
 import LoadingScreen from "./LoadingScreen";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 
 interface TransactionData {
   id: string;
@@ -98,20 +100,26 @@ export default function TransactionScreen() {
   return (
     <ScrollView>
       <View style={{ paddingHorizontal: 15 }}>
-        <Pressable
-          onPress={fetchTransactionHistory}
-          style={{
-            backgroundColor: "#77f",
-            alignItems: "center",
-            borderRadius: 15,
-            paddingVertical: 5,
-            marginVertical: 15,
-          }}
-        >
-          <ThemedText type="h5" lightColor="#fff">
-            Refresh
-          </ThemedText>
-        </Pressable>
+      <Pressable
+        style={{
+          backgroundColor: theme === "dark" ? "#555" : "#fff",
+          alignSelf: 'flex-end',
+          alignItems: "center",
+          paddingVertical: 10,
+          paddingHorizontal: 10,
+          marginTop: 10,
+          marginBottom: 10,
+          borderRadius: 50,
+          elevation: 5
+        }}
+        onPress={fetchTransactionHistory}
+      >
+       <FontAwesomeIcon
+                icon={faArrowsRotate}
+                size={20}
+                color={theme === "dark" ? "#ccc" : "#444"}
+              />
+      </Pressable>
 
         {transactions.length > 0 ? (
           transactions.map((trans) => (

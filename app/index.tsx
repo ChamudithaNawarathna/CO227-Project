@@ -75,17 +75,6 @@ export default function Index() {
               Log In
             </ThemedText>
           </Pressable>
-          <Pressable
-            style={styles.loginButton}
-            onPress={() => {
-              //router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
-              router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
-            }}
-          >
-            <ThemedText type="buttonText" lightColor="#fff" darkColor="#fff">
-              Developer Log In
-            </ThemedText>
-          </Pressable>
         </ThemedView>
       </ImageBackground>
     </ThemedView>

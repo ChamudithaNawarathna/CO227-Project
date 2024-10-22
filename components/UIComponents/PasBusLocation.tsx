@@ -18,6 +18,7 @@ import { useAppContext } from "@/context/AppContext";
 import Constants from "expo-constants";
 import { Picker } from "@react-native-picker/picker";
 import { Dropdown } from "react-native-element-dropdown";
+import ErrorScreen from "../CommonScreens/ErrorScreen";
 
 type Bus = {
   regNo: string;
@@ -26,7 +27,7 @@ type Bus = {
 };
 
 export default function PasBusLocation() {
-  const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY
+  const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
   const { baseURL, myTickets } = useAppContext();
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -39,30 +40,33 @@ export default function PasBusLocation() {
   const theme = useColorScheme() ?? "light";
 
   const availableBuses: Bus[] = myTickets
-  ? Array.from(myTickets.values())
-      .filter((ticket) => ticket.tracking) // Only include tickets where tracking is true
-      .map((ticket) => ({
-        regNo: ticket.vehicalNo || "", // Fallback to an empty string if vehicalNo is undefined
-        routeNo: ticket.routeNo || "", // Fallback to an empty string if routeNo is undefined
-        route: ticket.route || "", // Fallback to an empty string if route is undefined
-      }))
-      .filter((bus) => bus.regNo && bus.route) // Filter out any buses with undefined regNo or route
-  : [];
+    ? Array.from(myTickets.values())
+        .filter((ticket) => ticket.tracking) // Only include tickets where tracking is true
+        .map((ticket) => ({
+          regNo: ticket.vehicalNo || "", // Fallback to an empty string if vehicalNo is undefined
+          routeNo: ticket.routeNo || "", // Fallback to an empty string if routeNo is undefined
+          route: ticket.route || "", // Fallback to an empty string if route is undefined
+        }))
+        .filter((bus) => bus.regNo && bus.route) // Filter out any buses with undefined regNo or route
+    : [];
 
-// Use a Set to track seen regNo values
-const seenRegNos = new Set<string>();
+  // Use a Set to track seen regNo values
+  const seenRegNos = new Set<string>();
 
-// Format the dropdown data, ensuring unique regNo
-const dropdownData = availableBuses.reduce((acc, bus) => {
-  if (!seenRegNos.has(bus.regNo)) {
-    seenRegNos.add(bus.regNo); // Mark this regNo as seen
-    acc.push({
-      label: `${bus.regNo} | ${bus.route}`, // Show vehicalNo and route in the dropdown
-      value: bus, // Set the entire bus object as the value
-    });
-  }
-  return acc;
-}, [] as { label: string; value: Bus }[]);
+  // Format the dropdown data, ensuring unique regNo
+  const dropdownData = availableBuses.reduce(
+    (acc, bus) => {
+      if (!seenRegNos.has(bus.regNo)) {
+        seenRegNos.add(bus.regNo); // Mark this regNo as seen
+        acc.push({
+          label: `${bus.regNo} | ${bus.route}`, // Show vehicalNo and route in the dropdown
+          value: bus, // Set the entire bus object as the value
+        });
+      }
+      return acc;
+    },
+    [] as { label: string; value: Bus }[]
+  );
 
   // Request location permissions
   const requestPermissions = async (): Promise<void> => {
@@ -88,6 +92,7 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
 
   // Fetch bus location
   const fetchBusLocation = async (regNo: string) => {
+    console.log("Getting bus location of bus:", regNo);
     try {
       const response = await axios.get(`${baseURL}/tracking/trk1`, {
         params: { data: regNo },
@@ -123,7 +128,7 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
         console.log("Updated Location:", loc.coords);
       }
       if (selectedBus) await fetchBusLocation(selectedBus.regNo);
-    }, 2000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, []);
@@ -131,6 +136,10 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
   useEffect(() => {
     setSelectedBus(availableBuses[0]);
   }, []);
+
+  if (errorMsg) {
+    return <ErrorScreen error={errorMsg} retry={getLocation}/>
+  }
 
   return (
     <View style={styles.container}>
@@ -148,7 +157,7 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
               placeholder="Select a bus"
               value={selectedBus ? selectedBus.regNo : null}
               onChange={(item) => {
-                setSelectedBus(item.value); 
+                setSelectedBus(item.value);
               }}
             />
             <MapView
@@ -181,24 +190,22 @@ const dropdownData = availableBuses.reduce((acc, bus) => {
                       style={{ width: 50, height: 50 }}
                     />
                   </Marker>
-                  {GOOGLE_MAPS_API_KEY && (
-                    <MapViewDirections
-                      origin={{
-                        latitude: location.coords.latitude,
-                        longitude: location.coords.longitude,
-                      }}
-                      destination={{
-                        latitude: busLocation.latitude,
-                        longitude: busLocation.longitude,
-                      }}
-                      apikey={GOOGLE_MAPS_API_KEY}
-                      strokeWidth={6}
-                      strokeColor="#d17"
-                      onError={(errorMessage) => {
-                        console.error("MapViewDirections Error:", errorMessage);
-                      }}
-                    />
-                  )}
+                  <MapViewDirections
+                    origin={{
+                      latitude: location.coords.latitude,
+                      longitude: location.coords.longitude,
+                    }}
+                    destination={{
+                      latitude: busLocation.latitude,
+                      longitude: busLocation.longitude,
+                    }}
+                    apikey={"AIzaSyB8KTu2cHiVsaBQAjxVFfe5YSjUaQHZVec"}
+                    strokeWidth={6}
+                    strokeColor="#d17"
+                    onError={(errorMessage) => {
+                      console.error("MapViewDirections Error:", errorMessage);
+                    }}
+                  />
                 </View>
               )}
             </MapView>
@@ -227,6 +234,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     elevation: 3,
     zIndex: 2,
-    margin: 12
+    margin: 12,
   },
 });

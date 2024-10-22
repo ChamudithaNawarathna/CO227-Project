@@ -105,6 +105,7 @@ export const AvailableTicketView = ({ ticket }: Props) => {
           paddingHorizontal: 10,
           flexDirection: "row",
           justifyContent: "space-between",
+          gap: 20,
           marginVertical: 10,
         }}
       >
@@ -216,35 +217,6 @@ export const AvailableTicketView = ({ ticket }: Props) => {
             }}
           >
             Cancel
-          </Text>
-        </Pressable>
-        <Pressable
-          style={{
-            padding: 5,
-            alignItems: "center",
-          }}
-          onPress={() => setDisplayFullTicket(true)}
-        >
-          {ticket.tracking ? (
-            <FontAwesomeIcon
-              icon={faMapLocationDot}
-              size={iconSize}
-              color={iconColor}
-            />
-          ) : (
-            <FontAwesomeIcon
-              icon={faMapLocationDot}
-              size={iconSize}
-              color={disabledIconColor}
-            />
-          )}
-          <Text
-            style={{
-              fontSize: iconTitleSize,
-              color: ticket.tracking ? iconColor : disabledIconColor,
-            }}
-          >
-            Track Location
           </Text>
         </Pressable>
         <Pressable

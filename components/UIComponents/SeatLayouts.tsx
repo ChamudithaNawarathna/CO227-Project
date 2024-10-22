@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import Seat from "./Seat";
 import { ThemedText } from "../CommonModules/ThemedText";
+import { useAppContext } from "@/context/AppContext";
 
 export function SeatLegend() {
   const seatColors = new Map<String, string>([
@@ -9,6 +10,7 @@ export function SeatLegend() {
     ["Not-Available", "#f30e"],
     ["Reserved", "#f90"],
   ]);
+  const { accountType, seatNos, setSeatNos } = useAppContext();
   return (
     <View>
       <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 70, margin: 5 }}>
@@ -22,7 +24,7 @@ export function SeatLegend() {
                 borderRadius: 10,
               }}
             ></View>
-            <ThemedText>Available</ThemedText>
+            <ThemedText>Available {accountType}</ThemedText>
           </View>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <View

@@ -1,4 +1,7 @@
-import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowRotateBack,
+  faArrowsRotate,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   View,
@@ -52,7 +55,7 @@ export default function OperatorTabScreen({
   ];
 
   return (
-    <ScrollView style={{ flex: 1, marginHorizontal: 10}}>
+    <ScrollView style={{ flex: 1, marginHorizontal: 10 }}>
       <View style={styles.container}>
         <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
           <Dropdown
@@ -72,11 +75,15 @@ export default function OperatorTabScreen({
             onPress={isTracking ? stopTracking : startTracking}
           >
             <Text style={styles.buttonText}>
-              {isTracking && !errorPermission ? "Stop Tracking" : "Start Tracking"}
+              {isTracking && !errorPermission
+                ? "Stop Tracking"
+                : "Start Tracking"}
             </Text>
           </Pressable>
         </View>
-        {errorPermission && <Text style={styles.errorText}>{errorPermission}</Text>}
+        {errorPermission && (
+          <Text style={styles.errorText}>{errorPermission}</Text>
+        )}
 
         <View
           style={{
@@ -89,26 +96,23 @@ export default function OperatorTabScreen({
           <View style={{ alignSelf: "center" }}>
             <Pressable
               style={{
-                marginTop: 10,
-                flexDirection: "row",
-                gap: 5,
+                backgroundColor: theme === "dark" ? "#555" : "#fff",
                 alignSelf: "flex-end",
+                alignItems: "center",
+                paddingVertical: 10,
+                paddingHorizontal: 10,
+                marginTop: 10,
+                marginBottom: -70,
+                borderRadius: 50,
+                elevation: 5,
               }}
               onPress={fetchBusDetails}
             >
               <FontAwesomeIcon
-                icon={faArrowRotateBack}
-                size={18}
-                color={iconColor}
-                style={{ alignSelf: "center" }}
+                icon={faArrowsRotate}
+                size={20}
+                color={theme === "dark" ? "#ccc" : "#444"}
               />
-              <ThemedText
-                type="s5"
-                lightColor={iconColor}
-                darkColor={iconColor}
-              >
-                Refresh
-              </ThemedText>
             </Pressable>
           </View>
           {vehicleDetail.seats == 42 && <Seat44Layout />}

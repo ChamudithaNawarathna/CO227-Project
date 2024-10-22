@@ -51,6 +51,7 @@ type Props = {
   isVisible: boolean;
   onClose: (event?: GestureResponderEvent) => void;
   scheduleId: string;
+  seats: number;
   departureDate: string;
   aproxDepT: string;
   aproxAriT: string;
@@ -65,6 +66,7 @@ export default function SeatsModal({
   isVisible,
   onClose,
   scheduleId,
+  seats,
   departureDate,
   aproxDepT,
   aproxAriT,
@@ -147,7 +149,8 @@ export default function SeatsModal({
       </Pressable>
       <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
         <ThemedView style={styles.titleContainer}>
-          <Seat54Layout />
+          {seats == 42 && <Seat44Layout />}
+          {seats == 54 && <Seat54Layout />}
           <SeatLegend />
           <View style={{ flexDirection: "row", gap: 20, marginVertical: 10 }}>
             <View style={{ gap: 10 }}>

@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRotateBack, faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import {
   ActivityIndicator,
   Alert,
@@ -264,12 +264,12 @@ export default function Dashboard() {
       <View
         style={[styles.tab, focused ? styles.activeTab : styles.inactiveTab]}
       >
-        <Text style={{ color: focused ? "white" : "black" }}>
+        <ThemedText type="h6" style={{ color: focused ? "white" : "black" }}>
           {route.title.split("|")[0]}
-        </Text>
-        <Text style={{ color: focused ? "white" : "black" }}>
+        </ThemedText>
+        <ThemedText type="s7" style={{ color: focused ? "white" : "black" }}>
           {route.title.split("|")[1]}
-        </Text>
+        </ThemedText>
       </View>
     );
   };
@@ -351,8 +351,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tab: {
-    padding: 10,
-    borderRadius: 20,
+    padding: 5,
+    borderRadius: 10,
   },
   activeTab: {
     alignItems: "center",

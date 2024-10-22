@@ -61,7 +61,7 @@ export default function LogIn() {
       if (currentPos === 0 && !otpRequested) {
         // Check the flag before requesting OTP
         const userInfo = await fetchUserInfo();
-        if (email != '' && !otpRequested) {
+        if (email != "" && !otpRequested) {
           try {
             await requestOTP(); // Await requestOTP to ensure it completes
             otpRequested = true; // Set the flag to true after requesting OTP
@@ -77,7 +77,7 @@ export default function LogIn() {
             return; // Stop scrolling if OTP request fails
           }
         } else {
-          console.error("Failed to retrieve user info, stopping scroll.");
+          // console.error("Failed to retrieve user info, stopping scroll.");
           return; // Stop scrolling if user info retrieval fails
         }
       }
@@ -156,8 +156,8 @@ export default function LogIn() {
 
       return userInfo;
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      Alert.alert("Error", "Failed to fetch user details");
+      // console.error("Error fetching user data:", error);
+      // Alert.alert("Error", "Failed to fetch user details");
       return null;
     }
   };
@@ -256,7 +256,7 @@ export default function LogIn() {
                 lightColor="#1cba"
                 darkColor="#11aadd"
               >
-                <FontAwesome name="chevron-left" size={20} /> Back{" "}
+                <FontAwesome name="chevron-left" size={20} /> Back
               </ThemedText>
             </Pressable>
           )}

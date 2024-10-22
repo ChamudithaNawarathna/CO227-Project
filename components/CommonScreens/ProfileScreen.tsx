@@ -28,7 +28,8 @@ import { InfoCard } from "@/components/UIComponents/InfoCard";
 
 export default function ProfileScreen() {
   const {
-    operatorAcc, ownerAcc,
+    operatorAcc,
+    ownerAcc,
     profileImage,
     setProfileImage,
     credits,
@@ -105,6 +106,7 @@ export default function ProfileScreen() {
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
+            gap: 20,
             alignItems: "center",
             marginBottom: 30,
             borderRadius: 20,
@@ -138,6 +140,7 @@ export default function ProfileScreen() {
         </View>
 
         <ScrollView
+          showsVerticalScrollIndicator={false}
           style={{
             backgroundColor: "transparent",
             marginHorizontal: 20,

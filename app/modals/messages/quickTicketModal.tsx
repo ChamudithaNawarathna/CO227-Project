@@ -141,13 +141,13 @@ export default function QuickTicketModal({
       <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
         <ThemedView style={styles.titleContainer}>
           <Text
-            style={{ color: "#999", fontWeight: "600", fontStyle: "italic" }}
+            style={{ color: "#999", fontWeight: "600", fontStyle: "italic", textAlign: 'justify' }}
           >
             Please note that Quick Tickets allow you to purchase tickets via the
             app even after the regular booking period (24 hours before
             departure). However, Quick Tickets do not guarantee a reserved seat
           </Text>
-          <View style={{ flexDirection: "row", gap: 20, marginVertical: 10 }}>
+          <View style={{ flexDirection: "row", gap: 20, marginTop: 30, marginBottom: 10, marginHorizontal: 10 }}>
             <View style={{ gap: 10 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <ThemedText type="h4" lightColor="#a07070" darkColor="#b09090">
@@ -170,14 +170,14 @@ export default function QuickTicketModal({
                 alignSelf: "center",
                 backgroundColor: full > 0 || half > 0 ? "#0eaedf" : "#999a",
                 paddingHorizontal: 10,
-                paddingVertical: 20,
+                paddingVertical: 10,
                 borderRadius: 50,
                 alignItems: "center",
               }}
               onPress={handleBooking}
             >
               <ThemedText type="h4" lightColor="#fff">
-                Purchase Ticket
+                Buy
               </ThemedText>
             </Pressable>
           </View>
@@ -189,7 +189,6 @@ export default function QuickTicketModal({
 
 const styles = StyleSheet.create({
   pageBody: {
-    flex: 1,
     paddingHorizontal: 10,
     borderRadius: 30,
   },

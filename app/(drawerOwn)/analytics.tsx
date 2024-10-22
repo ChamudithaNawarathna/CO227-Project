@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRotateBack, faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { Dropdown } from "react-native-element-dropdown";
 import {
@@ -127,27 +127,26 @@ export default function Analytics() {
 
   return (
     <View style={styles.mainBody}>
-      <ScrollView style={{ backgroundColor: "transparent" }}>
-        <Pressable
-          style={{
-            marginTop: 10,
-            marginHorizontal: 10,
-            flexDirection: "row",
-            gap: 5,
-            alignSelf: "flex-end",
-          }}
-          onPress={fetchIncomeData}
-        >
-          <FontAwesomeIcon
-            icon={faArrowRotateBack}
-            size={18}
-            color={iconColor}
-            style={{ alignSelf: "center" }}
-          />
-          <ThemedText type="s5" lightColor={iconColor} darkColor={iconColor}>
-            Refresh
-          </ThemedText>
-        </Pressable>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: "transparent" }}>
+      <Pressable
+        style={{
+          backgroundColor: theme === "dark" ? "#555" : "#fff",
+          alignSelf: 'flex-end',
+          alignItems: "center",
+          paddingVertical: 10,
+          paddingHorizontal: 10,
+          marginBottom: 10,
+          borderRadius: 50,
+          elevation: 5
+        }}
+        onPress={fetchIncomeData}
+      >
+       <FontAwesomeIcon
+                icon={faArrowsRotate}
+                size={20}
+                color={theme === "dark" ? "#ccc" : "#444"}
+              />
+      </Pressable>
 
         {incomeData && (
           <View style={{ marginHorizontal: 5 }}>

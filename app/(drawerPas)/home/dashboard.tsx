@@ -20,6 +20,8 @@ import { AvailableTicketView } from "@/components/UIComponents/AvailableTicketVi
 import StringToDate from "@/components/CommonModules/StringToDateTime";
 import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
 import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 
 type AvailableTicket = {
   refNo: string;
@@ -144,7 +146,6 @@ export default function Dashboard() {
   }
 
   return (
-    <ScreenWrapper>
       <View style={styles.mainBody}>
         <View
           style={{
@@ -152,15 +153,14 @@ export default function Dashboard() {
             justifyContent: "space-between",
             alignItems: "center",
             borderRadius: 20,
-            paddingVertical: 3,
+            paddingBottom: 3,
+            marginTop: 10,
             paddingHorizontal: 5,
             marginHorizontal: "10%",
           }}
         >
           <ThemedText
             type={"h4"}
-            lightColor={"#fff"}
-            darkColor={"#fff"}
             style={{ marginLeft: 5 }}
           >
             Balance: LKR {credits}
@@ -169,56 +169,55 @@ export default function Dashboard() {
             style={[
               styles.rechargeButton,
               {
-                borderColor: "#fff",
+                borderColor: theme === "dark" ? "#ccc" : "#444",
                 borderWidth: 2,
               },
             ]}
             onPress={() => router.replace("/index" as Href<string>)}
           >
-            <ThemedText type="h6" lightColor={"#fff"} darkColor={"#fff"}>
+            <ThemedText type="h6">
               Recharge
             </ThemedText>
           </Pressable>
         </View>
 
-        <ThemedText
-          type={"h4"}
-          style={styles.cardHeader}
-          lightColor="#fff"
-          darkColor="#fff"
-        >
-          Available Tickets
-        </ThemedText>
-
-        <Pressable
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: 'center' }}>
+          <ThemedText
+            type={"h4"}
+            style={styles.cardHeader}
+          >
+            Available Tickets
+          </ThemedText>
+          <Pressable
             style={{
-              backgroundColor: "#a8f",
-              borderWidth: 0,
-              borderRadius: 10,
+              backgroundColor: theme === "dark" ? "#555" : "#fff",
+              alignSelf: "flex-end",
+              alignItems: "center",
+              paddingVertical: 10,
+              paddingHorizontal: 10,
               marginHorizontal: 10,
-              padding: 10,
-              marginTop: 10,
+              borderRadius: 50,
+              elevation: 5,
             }}
             onPress={fetchAvailableTickets}
           >
-            <ThemedText
-              type={"s5"}
-              style={{ textAlign: "center" }}
-              lightColor="#fff"
-              darkColor="#fff"
-            >
-              Refresh
-            </ThemedText>
+            <FontAwesomeIcon
+              icon={faArrowsRotate}
+              size={20}
+              color={theme === "dark" ? "#ccc" : "#444"}
+            />
           </Pressable>
+        </View>
+
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={{ padding: 12 }}>
             {loading ? (
               <View style={{ marginTop: 200, alignItems: "center" }}>
-              <ActivityIndicator
-                size={70}
-                color={theme === "dark" ? "#ddd" : "#777"}
-              />
-            </View>
+                <ActivityIndicator
+                  size={70}
+                  color={theme === "dark" ? "#ddd" : "#777"}
+                />
+              </View>
             ) : myTickets ? (
               Array.from(myTickets.entries()).map(([ticketNo, ticket]) => (
                 <AvailableTicketView key={ticketNo} ticket={ticket} />
@@ -235,7 +234,6 @@ export default function Dashboard() {
           </View>
         </ScrollView>
       </View>
-    </ScreenWrapper>
   );
 }
 
