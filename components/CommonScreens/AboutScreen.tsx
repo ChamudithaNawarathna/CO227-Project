@@ -1,14 +1,15 @@
 import React from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, useColorScheme } from "react-native";
 
-import AboutUs from "@/assets/docs/AboutUs.json";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import AboutUs from "../../assets/docs/AboutUs.json";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 
 export default function AboutScreen() {
+  const theme = useColorScheme() ?? "light";
   const { company } = AboutUs;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={{flex: 1, backgroundColor: theme === "dark" ? "#202020" : "#ffffff", padding: 20}}>
       <ThemedText style={styles.title}>{company.name}</ThemedText>
       <ThemedText style={styles.description}>{company.description}</ThemedText>
 
@@ -57,11 +58,6 @@ export default function AboutScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    marginVertical: 30,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",

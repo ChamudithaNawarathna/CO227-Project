@@ -1,47 +1,28 @@
-import {
-  DrawerContentScrollView,
-  DrawerItem,
-  DrawerItemList,
-} from "@react-navigation/drawer";
 import { Href, useRouter } from "expo-router";
-import { getBackgroundColorAsync } from "expo-system-ui";
 import {
-  Pressable,
   useColorScheme,
   View,
   Image,
   StyleSheet,
 } from "react-native";
 import { ThemedText } from "./CommonModules/ThemedText";
-import { MaterialIcons } from "@expo/vector-icons";
-import { faHome, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { accountType, useAppContext } from "@/context/AppContext";
+import { accountType, useAppContext } from "../context/AppContext";
 import { Dropdown } from "react-native-element-dropdown";
-import { Owner } from "@/controller/Owner";
-import { useState } from "react";
-import OwnSignupModal from "@/app/modals/ownSignupModal";
-import OpeSignupModal from "@/app/modals/opeSignupModal";
+import React, { useState } from "react";
+import { DrawerContentScrollView, DrawerItemList, DrawerItem } from "@react-navigation/drawer";
+import OpeSignupModal from "../app/modals/opeSignupModal";
+import OwnSignupModal from "../app/modals/ownSignupModal";
 
 export default function CustomDrawerContent(props: any) {
   const {
-    baseURL,
-operatorAcc, ownerAcc,
+    operatorAcc,
+    ownerAcc,
     profileImage,
     accountType,
     fName,
     lName,
-    phoneNo,
-    email,
-    nic,
-    accountNo,
-    accHolderName,
-    bankName,
-    branchName,
-    ntcLicenseNo,
-    driverLicenseNo,
-    occupation,
-    setOperatorAcc, setOwnerAcc,
     setAccountType,
     setFName,
     setLName,
@@ -55,7 +36,7 @@ operatorAcc, ownerAcc,
     setNTCLicenseNo,
     setDriverLicenseNo,
     setOccupation,
-    setCredits
+    setCredits,
   } = useAppContext();
   const theme = useColorScheme() ?? "light";
   const iconColor = theme === "dark" ? "#eee" : "#777";
@@ -73,12 +54,12 @@ operatorAcc, ownerAcc,
     switch (accType) {
       case "passenger":
         setAccountType(accType);
-        router.navigate("/(drawerPas)/home/dashboard" as Href<string>);
+        router.replace("/(drawerPas)/home/dashboard");
         return null;
       case "employee":
         if (operatorAcc) {
           setAccountType(accType);
-          router.navigate("/(drawerOpe)/home/dashboard" as Href<string>);
+          router.replace("/(drawerOpe)/home/dashboard");
         } else {
           setOpeSignupModal(true);
         }
@@ -86,7 +67,7 @@ operatorAcc, ownerAcc,
       case "owner":
         if (ownerAcc) {
           setAccountType(accType);
-          router.navigate("/(drawerOwn)/home/dashboard" as Href<string>);
+          router.replace("/(drawerOwn)/home/dashboard");
         } else {
           setOwnSignupModal(true);
         }
@@ -94,7 +75,7 @@ operatorAcc, ownerAcc,
     }
   }
 
-  function pressLogout () {
+  function pressLogout() {
     setFName("");
     setLName("");
     setPhoneNo("");
@@ -108,7 +89,7 @@ operatorAcc, ownerAcc,
     setDriverLicenseNo("");
     setOccupation("");
     setCredits(0);
-    router.replace("/")
+    router.replace("/");
   }
 
   return (
@@ -119,7 +100,7 @@ operatorAcc, ownerAcc,
             source={
               profileImage != ""
                 ? { uri: profileImage }
-                : require("@/assets/images/blank-profile-picture.png")
+                : require("../assets/images/blank-profile-picture.png")
             }
             style={styles.profileImage}
           />

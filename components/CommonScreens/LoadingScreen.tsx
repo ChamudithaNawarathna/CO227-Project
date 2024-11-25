@@ -1,11 +1,12 @@
 import { ActivityIndicator, useColorScheme, View } from "react-native";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
+import { ThemedView } from "../CommonModules/ThemedView";
 
 export default function LoadingScreen() {
   const theme = useColorScheme() ?? "light";
 
   return (
-    <View style={{ flex: 1 }}>
+    <ThemedView style={{ flex: 1 }}>
       <View style={{ marginTop: 200, alignItems: "center" }}>
         <ActivityIndicator
           size={70}
@@ -18,6 +19,6 @@ export default function LoadingScreen() {
           Loading....
         </ThemedText>
       </View>
-    </View>
+    </ThemedView>
   );
 }

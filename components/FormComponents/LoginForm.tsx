@@ -1,7 +1,6 @@
 import {
   Pressable,
   View,
-  Text,
   Image,
   StyleSheet,
   useColorScheme,
@@ -11,20 +10,12 @@ import {
   GestureHandlerRootView,
   TextInput,
 } from "react-native-gesture-handler";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
-import { ThemedView } from "../CommonModules/ThemedView";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 import {
-  validateName,
   validatePhoneNo,
-  validateNIC,
-  validateOTP,
 } from "./FormFunctions";
-import { formStyles } from "./FormStyles";
 import { FormInput } from "./FormInputField";
 import React from "react";
-import axios from "axios";
-import { useAppContext } from "@/context/AppContext";
 
 /********************************************************** Personal Info Page ***********************************************************/
 
@@ -58,9 +49,11 @@ export const LogInFormPage1 = ({
   }, [currentPos]);
 
   return (
-    <GestureHandlerRootView style={{
-      paddingVertical: 50
-    }}>
+    <GestureHandlerRootView>
+      <Image
+        source={require("../../assets/images/People waiting for bus at bus stop.png")}
+        style={styles.image}
+      />
       <FormInput
         ref={inputRefs.current[0]}
         title="Phone Number"
@@ -81,13 +74,25 @@ export const LogInFormPage1 = ({
           alignItems: "center",
         }}
       >
-        <View style={{ flex: 1, height: 2, backgroundColor: theme == "dark" ? "#ccc" : "#aaa" }} />
+        <View
+          style={{
+            flex: 1,
+            height: 2,
+            backgroundColor: theme == "dark" ? "#ccc" : "#aaa",
+          }}
+        />
         <ThemedText type="h5" lightColor="#aaa" darkColor="#ccc">
           or
         </ThemedText>
-        <View style={{ flex: 1, height: 2, backgroundColor: theme == "dark" ? "#ccc" : "#aaa" }} />
+        <View
+          style={{
+            flex: 1,
+            height: 2,
+            backgroundColor: theme == "dark" ? "#ccc" : "#aaa",
+          }}
+        />
       </View>
-      <View style={{ marginVertical: 30}}>
+      <View style={{ marginVertical: 30 }}>
         <Pressable
           style={{
             flexDirection: "row",
@@ -102,7 +107,7 @@ export const LogInFormPage1 = ({
           onPress={() => {}}
         >
           <Image
-            source={require("@/assets/icons/google.png")}
+            source={require("../../assets/logos/google.png")}
             style={styles.logo}
           />
           <ThemedText type="s5" lightColor="#000" darkColor="#000">
@@ -130,5 +135,11 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     margin: 8,
+  },
+  image: {
+    width: 300,
+    height: 120,
+    alignSelf: 'center',
+    marginBottom: 20
   },
 });

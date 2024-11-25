@@ -13,7 +13,7 @@ import {
   faChevronDown,
   faRightFromBracket,
 } from "@fortawesome/free-solid-svg-icons";
-import { accountType, useAppContext } from "@/context/AppContext";
+import { accountType, useAppContext } from "../context/AppContext";
 
 type DateType = {
   label: string;

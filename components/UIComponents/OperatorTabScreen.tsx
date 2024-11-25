@@ -15,7 +15,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { ThemedText } from "../CommonModules/ThemedText";
 import { Seat44Layout, Seat54Layout, OperatorSeatLegend } from "./SeatLayouts";
 import { Dispatch, SetStateAction } from "react";
-import { VehicleDetails } from "@/context/AppContext";
+import { VehicleDetails } from "../../context/AppContext";
 
 type Props = {
   updateInterval: {
@@ -55,7 +55,7 @@ export default function OperatorTabScreen({
   ];
 
   return (
-    <ScrollView style={{ flex: 1, marginHorizontal: 10 }}>
+    <ScrollView style={{ flex: 1, marginHorizontal: 10 }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
       <View style={styles.container}>
         <View style={{ flexDirection: "row", justifyContent: "space-evenly" }}>
           <Dropdown
@@ -65,9 +65,9 @@ export default function OperatorTabScreen({
             labelField="label"
             valueField="value"
             placeholder="Select a time interval"
-            value={updateInterval} // Use the state variable directly
+            value={updateInterval}
             onChange={(item) => {
-              setUpdateInterval(item); // Update the state with the selected object
+              setUpdateInterval(item);
             }}
           />
           <Pressable
@@ -88,7 +88,7 @@ export default function OperatorTabScreen({
         <View
           style={{
             marginHorizontal: 40,
-            backgroundColor: "#fff",
+            backgroundColor: "transparent",
             borderRadius: 20,
             paddingHorizontal: 10,
           }}
@@ -96,18 +96,23 @@ export default function OperatorTabScreen({
           <View style={{ alignSelf: "center" }}>
             <Pressable
               style={{
+                flexDirection: "row",
+                gap: 7,
                 backgroundColor: theme === "dark" ? "#555" : "#fff",
                 alignSelf: "flex-end",
                 alignItems: "center",
                 paddingVertical: 10,
                 paddingHorizontal: 10,
                 marginTop: 10,
-                marginBottom: -70,
+                marginBottom: -10,
                 borderRadius: 50,
                 elevation: 5,
               }}
               onPress={fetchBusDetails}
             >
+              <ThemedText type="h5" lightColor="#666" darkColor="#ccc">
+                Refresh Seats
+              </ThemedText>
               <FontAwesomeIcon
                 icon={faArrowsRotate}
                 size={20}
@@ -157,7 +162,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   trackingButton: {
-    backgroundColor: "#007bff",
+    backgroundColor: "#0384DB",
     padding: 10,
     borderRadius: 20,
     marginVertical: 10,
@@ -165,7 +170,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
-    textAlign: "center",
   },
   pickerLabel: {
     marginTop: 20,

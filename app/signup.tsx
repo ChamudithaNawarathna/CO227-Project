@@ -13,27 +13,24 @@ import { Href, Link, router } from "expo-router";
 import { useState, useEffect } from "react";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
+import { useAppContext } from "../context/AppContext";
+import { ThemedText } from "../components/CommonModules/ThemedText";
+import { ThemedView } from "../components/CommonModules/ThemedView";
 import {
   PassengerFormPage1,
-  PassengerFormPage2,
-} from "@/components/FormComponents/PassengerForm";
+} from "../components/FormComponents/PassengerForm";
 import {
   OperatorFormPage1,
   OperatorFormPage2,
-  OperatorFormPage3,
-} from "@/components/FormComponents/OperatorForm";
+} from "../components/FormComponents/OperatorForm";
 import {
   OwnerFormPage1,
   OwnerFormPage2,
-  OwnerFormPage3,
-} from "@/components/FormComponents/OwnerForm";
-import calculateBirthday from "@/components/CommonModules/CalculateBirthday";
+} from "../components/FormComponents/OwnerForm";
+import calculateBirthday from "../components/CommonModules/CalculateBirthday";
 import PrivacyModal from "./modals/privacyModal";
 import TermsModal from "./modals/termsModal";
-import { OTPPage } from "@/components/FormComponents/OTPPage";
+import { OTPPage } from "../components/FormComponents/OTPPage";
 
 var formPageCount = 2; // Excluding the common "Sign up as a passenger, operator or owner" form page
 const formPageWidth = 320;
@@ -176,7 +173,7 @@ export default function SignUp() {
 
       if (response && response.status === 201) {
         // Only navigate on successful registration
-        router.replace("/login" as Href<string>);
+        router.replace("/login");
       } else {
         console.error("Registration error:", "Registration failed");
         Alert.alert(
@@ -294,7 +291,7 @@ export default function SignUp() {
   return (
     <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
       <ImageBackground
-        source={require("@/assets/images/main_bg.png")}
+        source={require("../assets/images/main_bg.png")}
         style={styles.backgroundImage}
       >
         <ThemedView style={styles.titleContainer}>
@@ -317,7 +314,7 @@ export default function SignUp() {
             {/******** Sign up as a passenger, operator or owner form page ******************/}
             <Animated.View style={styles.formPage}>
               <Image
-                source={require("@/assets/images/People waiting for bus at bus stop.png")}
+                source={require("../assets/images/People waiting for bus at bus stop.png")}
                 style={styles.image}
               />
               <ThemedView style={styles.signInTypeContainer}>
@@ -615,7 +612,7 @@ export default function SignUp() {
               Already have an account?{" "}
               <Link
                 href={"/login"}
-                onPress={() => router.replace("/login" as Href<string>)}
+                onPress={() => router.replace("/login")}
               >
                 <ThemedText lightColor="#28b1de" darkColor="#2eccff">
                   Log In

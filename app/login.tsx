@@ -10,12 +10,11 @@ import FontAwesome from "@expo/vector-icons/build/FontAwesome";
 import { Href, Link, router } from "expo-router";
 import { useState, useEffect } from "react";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
-
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
-import { LogInFormPage1 } from "@/components/FormComponents/LoginForm";
-import { OTPPage } from "@/components/FormComponents/OTPPage";
+import { ThemedView } from "../components/CommonModules/ThemedView";
+import { ThemedText } from "../components/CommonModules/ThemedText";
+import { LogInFormPage1 } from "../components/FormComponents/LoginForm";
+import { OTPPage } from "../components/FormComponents/OTPPage";
+import {useAppContext } from "../context/AppContext";
 
 var formPageCount = 2;
 const formPageWidth = 320;
@@ -24,10 +23,7 @@ export default function LogIn() {
   const {
     baseURL,
     phoneNo,
-    email,
-    operatorAcc,
     setOperatorAcc,
-    ownerAcc,
     setOwnerAcc,
     setID,
     setFName,
@@ -61,9 +57,9 @@ export default function LogIn() {
       if (currentPos === 0 && !otpRequested) {
         // Check the flag before requesting OTP
         const userInfo = await fetchUserInfo();
-        if (email != "" && !otpRequested) {
+        if (userInfo && !otpRequested) {
           try {
-            await requestOTP(); // Await requestOTP to ensure it completes
+            await requestOTP(userInfo.email); // Await requestOTP to ensure it completes
             otpRequested = true; // Set the flag to true after requesting OTP
             let newPos =
               currentPos < formPageCount * formPageWidth
@@ -101,69 +97,66 @@ export default function LogIn() {
 
   // Redirect to the correct dashboard
   function goToDashboard() {
-    router.replace("/(drawerPas)/home/dashboard" as Href<string>);
+    router.replace("/(drawerPas)/home/dashboard");
   }
 
   //================================================ Backend Calls ===============================================//
 
-  // Fetch user data by user ID
-  const fetchUserInfo = async (): Promise<any | null> => {
-    try {
-      const response = await axios.post(`${baseURL}/users/req5`, {
-        data: phoneNo,
-      });
+// Fetch user data by user ID
+const fetchUserInfo = async (): Promise<any | null> => {
+  try {
+    const response = await axios.post(`${baseURL}/users/req5`, {
+      data: phoneNo,
+    });
 
-      if (response.data.error) {
-        console.error("Error fetching user info:", response.data.error);
-        Alert.alert("Error", "User not found or an error occurred");
-        return null;
-      }
-
-      const userInfo = response.data;
-      console.log(userInfo);
-
-      // Check if userInfo exists and has expected fields
-      if (!userInfo || !userInfo.userID) {
-        console.warn("User does not exist or invalid user data returned");
-        Alert.alert("Error", "User does not exist");
-        return null;
-      }
-
-      // Set user info safely using optional chaining in case fields are missing
-      setID(userInfo.userID || "");
-      setFName(userInfo.fName || "");
-      setLName(userInfo.lName || "");
-      setPhoneNo(userInfo.mobile || "");
-      setEmail(userInfo.email || "");
-      setNIC(userInfo.nic || "");
-      setAccountNo(userInfo.accNo || "");
-      setAccHolderName(userInfo.accName || "");
-      setBankName(userInfo.bank || "");
-      setBranchName(userInfo.branch || "");
-      setNTCLicenseNo(userInfo.ntc || "");
-      setDriverLicenseNo(userInfo.licence || "");
-      setOccupation(userInfo.empType || "");
-      setCredits(userInfo.credits || 0);
-      setDiscount(userInfo.discountPercentage || 0);
-
-      // Account type settings
-      if (userInfo.userType === "owner") {
-        setOwnerAcc(true);
-      }
-      if (userInfo.empType || userInfo.empType == "None") {
-        setOperatorAcc(true);
-      }
-
-      return userInfo;
-    } catch (error) {
-      // console.error("Error fetching user data:", error);
-      // Alert.alert("Error", "Failed to fetch user details");
+    // Check for errors in response
+    if (response.data.error) {
+      console.error("Error fetching user info:", response.data.error);
+      Alert.alert("Error", "User not found or an error occurred");
       return null;
     }
-  };
+
+    const userInfo = response.data;
+    console.log("User Info:", userInfo);
+
+    // Validate user info existence and expected fields
+    if (!userInfo || !userInfo.userID) {
+      console.warn("User does not exist or invalid user data returned");
+      Alert.alert("Error", "User does not exist");
+      return null;
+    }
+
+    // Set user information fields
+    setID(userInfo.userID ?? "");
+    setFName(userInfo.fName ?? "");
+    setLName(userInfo.lName ?? "");
+    setPhoneNo(userInfo.mobile ?? "");
+    setEmail(userInfo.email ?? "");
+    setNIC(userInfo.nic ?? "");
+    setAccountNo(userInfo.accNo ?? "");
+    setAccHolderName(userInfo.accName ?? "");
+    setBankName(userInfo.bank ?? "");
+    setBranchName(userInfo.branch ?? "");
+    setNTCLicenseNo(userInfo.ntc ?? "");
+    setDriverLicenseNo(userInfo.licence ?? "");
+    setOccupation(userInfo.empType ?? "");
+    setCredits(userInfo.credits ?? 0);
+    setDiscount(userInfo.discountPercentage ?? 0);
+
+    // Set account type settings
+    setOwnerAcc(userInfo.userType === "owner");
+    setOperatorAcc(!!userInfo.empType && userInfo.empType !== "None");
+
+    return userInfo;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    Alert.alert("Error", "Failed to fetch user data");
+    return null;
+  }
+};
 
   // Request an OTP
-  const requestOTP = async () => {
+  const requestOTP = async (email: string) => {
     try {
       const response = await axios.post(`${baseURL}/otp/request`, {
         data: {
@@ -173,8 +166,8 @@ export default function LogIn() {
         },
       });
       if (response.status === 201) {
+        console.log("OTP request was successful");
         Alert.alert("OTP sent", "Please check your email or mobile");
-        scrollForward();
       }
     } catch (error) {
       console.error(error);
@@ -202,9 +195,9 @@ export default function LogIn() {
   //================================================ UI Control ===============================================//
 
   return (
-    <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
+    <ThemedView style={styles.pageBody}>
       <ImageBackground
-        source={require("@/assets/images/main_bg.png")}
+        source={require("../assets/images/main_bg.png")}
         style={styles.backgroundImage}
       >
         <ThemedView style={styles.titleContainer}>
@@ -280,7 +273,7 @@ export default function LogIn() {
               Don't have an account?{" "}
               <Link
                 href={"/signup"}
-                onPress={() => router.replace("/login" as Href<string>)}
+                onPress={() => router.replace("/login")}
               >
                 <ThemedText lightColor="#28b1de" darkColor="#2eccff">
                   Sign Up
@@ -293,113 +286,6 @@ export default function LogIn() {
     </ThemedView>
   );
 }
-
-// const styles = StyleSheet.create({
-//   pageBody: {
-//     flex: 1,
-//   },
-//   backgroundImage: {
-//     flex: 1,
-//   },
-//   image: {
-//     width: "100%",
-//     height: "32%",
-//     marginTop: "25%",
-//   },
-//   formPageContainer: {
-//     alignContent: "center",
-//   },
-//   signInTypeContainer: {
-//     backgroundColor: "transparent",
-//     alignSelf: "center",
-//   },
-//   signInTypeButton: {
-//     borderWidth: 0,
-//     color: "#fff",
-//     borderRadius: 50,
-//     paddingVertical: 10,
-//     paddingHorizontal: 40,
-//     marginVertical: 5,
-//     backgroundColor: "#169af5",
-//     alignItems: "center",
-//     elevation: 3,
-//   },
-//   formPage: {
-//     width: formPageWidth,
-//     alignItems: "center",
-//     backgroundColor: "transparent",
-//     padding: 0,
-//   },
-//   formBackButton: {
-//     position: "absolute",
-//     left: 0,
-//     backgroundColor: "transparent",
-//   },
-//   formNextButton: {
-//     position: "absolute",
-//     right: 0,
-//     backgroundColor: "transparent",
-//   },
-//   formBody: {
-//     backgroundColor: "transparent",
-//     height: "55%",
-//     margin: 10,
-//     borderRadius: 10,
-//     padding: 10,
-//     alignSelf: "center",
-//   },
-//   tncBody: {
-//     width: formPageWidth,
-//     alignItems: "center",
-//     backgroundColor: "#fff",
-//     padding: 0,
-//   },
-//   titleContainer: {
-//     backgroundColor: "transparent",
-//     padding: 10,
-//     marginTop: 90,
-//     alignItems: "center",
-//   },
-//   footer: {
-//     backgroundColor: "transparent",
-//     position: "absolute",
-//     bottom: 150,
-//     alignSelf: "center",
-//   },
-//   submitButton: {
-//     borderWidth: 0,
-//     color: "#fff",
-//     borderRadius: 50,
-//     padding: 10,
-//     marginBottom: 5,
-//     backgroundColor: "#ff8b2e",
-//     alignItems: "center",
-//   },
-//   modelButton: {
-//     borderWidth: 0,
-//     color: "#fff",
-//     borderRadius: 50,
-//     padding: 10,
-//     marginBottom: 5,
-//     backgroundColor: "#2ededa",
-//     alignItems: "center",
-//   },
-//   formNavContainer: {
-//     width: formPageWidth,
-//     flexDirection: "row",
-//     alignSelf: "center",
-//     alignItems: "center",
-//     justifyContent: "space-around",
-//   },
-//   buttonBody: {
-//     alignItems: "center",
-//     backgroundColor: "#ff8b2e",
-//     marginVertical: 10,
-//     marginHorizontal: 20,
-//     paddingVertical: 5,
-//     borderRadius: 20,
-//   },
-// });
 
 const styles = StyleSheet.create({
   // Page structure

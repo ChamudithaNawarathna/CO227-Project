@@ -15,26 +15,30 @@ import {
 import {
   faLocationDot,
   faLocationCrosshairs,
+  faCalendarDays,
 } from "@fortawesome/free-solid-svg-icons";
-import { faCalendarDays } from "@fortawesome/free-regular-svg-icons";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import axios from "axios";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { useAppContext } from "../../../context/AppContext";
+import { ThemedText } from "../../../components/CommonModules/ThemedText";
 import {
   DateTimeInputSquare,
   BusStopSearchInput,
-} from "@/components/FormComponents/FormInputField";
-import SeatsModal from "@/app/modals/seatsModal";
-import { DateToString } from "@/components/CommonModules/DateTimeToString";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
-import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
-import QuickTicketModal from "@/app/modals/messages/quickTicketModal";
+} from "../../../components/FormComponents/FormInputField";
+import { DateToString } from "../../../components/CommonModules/DateTimeToString";
+import ErrorScreen from "../../../components/CommonScreens/ErrorScreen";
+import { ThemedView } from "../../../components/CommonModules/ThemedView";
+import { BusSchedule } from "../../../components/UIComponents/BusSchedule";
+import QuickTicketModal from "../../modals/messages/quickTicketModal";
+import SeatsModal from "../../modals/seatsModal";
 
-interface Schedule {
+/**
+ * Represents the structure of schedule
+ */
+export type Schedule = {
   id: string;
   from: string;
   to: string;
@@ -50,8 +54,11 @@ interface Schedule {
   arrival: string;
   journey: string;
   price: string;
-}
+};
 
+/**
+ * Represents the structure of busstop
+ */
 interface BusStop {
   id: number;
   name: string;
@@ -61,41 +68,52 @@ interface BusStop {
   };
 }
 
+/**
+ * Represents the structure of busstop id
+ */
 type BusStopIDs = {
   fromID: string;
   toID: string;
 };
 
+/**
+ * Tickets component provides users the ability to search for bus schedules, view available seats,
+ * and book tickets. If the current time is within 24 hours of departure, seat booking is allowed,
+ * otherwise, users can only purchase a Quick Ticket.
+ */
+
 export default function Tickets() {
-  const { baseURL, discount } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const iconSize = 20;
-  const folderUri = FileSystem.documentDirectory + "docs";
-  const fileUri = folderUri + "/busStops.json";
-  const today = new Date().toLocaleDateString("en-CA");
-  const [displaySeatsModel, setDisplaySeatsModel] = useState(false);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [openDate, setOpenDate] = useState(false);
-  const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [selectedSchedule, setSelectedSchedule] = useState<Schedule>();
-  const [busStops, setBusStops] = useState<BusStop[]>([]);
-  const [seats, setSeats] = useState(54);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
-  const [displayQTModal, setDisplayQTModal] = useState(false);
+  const { baseURL, discount } = useAppContext(); // Retrieve baseURL and discount from context
+  const theme = useColorScheme() ?? "light"; // Detect current theme (light/dark)
+  const folderUri = FileSystem.documentDirectory + "docs"; // Path to save JSON file
+  const fileUri = folderUri + "/busStops.json"; // Path to save bus stop data
+  const today = new Date().toLocaleDateString("en-CA"); // Get today's date in ISO format
+  const [displaySeatsModel, setDisplaySeatsModel] = useState(false); // State to manage seat selection modal
+  const [from, setFrom] = useState(""); // State to manage 'from' input value
+  const [to, setTo] = useState(""); // State to manage 'to' input value
+  const [date, setDate] = useState(new Date()); // State to manage selected date
+  const [openDate, setOpenDate] = useState(false); // State to manage date picker visibility
+  const [schedules, setSchedules] = useState<Schedule[]>([]); // State to hold fetched bus schedules
+  const [selectedSchedule, setSelectedSchedule] = useState<Schedule>(); // State to hold selected schedule
+  const [busStops, setBusStops] = useState<BusStop[]>([]); // State to hold bus stops data
+  const [seats, setSeats] = useState(54); // Default seat count
+  const [loading, setLoading] = useState<boolean>(true); // State to manage loading state
+  const [error, setError] = useState<string>(""); // State to manage error messages
+  const [displayQTModal, setDisplayQTModal] = useState(false); // State to manage Quick Ticket modal visibility
   const [busStopIDs, setBusStopIDs] = useState<BusStopIDs>({
     fromID: "",
     toID: "",
-  });
+  }); // State to store bus stop IDs for the selected 'from' and 'to'
   const inputRefs = useRef(
     Array.from({ length: 2 }, () => React.createRef<TextInput>())
-  );
+  ); // Refs for handling input fields
 
   //================================================ Functions ===============================================//
 
-  // Find bus stop ID of a given two bus stops
+  /**
+   * Finds the bus stop IDs for the selected 'from' and 'to' bus stop names.
+   * Retrieves data from a locally stored JSON file.
+   */
   const findBusStopID = async (from: string, to: string) => {
     try {
       const fileContent = await FileSystem.readAsStringAsync(fileUri, {
@@ -128,7 +146,10 @@ export default function Tickets() {
     }
   };
 
-  // Save fetched bus stops in a JSON file
+  /**
+   * Saves the current bus stop data as a JSON file to local storage.
+   * Ensures that the necessary directories are created before saving the file.
+   */
   const saveToFile = async () => {
     try {
       // Check if the 'docs' folder exists, if not, create it
@@ -153,7 +174,10 @@ export default function Tickets() {
     }
   };
 
-  // Fetch bus schedules if the inputs are given
+  /**
+   * Handles the search process when user clicks on 'Search' button.
+   * Validates inputs for 'from', 'to', and 'date', and triggers schedule fetching if valid.
+   */
   const handleSearch = () => {
     if (!from || !to || !date) {
       Alert.alert(
@@ -161,33 +185,19 @@ export default function Tickets() {
         "Please choose 'from' and 'to' locations and the date."
       );
       return;
-    }
-    fetchSchedules();
-  };
-
-  function checkQTAvailability(closingDate: string) {
-    if (closingDate <= today) {
-      return true;
     } else {
-      return false;
+      console.log(from, to, date);
+      fetchSchedules();
     }
-  }
-
-  // Display seat layout to choose seat(s)
-  const pressBuy = (schedule: Schedule) => {
-    setSelectedSchedule(schedule);
-    setSeats(schedule.seats);
-    setDisplaySeatsModel(true);
   };
 
-  const pressQuickTicket = (schedule: Schedule) => {
-    setSelectedSchedule(schedule);
-    setDisplayQTModal(true);
-  };
 
   //================================================ Backend Calls ===============================================//
 
-  // Fetch bus schedules that satisfy input conditions
+  /**
+   * Fetches bus schedules based on user input (from, to, date).
+   * Sends a POST request to the backend to retrieve matching schedules.
+   */
   const fetchSchedules = async () => {
     setLoading(true);
     setError("");
@@ -215,7 +225,10 @@ export default function Tickets() {
     }
   };
 
-  // Fetch bus stops
+  /**
+   * Fetches bus stop names from the backend.
+   * Populates the list of available bus stops to choose from.
+   */
   const fetchBusStops = async () => {
     setLoading(true);
     setError("");
@@ -255,7 +268,7 @@ export default function Tickets() {
   }
 
   return (
-    <View style={styles.mainBody}>
+    <ThemedView style={styles.mainBody}>
       <BusStopSearchInput
         ref={inputRefs.current[0]}
         nextFocus={inputRefs.current[1]}
@@ -306,12 +319,13 @@ export default function Tickets() {
       <Pressable
         onPress={handleSearch}
         style={{
-          backgroundColor: "#60c0ff",
+          backgroundColor: "#38A0DA",
           alignItems: "center",
           borderRadius: 10,
           paddingVertical: 10,
-          marginVertical: 7,
-          marginHorizontal: 7,
+          marginTop: 7,
+          marginBottom: 20,
+          marginHorizontal: 4,
         }}
       >
         <ThemedText type="h5" lightColor="#fff">
@@ -331,114 +345,14 @@ export default function Tickets() {
           data={schedules}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <View
-              style={{
-                marginBottom: 15,
-                borderRadius: 10,
-                backgroundColor: theme === "dark" ? "#555" : "#fff",
-                elevation: 5,
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: theme === "dark" ? "#f91" : "#f91",
-                  borderTopLeftRadius: 10,
-                  borderTopRightRadius: 10,
-                  paddingVertical: 5,
-                  paddingHorizontal: 10,
-                  flexDirection: "row",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                  Booking Closing Date: {item.closing}
-                </ThemedText>
-              </View>
-              <View style={{ margin: 10 }}>
-                <View
-                  style={{
-                    paddingHorizontal: 10,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginBottom: 10,
-                  }}
-                >
-                  <View>
-                    <ThemedText type="h6">Origin</ThemedText>
-                    <ThemedText type="h4">{item.departure}</ThemedText>
-                    <ThemedText type="h4">
-                      {item.from?.split(",")[0]?.trim()}
-                    </ThemedText>
-                  </View>
-                  <View>
-                    <ThemedText type="h6">Destination</ThemedText>
-                    <ThemedText type="h4">{item.arrival}</ThemedText>
-                    <ThemedText type="h4">
-                      {item.to?.split(",")[0]?.trim()}
-                    </ThemedText>
-                  </View>
-                </View>
-                <View style={{ marginVertical: 5, marginHorizontal: 10 }}>
-                  <ThemedText type="s6" lightColor="#999" darkColor="#ddd">
-                    {item.org} | {item.service} | {item.routeType} | Route:{" "}
-                    {item.routeNo}
-                  </ThemedText>
-                </View>
-                <View
-                  style={{
-                    paddingHorizontal: 10,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    gap: 5,
-                    marginBottom: 5,
-                    alignItems: "center",
-                  }}
-                >
-                  <View>
-                    <ThemedText type="h4">Price: LKR {item.price}</ThemedText>
-                  </View>
-                  <View style={{ justifyContent: "space-between" }}>
-                    {checkQTAvailability(item.closing) ? (
-                      <Pressable
-                        style={{
-                          flex: 1,
-                          alignSelf: "center",
-                          backgroundColor: "#59f",
-                          paddingHorizontal: 10,
-                          paddingVertical: 10,
-                          marginVertical: 10,
-                          borderRadius: 50,
-                          alignItems: "center",
-                        }}
-                        onPress={() => pressQuickTicket(item)}
-                      >
-                        <ThemedText type="h4" lightColor="#fff">
-                          Quick Ticket
-                        </ThemedText>
-                      </Pressable>
-                    ) : (
-                      <Pressable
-                        style={{
-                          flex: 1,
-                          alignSelf: "center",
-                          backgroundColor: "#e28",
-                          paddingHorizontal: 10,
-                          paddingVertical: 10,
-                          marginVertical: 10,
-                          borderRadius: 50,
-                          alignItems: "center",
-                        }}
-                        onPress={() => pressBuy(item)}
-                      >
-                        <ThemedText type="h4" lightColor="#fff">
-                          Buy Ticket
-                        </ThemedText>
-                      </Pressable>
-                    )}
-                  </View>
-                </View>
-              </View>
-            </View>
+            <BusSchedule
+              schedule={item}
+              today={today}
+              setDisplaySeatsModel={setDisplaySeatsModel}
+              setDisplayQTModal={setDisplayQTModal}
+              setSeats={setSeats}
+              setSelectedSchedule={setSelectedSchedule}
+            />
           )}
         />
       )}
@@ -481,14 +395,14 @@ export default function Tickets() {
           </ThemedText>
         </View>
       )}
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   mainBody: {
-    marginHorizontal: 15,
-    marginVertical: 5,
+    paddingTop: 10,
+    paddingHorizontal: 10,
     flex: 1,
     zIndex: 1,
     position: "relative",

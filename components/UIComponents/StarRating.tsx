@@ -27,11 +27,11 @@ const StarRating: React.FC<StarRatingProps> = ({
     for (let i = 1; i <= maxStars; i++) {
       let starImage;
       if (i <= Math.floor(roundedRating)) {
-        starImage = require("@/assets/icons/full_star.png");
+        starImage = require("../../assets/icons/full_star.png");
       } else if (i === Math.ceil(roundedRating) && roundedRating % 1 !== 0) {
-        starImage = require("@/assets/icons/half_star.png");
+        starImage = require("../../assets/icons/half_star.png");
       } else {
-        starImage = require("@/assets/icons/empty_star.png");
+        starImage = require("../../assets/icons/empty_star.png");
       }
 
       stars.push(

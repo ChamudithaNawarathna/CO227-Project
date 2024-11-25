@@ -3,21 +3,18 @@ import {
   GestureResponderEvent,
   Pressable,
   StyleSheet,
-  TextInput,
   View,
 } from "react-native";
 import React from "react";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { FormInput } from "@/components/FormComponents/FormInputField";
+import { useAppContext } from "../../context/AppContext";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 import axios from "axios";
 import Modal from "react-native-modal";
-import StarRating from "@/components/UIComponents/StarRating";
+import StarRating from "../../components/UIComponents/StarRating";
 
 type Props = {
   isVisible: boolean;
@@ -28,17 +25,13 @@ type Props = {
 export default function RatingModal({ isVisible, onClose, refNo }: Props) {
   const { baseURL, id } = useAppContext();
   const [stars, setStars] = useState(0);
-  const [comments, setComments] = useState("");
   const [filled, setFilled] = useState(false);
-  const inputRefs = useRef(
-    Array.from({ length: 2 }, () => React.createRef<TextInput>())
-  );
 
   //================================================ Functions ===============================================//
 
   // Update user data in the database and redirect to the correct dashboard
   function pressSubmit() {
-    updateBusRatings(id, refNo, stars, comments);
+    updateBusRatings(id, refNo, stars);
     onClose();
   }
 
@@ -48,15 +41,13 @@ export default function RatingModal({ isVisible, onClose, refNo }: Props) {
   const updateBusRatings = async (
     id: string,
     refNo: string,
-    stars: number,
-    comments: string
+    stars: number
   ) => {
     try {
       const response = await axios.post(`${baseURL}/bus/rating`, {
         userID: id,
         refNo,
         stars,
-        comments,
       });
 
       if (response.status === 200) {
@@ -75,17 +66,16 @@ export default function RatingModal({ isVisible, onClose, refNo }: Props) {
   // Reset input fields
   useEffect(() => {
     setStars(0);
-    setComments("");
   }, [isVisible]);
 
   // Check if all the fields are filled
   useEffect(() => {
-    if (stars != 0 && comments != "") {
+    if (stars != 0) {
       setFilled(true);
     } else {
       setFilled(false);
     }
-  }, [stars, comments]);
+  }, [stars]);
 
   //================================================ UI Control ===============================================//
 
@@ -100,9 +90,6 @@ export default function RatingModal({ isVisible, onClose, refNo }: Props) {
       </Pressable>
       <View style={styles.container}>
         <View style={{ marginBottom: 20 }}>
-          <ThemedText lightColor="#777" darkColor="#eee">
-            Star rating
-          </ThemedText>
           <StarRating
             rating={stars}
             maxStars={5}
@@ -112,17 +99,6 @@ export default function RatingModal({ isVisible, onClose, refNo }: Props) {
             }}
           />
         </View>
-        <FormInput
-          ref={inputRefs.current[0]}
-          title="Comments"
-          input={comments}
-          setInput={setComments}
-          multiline={true}
-          numberOfLines={8}
-          maxLength={500}
-          textAlignVerticle="top"
-          placeholder="Enter comments"
-        />
         <Pressable
           style={[
             styles.submitButton,

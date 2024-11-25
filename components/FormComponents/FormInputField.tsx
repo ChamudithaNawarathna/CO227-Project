@@ -81,9 +81,11 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
     ref
   ) => {
     const theme = useColorScheme() ?? "light";
+    const [isFocused, setIsFocused] = useState(false);
+
     return (
       <View>
-        <ThemedText lightColor="#777" darkColor="#eee">
+        <ThemedText type="h6" lightColor="#777" darkColor="#eee">
           {title}
         </ThemedText>
         <TextInput
@@ -92,6 +94,7 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
           style={[
             styles.inputField,
             error && { borderColor: "red" },
+            isFocused && { borderColor: "#33aefc" },
             theme === "dark" && { backgroundColor: "#444", color: "#fff" },
             multiline && { height: numberOfLines * 40 },
           ]}
@@ -111,6 +114,8 @@ export const FormInput = React.forwardRef<TextInput, InputProps>(
           placeholder={placeholder}
           placeholderTextColor={theme === "dark" ? "#bbb" : "gray"}
           onChangeText={(text) => validation(text, setInput, setError)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           onSubmitEditing={() => {
             nextFocus?.current?.focus();
           }}
@@ -144,9 +149,11 @@ export const FormDropdown = ({
   placeholder = "Select item",
 }: DropdownProps) => {
   const theme = useColorScheme() ?? "light";
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <View>
-      <ThemedText lightColor="#777" darkColor="#eee">
+      <ThemedText type="h6" lightColor="#777" darkColor="#eee">
         {title}
       </ThemedText>
       <ThemedView
@@ -154,7 +161,7 @@ export const FormDropdown = ({
         pointerEvents={"auto"}
       >
         <Dropdown
-          style={styles.inputDropdown}
+          style={[styles.inputDropdown, isFocused && { borderColor: "#33aefc" },]}
           placeholderStyle={[
             { color: "gray" },
             theme === "dark" && { backgroundColor: "#444" },
@@ -167,6 +174,8 @@ export const FormDropdown = ({
           onChange={(item) => {
             setInput(item.value);
           }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
       </ThemedView>
     </View>
@@ -196,6 +205,7 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
     ref
   ) => {
     const theme = useColorScheme() ?? "light";
+    const [isFocused, setIsFocused] = useState(false);
     const [busStops, setBusStops] = useState<string[]>([]);
     const [filteredData, setFilteredData] = useState<string[]>([]);
     const folderUri = FileSystem.documentDirectory + "docs";
@@ -207,7 +217,6 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
         });
         const parsedData = JSON.parse(fileContent);
 
-        // Assuming the structure of the JSON is [{ name: "Stop Name", location: { lat, lng } }, ...]
         const stopNames = parsedData.map((stop: any) => stop.name);
         setBusStops(stopNames);
       } catch (error) {
@@ -245,10 +254,11 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
       <View style={{ zIndex: layer, position: "relative" }}>
         <View
           style={[
-            styles.searchInputContainer,
+            styles.busSearchInput,
             theme === "dark" && {
               backgroundColor: "#444",
             },
+            isFocused && { borderColor: "#33aefc" },
           ]}
         >
           <FontAwesomeIcon
@@ -265,6 +275,8 @@ export const BusStopSearchInput = React.forwardRef<TextInput, SearchProps>(
             placeholder={placeholder}
             placeholderTextColor={theme === "dark" ? "#bbb" : "gray"}
             onChangeText={(text) => updateSearch(text)}
+            onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
             onSubmitEditing={() => {
               nextFocus?.current?.focus();
             }}
@@ -322,6 +334,7 @@ export function DateTimeInputSquare({
   setOpenPicker = defaultSetBoolean,
 }: DateTimeSquareProps) {
   const theme = useColorScheme() ?? "light";
+  const [isFocused, setIsFocused] = useState(false);
   const updateInput = () => {
     setOpenPicker(true);
     setInput(new Date());
@@ -331,10 +344,11 @@ export function DateTimeInputSquare({
     <View>
       <View
         style={[
-          styles.searchInputContainer,
+          styles.dateTimeInputSquare,
           theme === "dark" && {
             backgroundColor: "#444",
           },
+          isFocused && { borderColor: "#33aefc" },
         ]}
       >
         <FontAwesomeIcon
@@ -348,6 +362,8 @@ export function DateTimeInputSquare({
           onPress={() => {
             updateInput();
           }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         >
           <ThemedText>
             {type == "Date" &&
@@ -386,7 +402,7 @@ export function DateTimeInputRound({
 
   return (
     <View>
-      <ThemedText lightColor="#777" darkColor="#eee">
+      <ThemedText type="h6" lightColor="#777" darkColor="#eee">
         {title}
       </ThemedText>
       <View
@@ -430,9 +446,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     backgroundColor: "#fff",
-    elevation: 5,
+    elevation: 10,
   },
-  searchInputContainer: {
+  dateTimeInputSquare: {
     flexDirection: "row",
     alignItems: "center",
     marginHorizontal: 5,
@@ -441,6 +457,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 10,
+    backgroundColor: "#fff",
+    elevation: 3,
+  },
+  busSearchInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 5,
+    marginVertical: 5,
+    color: "#333",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 2,
     backgroundColor: "#fff",
     elevation: 3,
   },

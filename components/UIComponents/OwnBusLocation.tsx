@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { useColorScheme } from "react-native";
-import { useAppContext } from "@/context/AppContext";
-import { Picker } from "@react-native-picker/picker";
+import { useAppContext } from "../../context/AppContext";
 import axios from "axios";
 import { Dropdown } from "react-native-element-dropdown";
 
@@ -102,9 +101,9 @@ const dropdownData = myBuses.reduce((acc, bus) => {
               labelField={"label"}
               valueField={"value"}
               placeholder="Select a bus"
-              value={selectedBusId ? selectedBusId : null} // Show regNo when selected
+              value={selectedBusId ? selectedBusId : null} 
               onChange={(item) => {
-                setSelectedBusId(item.value); // Update selected bus id
+                setSelectedBusId(item.value);
               }}
             />
            
@@ -137,7 +136,7 @@ const dropdownData = myBuses.reduce((acc, bus) => {
                   pinColor="blue"
                 >
                   <Image
-                    source={require("@/assets/icons/bus_location_icon.png")}
+                    source={require("../../assets/icons/bus_location_icon.png")}
                     style={{ width: 50, height: 50 }}
                   />
                 </Marker>

@@ -1,13 +1,11 @@
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext } from "../../context/AppContext";
 import axios from "axios";
-import { useState, useEffect } from "react";
-import { Alert, Pressable } from "react-native";
+import { useState, useEffect, useRef } from "react";
+import { Alert, Pressable, TextInput, View, StyleSheet, useColorScheme } from "react-native";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ThemedText } from "../CommonModules/ThemedText";
 import { ThemedView } from "../CommonModules/ThemedView";
-import { validateOTP } from "./FormFunctions";
-import { FormInput } from "./FormInputField";
 import { formStyles } from "./FormStyles";
 
 export const OTPPage = ({
@@ -19,11 +17,38 @@ export const OTPPage = ({
   currentPos,
 }: any) => {
   const { baseURL, phoneNo, email } = useAppContext();
+  const theme = useColorScheme() ?? "light";
   const [otpError, setOTPError] = useState(false);
   const [isTimeOut, setIsTimeOut] = useState(false);
   const [isTimerPlaying, setIsTimerPlaying] = useState(true);
   const [keyVal, setKeyVal] = useState(0);
 
+  const [otpArray, setOtpArray] = useState(Array(6).fill(''));
+  const inputs = useRef<(TextInput | null)[]>([]);
+
+  const handleChange = (text: string, index: number) => {
+    const newOtpArray = [...otpArray]; // Create a new array to maintain immutability
+    newOtpArray[index] = text; // Set the new value
+    setOtpArray(newOtpArray); // Update the state
+
+    // Update the full OTP string
+    setOTP(newOtpArray.join(''));
+
+    // Move focus logic
+    if (text && index < inputs.current.length - 1) {
+      inputs.current[index + 1]?.focus();
+    }
+    console.log("OTP: ",otp, "index: ", index);
+  };
+  
+  const handleKeyPress = (event: any, index: number) => {
+    if (event.nativeEvent.key === 'Backspace' && index > 0 && !otpArray[index]) {
+      console.log(`Backspace detected at index ${index}`);
+      inputs.current[index - 1]?.focus();
+    }
+  };
+  
+  
   // Make "Back" button visible and hide "Next" button
   useEffect(() => {
     setKeyVal(keyVal + 1);
@@ -79,8 +104,8 @@ export const OTPPage = ({
           isPlaying={isTimerPlaying}
           size={150}
           duration={180}
-          colors={["#0cf", "#0cf", "#c33"]}
-          colorsTime={[120, 60, 0]}
+          colors={["#0cf", "#0cf"]}
+          colorsTime={[120, 0]}
           onComplete={() => {
             enableResendOTPButton();
           }}
@@ -89,18 +114,21 @@ export const OTPPage = ({
         </CountdownCircleTimer>
       </ThemedView>
 
-      <FormInput
-        title="Enter the OTP"
-        input={otp}
-        setInput={setOTP}
-        error={otpError}
-        setError={setOTPError}
-        errorMessage={"Incorrect OTP"}
-        validation={validateOTP}
-        maxLength={6}
-        keyboardType="number-pad"
-        placeholder="000000"
-      />
+      <View style={styles.otpContainer}>
+        {otpArray.map((digit, index) => (
+          <TextInput
+            key={index}
+            value={otpArray[index]}
+            ref={(ref) => (inputs.current[index] = ref)}
+            style={[styles.input,{color: theme == "dark" ? "#fff" : "#5f5f5f", borderColor: theme == "dark" ? "#fff" : "#9f9f9f"}]}
+            keyboardType="number-pad"
+            maxLength={1}
+            onChangeText={(text) => handleChange(text, index)}
+            onKeyPress={(event) => handleKeyPress(event, index)}
+          />
+        ))}
+      </View>
+
       {isTimeOut && !isTimerPlaying && (
         <Pressable
           style={formStyles.resendOTPButton}
@@ -126,3 +154,21 @@ export const OTPPage = ({
     </GestureHandlerRootView>
   );
 };
+
+const styles = StyleSheet.create({
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
+  },
+  input: {
+    width: 40,
+    height: 50,
+    marginHorizontal: 3,
+    borderWidth: 2,
+    borderRadius: 5,
+    textAlign: 'center',
+    fontSize: 22,
+    fontWeight: 'bold'
+  },
+});

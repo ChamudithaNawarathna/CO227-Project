@@ -1,11 +1,9 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { useColorScheme } from '../../../hooks/useColorScheme';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faBusAlt, faCartArrowDown, faCartFlatbed, faCartShopping, faCarTunnel, faCircleDollarToSlot, faCog, faDollar, faExclamationCircle, faFileInvoiceDollar, faHome, faMapLocationDot, faMoneyBillTransfer, faMoneyCheckDollar, faPieChart, faSearch, faSearchLocation, faTable, faTicket, faTicketAlt, faUser } from '@fortawesome/free-solid-svg-icons';
-import { faProductHunt } from '@fortawesome/free-brands-svg-icons';
+import { faPieChart, faSearchLocation } from '@fortawesome/free-solid-svg-icons';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();

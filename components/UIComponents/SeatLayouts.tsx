@@ -1,7 +1,7 @@
 import { View } from "react-native";
 import Seat from "./Seat";
 import { ThemedText } from "../CommonModules/ThemedText";
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext } from "../../context/AppContext";
 
 export function SeatLegend() {
   const seatColors = new Map<String, string>([
@@ -24,7 +24,7 @@ export function SeatLegend() {
                 borderRadius: 10,
               }}
             ></View>
-            <ThemedText>Available {accountType}</ThemedText>
+            <ThemedText>Available</ThemedText>
           </View>
           <View style={{ flexDirection: "row", gap: 10 }}>
             <View

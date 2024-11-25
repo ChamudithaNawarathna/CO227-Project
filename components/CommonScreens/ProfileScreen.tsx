@@ -11,7 +11,6 @@ import {
   faEdit,
   faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
-import { Href, router } from "expo-router";
 import {
   Image,
   Pressable,
@@ -21,11 +20,19 @@ import {
   View,
 } from "react-native";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import { InfoCard } from "@/components/UIComponents/InfoCard";
+import { useAppContext } from "../../context/AppContext";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
+import { InfoCard } from "../../components/UIComponents/InfoCard";
+import { ThemedView } from "../CommonModules/ThemedView";
 
+/**
+ * ProfileScreen
+ *
+ * This component displays the user's profile information, including personal, bank,
+ * and license details. It also allows the user to update their profile picture.
+ *
+ * @returns {JSX.Element} The profile screen component.
+ */
 export default function ProfileScreen() {
   const {
     operatorAcc,
@@ -44,14 +51,17 @@ export default function ProfileScreen() {
     ntcLicenseNo,
     driverLicenseNo,
     occupation,
-  } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#ddd" : "#777";
+  } = useAppContext(); // Extracting global context values
+  const theme = useColorScheme() ?? "light"; // Detect current theme (light or dark mode)
+  const iconColor = theme === "dark" ? "#ddd" : "#777"; // Adjust icon color based on theme
 
   //================================================ Functions ===============================================//
 
+  /**
+   * Handles selecting and setting a profile picture.
+   * Requests permissions, opens the image picker, and updates the profile picture on selection.
+   */
   const pickImage = async () => {
-    // Request permission to access the media library
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -60,7 +70,6 @@ export default function ProfileScreen() {
       return;
     }
 
-    // Open the image picker
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: false,
@@ -76,69 +85,8 @@ export default function ProfileScreen() {
   //================================================ UI Control ===============================================//
 
   return (
-    <ScreenWrapper>
+    <ThemedView style={{ flex: 1 }}>
       <View style={styles.mainBody}>
-        <View style={{ alignItems: "center", marginBottom: 5 }}>
-          <View style={{ flexDirection: "row" }}>
-            <Image
-              source={
-                profileImage != ""
-                  ? { uri: profileImage }
-                  : require("@/assets/images/blank-profile-picture.png")
-              }
-              style={styles.profileImage}
-            />
-            <Pressable onPress={pickImage}>
-              <FontAwesomeIcon
-                icon={faEdit}
-                size={20}
-                color={"#fff"}
-                style={{ position: "absolute", bottom: 15, right: -8 }}
-              />
-            </Pressable>
-          </View>
-
-          <ThemedText type={"s3"}>
-            {fName} {lName}
-          </ThemedText>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            gap: 20,
-            alignItems: "center",
-            marginBottom: 30,
-            borderRadius: 20,
-            paddingVertical: 3,
-            paddingHorizontal: 5,
-            marginHorizontal: "10%",
-          }}
-        >
-          <ThemedText
-            type={"h4"}
-            lightColor={"#555"}
-            darkColor={"#fff"}
-            style={{ marginLeft: 5 }}
-          >
-            Balance: LKR {credits}
-          </ThemedText>
-          <Pressable
-            style={[
-              styles.rechargeButton,
-              {
-                borderColor: theme === "dark" ? "#fff" : "#666",
-                borderWidth: 2,
-              },
-            ]}
-            onPress={() => router.replace("/index" as Href<string>)}
-          >
-            <ThemedText type="h6" lightColor={"#666"} darkColor={"#fff"}>
-              Recharge
-            </ThemedText>
-          </Pressable>
-        </View>
-
         <ScrollView
           showsVerticalScrollIndicator={false}
           style={{
@@ -146,6 +94,30 @@ export default function ProfileScreen() {
             marginHorizontal: 20,
           }}
         >
+          <View style={{ alignItems: "center", marginBottom: 5 }}>
+            <View style={{ flexDirection: "row" }}>
+              <Image
+                source={
+                  profileImage != ""
+                    ? { uri: profileImage }
+                    : require("../../assets/images/blank-profile-picture.png")
+                }
+                style={styles.profileImage}
+              />
+              <Pressable onPress={pickImage}>
+                <FontAwesomeIcon
+                  icon={faEdit}
+                  size={20}
+                  color={theme === "dark" ? "#fff" : "#666"}
+                  style={{ position: "absolute", bottom: 15, right: -8 }}
+                />
+              </Pressable>
+            </View>
+
+            <ThemedText type={"h3"} lightColor="#33aefc" darkColor="#03C4EF">
+              {fName} {lName}
+            </ThemedText>
+          </View>
           <View>
             <View>
               <ThemedText
@@ -260,7 +232,7 @@ export default function ProfileScreen() {
           </View>
         </ScrollView>
       </View>
-    </ScreenWrapper>
+    </ThemedView>
   );
 }
 

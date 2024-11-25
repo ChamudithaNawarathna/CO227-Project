@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import axios from "axios";
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext } from "../context/AppContext";
 
 // Define the structure of the bus data
 interface Bus {

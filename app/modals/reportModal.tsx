@@ -12,14 +12,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useRef, useState } from "react";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 import {
   FormDropdown,
   FormInput,
-} from "@/components/FormComponents/FormInputField";
+} from "../../components/FormComponents/FormInputField";
 import axios from "axios";
 import Modal from "react-native-modal";
+import { useAppContext } from "../../context/AppContext";
 
 type Props = {
   isVisible: boolean;

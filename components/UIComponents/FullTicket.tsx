@@ -1,18 +1,13 @@
-import { Ticket } from "@/controller/Ticket";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { Ticket } from "../../controller/Ticket";
+import React, {  } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Alert,
-  ActivityIndicator,
   GestureResponderEvent,
   Pressable,
   useColorScheme,
 } from "react-native";
-import StringToDate from "../CommonModules/StringToDateTime";
-import { useAppContext } from "@/context/AppContext";
 import Modal from "react-native-modal";
 import { DateToString, TimeToString } from "../CommonModules/DateTimeToString";
 import { ThemedText } from "../CommonModules/ThemedText";
@@ -26,7 +21,7 @@ type Props = {
   ticket: Ticket;
 };
 
-const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
+const FullTicket = ({ isVisible, onClose, ticket }: Props) => {
   const theme = useColorScheme() ?? "light";
 
   return (
@@ -42,10 +37,10 @@ const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
       >
         <View
           style={{
-            backgroundColor: "#f91",
+            backgroundColor: ticket.tracking ? "#62edb5" : "#FBCA77",
             borderTopLeftRadius: 10,
             borderTopRightRadius: 10,
-            paddingVertical: 5,
+            paddingVertical: 10,
             paddingHorizontal: 10,
             flexDirection: "row",
             justifyContent: "space-between",
@@ -54,19 +49,31 @@ const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
           <QRCode
             value={`${ticket.vehicalNo}|${TimeToString(ticket.departure)}|${ticket.from?.split(",")[0]?.trim()}|${ticket.to?.split(",")[0]?.trim()}|${ticket.seatNos}|${ticket.full}|${ticket.half}`}
             size={70}
-            color="#fff"
+            color={ticket.tracking ? "#227D58" : "#B97008"}
             backgroundColor="transparent"
           />
           <View>
-            <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+            <ThemedText
+              type="h6"
+              lightColor={ticket.tracking ? "#227D58" : "#B97008"}
+              darkColor={ticket.tracking ? "#227D58" : "#B97008"}
+            >
               Reference No: {ticket.ticketNo}
             </ThemedText>
-            <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+            <ThemedText
+              type="h6"
+              lightColor={ticket.tracking ? "#227D58" : "#B97008"}
+              darkColor={ticket.tracking ? "#227D58" : "#B97008"}
+            >
               Departure: {DateToString(ticket.departure)}
               {` / `}
               {TimeToString(ticket.departure)}
             </ThemedText>
-            <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
+            <ThemedText
+              type="h6"
+              lightColor={ticket.tracking ? "#227D58" : "#B97008"}
+              darkColor={ticket.tracking ? "#227D58" : "#B97008"}
+            >
               Booked on: {DateToString(ticket.bookedDate)}
               {` / `}
               {TimeToString(ticket.bookedDate)}
@@ -250,9 +257,15 @@ const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
         </View>
 
         <View style={{ alignItems: "center" }}>
-          <ThemedText type="h4" darkColor="#fff">
-            Seat No(s): {ticket.seatNos}
-          </ThemedText>
+          {ticket.seatNos == undefined || ticket.seatNos.length == 0 ? (
+            <ThemedText type="h4" darkColor="#fff">
+              Quick Ticket
+            </ThemedText>
+          ) : (
+            <ThemedText type="h4" darkColor="#fff">
+              Seat No(s): {ticket.seatNos.join(", ")}
+            </ThemedText>
+          )}
         </View>
 
         {ticket.tracking && (
@@ -265,8 +278,18 @@ const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
               alignItems: "center",
             }}
           >
-            <FontAwesomeIcon icon={faCircleInfo} size={14} color={"#f91"} />
-            <Text style={{ fontWeight: "bold", fontSize: 13, color: "#f91" }}>
+            <FontAwesomeIcon
+              icon={faCircleInfo}
+              size={14}
+              color={theme === "dark" ? "#02D47F" : "#07C075"}
+            />
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 13,
+                color: theme === "dark" ? "#02D47F" : "#07C075",
+              }}
+            >
               Tracking is available
             </Text>
           </View>
@@ -281,8 +304,18 @@ const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
               alignItems: "center",
             }}
           >
-            <FontAwesomeIcon icon={faCircleInfo} size={14} color={"#f91"} />
-            <Text style={{ fontWeight: "bold", fontSize: 13, color: "#f91" }}>
+            <FontAwesomeIcon
+              icon={faCircleInfo}
+              size={14}
+              color={theme === "dark" ? "#F8B43F" : "#F7A416"}
+            />
+            <Text
+              style={{
+                fontWeight: "bold",
+                fontSize: 13,
+                color: theme === "dark" ? "#F8B43F" : "#F7A416",
+              }}
+            >
               Tracking is available 5 min before the bus departure
             </Text>
           </View>
@@ -301,7 +334,7 @@ const FullTicketView = ({ isVisible, onClose, ticket }: Props) => {
           <QRCode
             value={`${ticket.vehicalNo}|${TimeToString(ticket.departure)}|${ticket.from?.split(",")[0]?.trim()}|${ticket.to?.split(",")[0]?.trim()}|${ticket.seatNos}|${ticket.full}|${ticket.half}`}
             size={200}
-            color={theme === "dark" ? "#fff" : "#000"}
+            color={theme === "dark" ? "#fff" : "#5a5a5a"}
             backgroundColor="transparent"
           />
         </View>
@@ -328,4 +361,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FullTicketView;
+export default FullTicket;

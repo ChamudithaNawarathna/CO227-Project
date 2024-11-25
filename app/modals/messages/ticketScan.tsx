@@ -1,5 +1,4 @@
 import {
-  Alert,
   GestureResponderEvent,
   Pressable,
   StyleSheet,
@@ -7,25 +6,10 @@ import {
   View,
   Image,
 } from "react-native";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { ThemedView } from "../../../components/CommonModules/ThemedView";
+import { ThemedText } from "../../../components/CommonModules/ThemedText";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { router } from "expo-router";
-import { useState } from "react";
-import {
-  Seat44Layout,
-  Seat54Layout,
-  SeatLegend,
-} from "@/components/UIComponents/SeatLayouts";
-import { AppProvider, useAppContext } from "@/context/AppContext";
-import { Ticket } from "@/controller/Ticket";
-import axios from "axios";
-import {
-  DateToString,
-  TimeToString,
-} from "@/components/CommonModules/DateTimeToString";
-import NumberPicker from "@/components/UIComponents/NumberPicker";
 import Modal from "react-native-modal";
 
 type Props = {
@@ -65,8 +49,8 @@ export default function TicketScan({
         <Image
           source={
             (valid || isQuickTicket)
-              ? require("@/assets/icons/valid.png")
-              : require("@/assets/icons/invalid.png")
+              ? require("../../../assets/icons/valid.png")
+              : require("../../../assets/icons/invalid.png")
           }
           style={styles.validityIcon}
         />

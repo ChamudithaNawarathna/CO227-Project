@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { faArrowRotateBack, faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import {
+  faArrowRotateBack,
+  faArrowsRotate,
+} from "@fortawesome/free-solid-svg-icons";
+
 import { Dropdown } from "react-native-element-dropdown";
 import {
   ActivityIndicator,
@@ -13,11 +16,17 @@ import {
   View,
 } from "react-native";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { EarningsGraph } from "@/components/UIComponents/EarningGraph";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import { useAppContext } from "../../context/AppContext";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
+import { EarningsGraph } from "../../components/UIComponents/EarningGraph";
+import ErrorScreen from "../../components/CommonScreens/ErrorScreen";
+import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { ThemedView } from "../../components/CommonModules/ThemedView";
+import LoadingScreen from "../../components/CommonScreens/LoadingScreen";
 
+/**
+ * Represents the structure of income data for weekly, monthly, and annual statistics.
+ */
 interface IncomeData {
   weekly: {
     receivedData: number[];
@@ -39,28 +48,35 @@ interface IncomeData {
   };
 }
 
+/**
+ * Analytics screen for visualizing weekly, monthly, and annual income data through graphs.
+ * Allows users to toggle between total earnings, refunds, and received data for each time period.
+ */
 export default function Analytics() {
-  const { baseURL, id } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#aaa" : "#777";
+  const { baseURL, id } = useAppContext(); // Extracting global context values
+  const theme = useColorScheme() ?? "light"; // Detect current theme (light or dark mode)
   const dropdownOptions = [
     { label: "Total Earnings", value: "earningData" },
     { label: "Total Refunds", value: "refundData" },
     { label: "Total Received", value: "receivedData" },
-  ];
-  const [incomeData, setIncomeData] = useState<IncomeData | null>(null);
+  ]; // Dropdown options for selecting data types
+  const [incomeData, setIncomeData] = useState<IncomeData | null>(null); // Income data fetched from API.
   const [selectedWeeklyData, setSelectedWeeklyData] =
-    useState<string>("earningData");
+    useState<string>("earningData"); // Selected weekly data type.
   const [selectedMonthlyData, setSelectedMonthlyData] =
-    useState<string>("earningData");
+    useState<string>("earningData"); // Selected monthly data type.
   const [selectedAnnualData, setSelectedAnnualData] =
-    useState<string>("earningData");
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
+    useState<string>("earningData"); // Selected annual data type.
+  const [loading, setLoading] = useState<boolean>(true); // Loading state for data fetch.
+  const [error, setError] = useState<string>(""); // Error message for data fetch.
 
   //============================================== Functions ===============================================//
 
-  // Function to get data for weekly graph
+  /**
+   * Transforms weekly income data into a format suitable for graph rendering.
+   * @param dataType - Key indicating the type of weekly data (e.g., "earningData").
+   * @returns Array of objects with labels and values for the graph.
+   */
   const getWeeklyData = (dataType: keyof IncomeData["weekly"]) => {
     if (!incomeData) return [];
     const earningData = incomeData.weekly[dataType];
@@ -70,7 +86,11 @@ export default function Analytics() {
     }));
   };
 
-  // Function to transform data for monthly graph
+  /**
+   * Transforms monthly income data into a format suitable for graph rendering.
+   * @param dataType - Key indicating the type of monthly data (e.g., "earningData").
+   * @returns Array of objects with labels and values for the graph.
+   */
   const getMonthlyData = (dataType: keyof IncomeData["monthly"]) => {
     if (!incomeData) return [];
     const earningData = incomeData.monthly[dataType];
@@ -80,7 +100,11 @@ export default function Analytics() {
     }));
   };
 
-  // Function to transform data for annual graph
+  /**
+   * Transforms annual income data into a format suitable for graph rendering.
+   * @param dataType - Key indicating the type of annual data (e.g., "earningData").
+   * @returns Array of objects with labels and values for the graph.
+   */
   const getAnnualData = (dataType: keyof IncomeData["annual"]) => {
     if (!incomeData) return [];
     const earningData = incomeData.annual[dataType];
@@ -92,7 +116,10 @@ export default function Analytics() {
 
   //============================================== Backend Calls ===============================================//
 
-  // Fetch total income data
+  /**
+   * Fetches total income data from the backend.
+   * Sets the income data in state and handles loading and error states.
+   */
   const fetchIncomeData = async () => {
     setLoading(true);
     setError("");
@@ -118,7 +145,7 @@ export default function Analytics() {
   //================================================ UI Control ===============================================//
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <LoadingScreen />;
   }
 
   if (error !== "" && !loading) {
@@ -126,28 +153,11 @@ export default function Analytics() {
   }
 
   return (
-    <View style={styles.mainBody}>
-      <ScrollView showsVerticalScrollIndicator={false} style={{ backgroundColor: "transparent" }}>
-      <Pressable
-        style={{
-          backgroundColor: theme === "dark" ? "#555" : "#fff",
-          alignSelf: 'flex-end',
-          alignItems: "center",
-          paddingVertical: 10,
-          paddingHorizontal: 10,
-          marginBottom: 10,
-          borderRadius: 50,
-          elevation: 5
-        }}
-        onPress={fetchIncomeData}
+    <ThemedView style={styles.mainBody}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: "transparent", padding: 20 }}
       >
-       <FontAwesomeIcon
-                icon={faArrowsRotate}
-                size={20}
-                color={theme === "dark" ? "#ccc" : "#444"}
-              />
-      </Pressable>
-
         {incomeData && (
           <View style={{ marginHorizontal: 5 }}>
             <View
@@ -158,23 +168,49 @@ export default function Analytics() {
               <View
                 style={{
                   flexDirection: "row",
-                  gap: 10,
-                  justifyContent: "flex-start",
+                  justifyContent: "space-between",
                 }}
               >
-                <ThemedText style={styles.title}>Weekly</ThemedText>
-                <Dropdown
-                  style={styles.inputDropdown}
-                  placeholderStyle={{ color: "gray" }}
-                  data={dropdownOptions}
-                  labelField="label"
-                  valueField="value"
-                  placeholder="Select Data Type"
-                  value={selectedWeeklyData}
-                  onChange={(item) => {
-                    setSelectedWeeklyData(item.value); // Update selected data type for weekly
+                <View
+                  style={{
+                    flexDirection: "row",
+                    gap: 10,
+                    justifyContent: "flex-start",
                   }}
-                />
+                >
+                  <ThemedText style={styles.title}>Weekly</ThemedText>
+                  <Dropdown
+                    style={styles.inputDropdown}
+                    placeholderStyle={{ color: "gray" }}
+                    data={dropdownOptions}
+                    labelField="label"
+                    valueField="value"
+                    placeholder="Select Data Type"
+                    value={selectedWeeklyData}
+                    onChange={(item) => {
+                      setSelectedWeeklyData(item.value); // Update selected data type for weekly
+                    }}
+                  />
+                </View>
+                <Pressable
+                  style={{
+                    backgroundColor: theme === "dark" ? "#555" : "#fff",
+                    alignSelf: "flex-end",
+                    alignItems: "center",
+                    paddingVertical: 10,
+                    paddingHorizontal: 10,
+                    marginBottom: 30,
+                    borderRadius: 50,
+                    elevation: 5,
+                  }}
+                  onPress={fetchIncomeData}
+                >
+                  <FontAwesomeIcon
+                    icon={faArrowsRotate}
+                    size={20}
+                    color={theme === "dark" ? "#ccc" : "#444"}
+                  />
+                </Pressable>
               </View>
               <EarningsGraph
                 data={getWeeklyData(
@@ -252,13 +288,12 @@ export default function Analytics() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   mainBody: {
-    padding: 10,
     flex: 1,
   },
   title: {

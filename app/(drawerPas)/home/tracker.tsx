@@ -2,22 +2,30 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, View, useColorScheme } from "react-native";
 import * as Location from "expo-location";
 
-import PasBusLocation from "@/components/UIComponents/PasBusLocation";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
-import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
+import PasBusLocation from "../../../components/UIComponents/PasBusLocation";
+import ErrorScreen from "../../../components/CommonScreens/ErrorScreen";
+import LoadingScreen from "../../../components/CommonScreens/LoadingScreen";
+import { ThemedView } from "../../../components/CommonModules/ThemedView";
 
+/**
+ * Tracker component for fetching and displaying user's current location.
+ * Handles location permission requests, location retrieval, and error handling.
+ */
 export default function Tracker() {
-  const theme = useColorScheme() ?? "light";
+  const theme = useColorScheme() ?? "light"; // Get the current theme ('light' or 'dark')
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
-  );
-  const [errorPermission, setErrorPermission] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  ); // State to store the location object retrieved from the device
+  const [errorPermission, setErrorPermission] = useState<string | null>(null); // State to store any error related to location permission
+  const [loading, setLoading] = useState(true); // State to handle loading state while fetching location
+  const [error, setError] = useState<string>(""); // State to handle general errors in fetching location
 
   //================================================ Functions ===============================================//
 
-  // Request location permission
+  /**
+   * Request for foreground location permission from the user.
+   * @returns {Promise<boolean>} - Returns true if permission is granted, otherwise false.
+   */
   const requestPermissions = async (): Promise<boolean> => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -27,7 +35,11 @@ export default function Tracker() {
     return true;
   };
 
-  // Get your current location
+  /**
+   * Fetch the current location of the user.
+   * If successful, it updates the state with the location details.
+   * If an error occurs, the permission error state is set.
+   */
   const getLocation = async (): Promise<void> => {
     try {
       let loc = await Location.getCurrentPositionAsync({
@@ -35,13 +47,16 @@ export default function Tracker() {
       });
       setLocation(loc);
     } catch (error) {
-      setErrorPermission("Error getting location: " + error);
+      setErrorPermission(String(error));
     } finally {
       setLoading(false);
     }
   };
 
-  // Reload your current location
+  /**
+   * Reload the current location by requesting permission and then fetching the location.
+   * A slight delay is added before fetching the location to simulate re-fetching after an update.
+   */
   const reloadLocation = async (): Promise<void> => {
     (async () => {
       const hasPermission = await requestPermissions();
@@ -58,8 +73,10 @@ export default function Tracker() {
 
   //================================================ Use Effects ===============================================//
 
-  // Request permission and start tracking on component mount
-
+  /**
+   * On component mount, request for location permissions and fetch the location if granted.
+   * If permission is denied, set loading to false.
+   */
   useEffect(() => {
     (async () => {
       const hasPermission = await requestPermissions();
@@ -80,11 +97,19 @@ export default function Tracker() {
     return <LoadingScreen />;
   }
 
-  if (error !== "" && !loading) {
-    return <ErrorScreen error={error} retry={reloadLocation} />;
+  if ((error !== "" || errorPermission) && !loading) {
+    return errorPermission ? (
+      <ErrorScreen error={errorPermission} retry={getLocation} />
+    ) : (
+      <ErrorScreen error={error} retry={reloadLocation} />
+    );
   }
 
-  return <View style={styles.container}>{location && <PasBusLocation />}</View>;
+  return (
+    <ThemedView style={styles.container}>
+      {location && <PasBusLocation />}
+    </ThemedView>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -108,11 +133,11 @@ const styles = StyleSheet.create({
 // import { Image, StyleSheet, Pressable } from "react-native";
 // import { Link } from "expo-router";
 
-// import { ThemedText } from "@/components/CommonModules/ThemedText";
-// import { ThemedView } from "@/components/CommonModules/ThemedView";
+// import { ThemedText } from "../../../components/CommonModules/ThemedText";
+// import { ThemedView } from "../../../components/CommonModules/ThemedView";
 // import { TextInput } from "react-native-gesture-handler";
-// import GPTScrollView from "@/components/GPTScrollView";
-// import ParallaxScrollView from "@/components/GPTScrollView";
+// import GPTScrollView from "../../../components/GPTScrollView";
+// import ParallaxScrollView from "../../../components/GPTScrollView";
 
 // export default function Tracker() {
 //   return (
@@ -168,9 +193,9 @@ const styles = StyleSheet.create({
 // import { Image, StyleSheet, Pressable } from "react-native";
 // import { Link } from "expo-router";
 
-// import ParallaxScrollView from "@/components/ParallaxScrollView";
-// import { ThemedText } from "@/components/CommonModules/ThemedText";
-// import { ThemedView } from "@/components/CommonModules/ThemedView";
+// import ParallaxScrollView from "../../../components/ParallaxScrollView";
+// import { ThemedText } from "../../../components/CommonModules/ThemedText";
+// import { ThemedView } from "../../../components/CommonModules/ThemedView";
 // import { TextInput } from "react-native-gesture-handler";
 
 // export default function Tracker() {

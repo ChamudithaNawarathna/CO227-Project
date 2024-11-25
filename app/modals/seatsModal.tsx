@@ -6,8 +6,8 @@ import {
   useColorScheme,
   View,
 } from "react-native";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { ThemedView } from "../../components/CommonModules/ThemedView";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { router } from "expo-router";
@@ -16,16 +16,15 @@ import {
   Seat44Layout,
   Seat54Layout,
   SeatLegend,
-} from "@/components/UIComponents/SeatLayouts";
-import { AppProvider, useAppContext } from "@/context/AppContext";
-import { Ticket } from "@/controller/Ticket";
+} from "../../components/UIComponents/SeatLayouts";
 import axios from "axios";
 import {
   DateToString,
   TimeToString,
-} from "@/components/CommonModules/DateTimeToString";
-import NumberPicker from "@/components/UIComponents/NumberPicker";
+} from "../../components/CommonModules/DateTimeToString";
+import NumberPicker from "../../components/UIComponents/NumberPicker";
 import Modal from "react-native-modal";
+import { useAppContext } from "../../context/AppContext";
 
 interface TicketData {
   userID: string;
@@ -174,7 +173,7 @@ export default function SeatsModal({
                 flex: 1,
                 alignSelf: "center",
                 backgroundColor:
-                  seatNos.length != 0 && (full > 0 || half > 0)
+                  seatNos.length == full + half
                     ? "#0eaedf"
                     : "#999a",
                 paddingHorizontal: 10,

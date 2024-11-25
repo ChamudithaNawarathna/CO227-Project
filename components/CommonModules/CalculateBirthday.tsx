@@ -1,4 +1,4 @@
-import { DateToString } from "@/components/CommonModules/DateTimeToString";
+import { DateToString } from "../../components/CommonModules/DateTimeToString";
 
 export default function calculateBirthday(nic: string): string {
     let year = parseInt(nic.substring(0, 4), 10); // Extract year

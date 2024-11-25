@@ -1,62 +1,68 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Pressable } from "react-native";
 import { Camera, CameraView } from "expo-camera";
-import { BarCodeScanningResult } from "expo-camera/build/legacy/Camera.types";
+import { BarcodeScanningResult } from "expo-camera/build/Camera.types";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import TicketScan from "@/app/modals/messages/ticketScan";
-import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import { useAppContext } from "../../../context/AppContext";
+import { ThemedText } from "../../../components/CommonModules/ThemedText";
+import LoadingScreen from "../../../components/CommonScreens/LoadingScreen";
+import ErrorScreen from "../../../components/CommonScreens/ErrorScreen";
+import TicketScan from "../../modals/messages/ticketScan";
 
+/**
+ * Scanner component for bus operators.
+ * Provides functionality to scan the QR code at the top left corner of the ticket
+ */
 export default function Scanner() {
-  const { busScheduleDetails } = useAppContext();
-  const [scanned, setScanned] = useState(false);
-  const [scannedData, setScannedData] = useState<string[]>([]);
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [valid, setValid] = useState(false);
-  const [isQuickTicket, setIsQuickTicket] = useState(false);
-  const [error, setError] = useState<string>("");
+  const { busScheduleDetails } = useAppContext(); // Extracting global context values
+  const [scanned, setScanned] = useState(false); // State to track if a QR code has been scanned
+  const [scannedData, setScannedData] = useState<string[]>([]); // Stores the parsed QR code data
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null); // Tracks camera permission status
+  const [valid, setValid] = useState(false); // Indicates if the scanned ticket is valid
+  const [isQuickTicket, setIsQuickTicket] = useState(false); // Tracks if the scanned ticket is not pre-booked
+  const [error, setError] = useState<string>(""); // Error message for UI feedback
 
   //================================================ Functions ===============================================//
 
-  // Request camera permission
+  /**
+   * Requests camera permission from the user. Updates `hasPermission` based on the result.
+   */
   const getCameraPermission = async () => {
     setError("");
     const { status } = await Camera.requestCameraPermissionsAsync();
     setHasPermission(status === "granted");
   };
 
-  // Check and display data in the QR code
-  const handleBarCodeScanned = (result: BarCodeScanningResult) => {
+  /**
+   * Handles the barcode scanning event. Parses the scanned data, validates it against the bus schedule,
+   * and updates state accordingly.
+   * @param result - The result of the barcode scan containing the scanned data.
+   */
+  const handleBarCodeScanned = (result: BarcodeScanningResult) => {
     setIsQuickTicket(false);
     const data: string = result.data;
     const splitData = data.split("|");
 
     if (splitData.length >= 5) {
-      // Convert seat numbers from string to array of numbers
       const scannedSeatNos = splitData[4]
         .split(",")
-        .map((seat: string) => parseInt(seat?.trim().replace(/['"]/g, ""), 10)); // Convert to numbers
+        .map((seat: string) => parseInt(seat?.trim().replace(/['"]/g, ""), 10));
 
-      // Find the bus with the same vehicle registration number
       const bus = busScheduleDetails.find(
         (bus) =>
-          bus.vehicleRegNo === splitData[0] && // Compare vehicle registration number
-          bus.departureTime === splitData[1] // Compare departure time
+          bus.vehicleRegNo === splitData[0] &&
+          bus.departureTime === splitData[1]
       );
 
-      // If bus is found, check if the seat numbers match
       if (bus) {
         const bookedSeatNumbers = bus.bookedSeats.map((seat) =>
           parseInt(seat, 10)
-        ); // Convert booked seats to numbers
+        );
         console.log("Booked Seats in Bus:");
         bookedSeatNumbers.forEach((seat, index) => {
-          console.log(`Index ${index}: ${seat}`); // Log actual booked seat numbers
+          console.log(`Index ${index}: ${seat}`);
         });
 
-        // Check if every scanned seat number is included in the booked seats
         const seatsMatch = scannedSeatNos.every((seat: number) =>
           bookedSeatNumbers.includes(seat)
         );
@@ -68,7 +74,7 @@ export default function Scanner() {
       }
 
       setScanned(true);
-      setScannedData(splitData); // Update scannedData here after everything is checked
+      setScannedData(splitData);
     } else {
       console.error("Scanned data is incomplete:", splitData);
       setValid(false);
@@ -78,7 +84,9 @@ export default function Scanner() {
 
   //================================================ Use Effects ===============================================//
 
-  // Request camera permission on component mount
+  /**
+   * Requests camera permission when the component is mounted.
+   */
   useEffect(() => {
     getCameraPermission();
   }, []);

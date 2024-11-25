@@ -5,20 +5,16 @@ import {
   Text,
   useColorScheme,
   Image,
-  Alert,
 } from "react-native";
-import MapView, { Marker, Polyline, Region } from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
 import MapViewDirections from "react-native-maps-directions";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
-import { useAppContext } from "@/context/AppContext";
-import Constants from "expo-constants";
-import { Picker } from "@react-native-picker/picker";
+import { useAppContext } from "../../context/AppContext";
 import { Dropdown } from "react-native-element-dropdown";
 import ErrorScreen from "../CommonScreens/ErrorScreen";
+import { ThemedView } from "../CommonModules/ThemedView";
 
 type Bus = {
   regNo: string;
@@ -27,8 +23,7 @@ type Bus = {
 };
 
 export default function PasBusLocation() {
-  const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
-  const { baseURL, myTickets } = useAppContext();
+  const { baseURL, apiKey, myTickets } = useAppContext();
   const [location, setLocation] = useState<LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedBus, setSelectedBus] = useState<Bus | null>(null);
@@ -142,7 +137,7 @@ export default function PasBusLocation() {
   }
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       {errorMsg ? (
         <Text>{errorMsg}</Text>
       ) : (
@@ -186,7 +181,7 @@ export default function PasBusLocation() {
                     pinColor="blue"
                   >
                     <Image
-                      source={require("@/assets/icons/bus_location_icon.png")}
+                      source={require("../../assets/icons/bus_location_icon.png")}
                       style={{ width: 50, height: 50 }}
                     />
                   </Marker>
@@ -199,7 +194,7 @@ export default function PasBusLocation() {
                       latitude: busLocation.latitude,
                       longitude: busLocation.longitude,
                     }}
-                    apikey={"AIzaSyB8KTu2cHiVsaBQAjxVFfe5YSjUaQHZVec"}
+                    apikey={apiKey}
                     strokeWidth={6}
                     strokeColor="#d17"
                     onError={(errorMessage) => {
@@ -212,7 +207,7 @@ export default function PasBusLocation() {
           </View>
         )
       )}
-    </View>
+    </ThemedView>
   );
 }
 

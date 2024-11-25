@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { useState, useEffect } from "react";
 import { Pressable, useColorScheme, View, StyleSheet } from "react-native";
 import { ThemedText } from "../CommonModules/ThemedText";
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext } from "../../context/AppContext";
 
 type SeatProps = {
   index: number;

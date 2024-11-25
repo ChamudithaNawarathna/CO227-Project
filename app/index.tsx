@@ -9,8 +9,8 @@ import {
 import { Href, router } from "expo-router";
 import React, { useEffect } from "react";
 
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
+import { ThemedText } from "../components/CommonModules/ThemedText";
+import { ThemedView } from "../components/CommonModules/ThemedView";
 
 export default function Index() {
   const theme = useColorScheme() ?? "light";
@@ -27,15 +27,15 @@ export default function Index() {
   return (
     <ThemedView style={styles.pageBody} lightColor="#fff" darkColor="#222">
       <ImageBackground
-        source={require("@/assets/images/main_bg.png")}
+        source={require("../assets/images/main_bg.png")}
         style={styles.backgroundImage}
       >
         <ThemedView style={styles.logoContainer}>
           <Image
             source={
               theme === "dark"
-                ? require("@/assets/logos/logo_darkmode.png")
-                : require("@/assets/logos/logo_lightmode.png")
+                ? require("../assets/logos/logo_darkmode.png")
+                : require("../assets/logos/logo_lightmode.png")
             }
             style={styles.logo}
           />
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   signupButton: {
     alignItems: "center",
-    backgroundColor: "#1bbcc7",
+    backgroundColor: "#10D3E9",
     marginVertical: 7,
     marginHorizontal: 40,
     paddingVertical: 10,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     alignItems: "center",
-    backgroundColor: "#9595b3",
+    backgroundColor: "#969DF8",
     marginVertical: 7,
     marginHorizontal: 40,
     paddingVertical: 10,

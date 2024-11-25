@@ -1,9 +1,6 @@
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { useAppContext } from "@/context/AppContext";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { ThemedText } from "../../../components/CommonModules/ThemedText";
+import { useAppContext } from "../../../context/AppContext";
 import axios from "axios";
-import { Href, Link } from "expo-router";
 import {
   View,
   Text,
@@ -27,7 +24,7 @@ type Props = {
   refund: string;
 };
 
-export const TicketCancelModal = ({
+export default function TicketCancelModal ({
   isVisible,
   onClose,
   refNo,
@@ -38,7 +35,7 @@ export const TicketCancelModal = ({
   duration,
   amount,
   refund,
-}: Props) => {
+}: Props) {
 
   const { baseURL} = useAppContext();
 

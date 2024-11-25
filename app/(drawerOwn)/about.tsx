@@ -1,5 +1,5 @@
 import React, {  } from 'react';
-import AboutScreen from '@/components/CommonScreens/AboutScreen';
+import AboutScreen from '../../components/CommonScreens/AboutScreen';
 
 export default function About() {
   return (

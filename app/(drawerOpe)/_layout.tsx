@@ -2,43 +2,39 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
 import { Drawer } from "expo-router/drawer";
-import React from "react";
+import React, { useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import CustomDrawerContent from "@/components/CustomDrawerContent";
+import CustomDrawerContent from "../../components/CustomDrawerContent";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBars,
-  faBusAlt,
-  faChartLine,
-  faCog,
+  faBell,
   faHome,
   faInfoCircle,
-  faMoneyBillTransfer,
-  faTable,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
+import { ThemedView } from "../../components/CommonModules/ThemedView";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { color } from "react-native-elements/dist/helpers";
-import { AppContext, AppProvider } from "@/context/AppContext";
+import { useAppContext } from "../../context/AppContext";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
+import MessageModal from "../modals/messageModal";
 
 export default function DrawerLayout() {
-  const navigation = useNavigation();
+  const { navigation } = useAppContext();
   const theme = useColorScheme() ?? "light";
   const iconSize = 24;
+  const [displayMessageModal, setDisplayMessageModal] = useState(false);
 
   return (
     <GestureHandlerRootView>
       <Drawer
         drawerContent={CustomDrawerContent}
         screenOptions={{
-          //drawerHideStatusBarOnOpen: true,
           drawerInactiveBackgroundColor: "transparent",
           drawerActiveBackgroundColor: theme === "dark" ? "#4de4" : "#4de8",
           drawerType: "front",
@@ -51,23 +47,16 @@ export default function DrawerLayout() {
           drawerAllowFontScaling: true,
           headerShadowVisible: false,
           headerTitle: () => (
-            <View style={styles.drawerHeader}>
-              <Image
-                source={
-                  theme === "dark"
-                    ? require("@/assets/logos/logo_darkmode.png")
-                    : require("@/assets/logos/logo_darkmode.png")
-                }
-                style={styles.logo}
-              />
-            </View>
+            <ThemedText type="h4" lightColor="#5a5a5a" darkColor="#ffffff">
+              e-Conductor
+            </ThemedText>
           ),
           headerTitleAlign: "center",
           headerBackground: ({}) => (
             <ThemedView
               style={{
                 flex: 1,
-                backgroundColor: theme === "dark" ? "#5fb5e5" : "#5fb5e5",
+                backgroundColor: theme === "dark" ? "#202020" : "#ffffff",
               }}
             />
           ),
@@ -84,9 +73,32 @@ export default function DrawerLayout() {
               <FontAwesomeIcon
                 icon={faBars}
                 size={24}
-                color={theme === "dark" ? "#fff" : "#fff"}
+                color={theme === "dark" ? "#ffffff" : "#5a5a5a"}
               />
             </Pressable>
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row" }}>
+              <Pressable
+                style={{
+                  backgroundColor: "transparent",
+                  borderWidth: 0,
+                  paddingHorizontal: 10,
+                  paddingVertical: 5,
+                }}
+                onPress={() => setDisplayMessageModal(!displayMessageModal)}
+              >
+                <FontAwesomeIcon
+                  icon={faBell}
+                  size={24}
+                  color={theme === "dark" ? "#ffffff" : "#5a5a5a"}
+                />
+              </Pressable>
+              <MessageModal
+                isVisible={displayMessageModal}
+                onClose={() => setDisplayMessageModal(false)}
+              />
+            </View>
           ),
         }}
       >
@@ -94,9 +106,10 @@ export default function DrawerLayout() {
           name="home"
           options={{
             drawerLabel: "Home",
-            drawerIcon: ({ color }) => (
+            drawerIcon: ({ color }: any) => (
               <FontAwesomeIcon icon={faHome} size={iconSize} color={color} />
             ),
+            headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
           }}
         />
 
@@ -104,18 +117,18 @@ export default function DrawerLayout() {
           name="profile"
           options={{
             drawerLabel: "Profile",
-            drawerIcon: ({ color }) => (
+            drawerIcon: ({ color }: any) => (
               <FontAwesomeIcon icon={faUser} size={iconSize} color={color} />
             ),
             headerTitle: "Profile",
-            headerTintColor: "#fff",
+            headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
           }}
         />
         <Drawer.Screen
           name="about"
           options={{
             drawerLabel: "About",
-            drawerIcon: ({ color }) => (
+            drawerIcon: ({ color }: any) => (
               <FontAwesomeIcon
                 icon={faInfoCircle}
                 size={iconSize}
@@ -123,7 +136,7 @@ export default function DrawerLayout() {
               />
             ),
             headerTitle: "About",
-            headerTintColor: "#fff",
+            headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
           }}
         />
       </Drawer>

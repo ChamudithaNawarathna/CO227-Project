@@ -2,76 +2,86 @@ import {
   Image,
   Pressable,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
   View,
 } from "react-native";
 import { Drawer } from "expo-router/drawer";
-import React from "react";
+import React, { useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import CustomDrawerContent from "@/components/CustomDrawerContent";
+import CustomDrawerContent from "../../components/CustomDrawerContent";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import {
   faBars,
+  faBell,
   faBusAlt,
   faChartLine,
-  faCog,
   faHome,
   faInfoCircle,
   faMoneyBillTransfer,
-  faTable,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
+import { ThemedView } from "../../components/CommonModules/ThemedView";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { color } from "react-native-elements/dist/helpers";
-import { AppContext, AppProvider } from "@/context/AppContext";
+import { useAppContext } from "../../context/AppContext";
+import MessageModal from "../modals/messageModal";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 
 export default function DrawerLayout() {
-  const navigation = useNavigation();
+  const { navigation } = useAppContext();
   const theme = useColorScheme() ?? "light";
   const iconSize = 24;
+  const [displayMessageModal, setDisplayMessageModal] = useState(false);
 
   return (
       <GestureHandlerRootView>
         <Drawer
-          drawerContent={CustomDrawerContent}
-          screenOptions={{
-            //drawerHideStatusBarOnOpen: true,
-            drawerInactiveBackgroundColor: "transparent",
-            drawerActiveBackgroundColor: theme === "dark" ? "#4de4" : "#4de8",
-            drawerType: "front",
-            drawerStyle: {
-              backgroundColor: theme === "dark" ? "#333" : "#fff",
-              width: 250,
-            },
-            drawerActiveTintColor: theme === "dark" ? "#2ff" : "#05c",
-            drawerInactiveTintColor: theme === "dark" ? "#eee" : "#777",
-            drawerAllowFontScaling: true,
-            headerShadowVisible: false,
-            headerTitle: () => (
-              <View style={styles.drawerHeader}>
-                <Image
-                  source={
-                    theme === "dark"
-                      ? require("@/assets/logos/logo_darkmode.png")
-                      : require("@/assets/logos/logo_darkmode.png")
-                  }
-                  style={styles.logo}
-                />
-              </View>
-            ),
-            headerTitleAlign: "center",
-            headerBackground: ({}) => (
-              <ThemedView
-                style={{
-                  flex: 1,
-                  backgroundColor: theme === "dark" ? "#5fb5e5" : "#5fb5e5",
-                }}
+        drawerContent={CustomDrawerContent}
+        screenOptions={{
+          drawerInactiveBackgroundColor: "transparent",
+          drawerActiveBackgroundColor: theme === "dark" ? "#4de4" : "#4de8",
+          drawerType: "front",
+          drawerStyle: {
+            backgroundColor: theme === "dark" ? "#333" : "#fff",
+            width: 250,
+          },
+          drawerActiveTintColor: theme === "dark" ? "#2ff" : "#05c",
+          drawerInactiveTintColor: theme === "dark" ? "#eee" : "#777",
+          drawerAllowFontScaling: true,
+          headerShadowVisible: false,
+          headerTitle: () => (
+            <ThemedText type="h4" lightColor="#5a5a5a" darkColor="#ffffff">
+              e-Conductor
+            </ThemedText>
+          ),
+          headerTitleAlign: "center",
+          headerBackground: ({}) => (
+            <ThemedView
+              style={{
+                flex: 1,
+                backgroundColor: theme === "dark" ? "#202020" : "#ffffff",
+              }}
+            />
+          ),
+          headerLeft: () => (
+            <Pressable
+              style={{
+                backgroundColor: "transparent",
+                borderWidth: 0,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+              }}
+              onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+            >
+              <FontAwesomeIcon
+                icon={faBars}
+                size={24}
+                color={theme === "dark" ? "#ffffff" : "#5a5a5a"}
               />
-            ),
-            headerLeft: () => (
+            </Pressable>
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row" }}>
               <Pressable
                 style={{
                   backgroundColor: "transparent",
@@ -79,24 +89,30 @@ export default function DrawerLayout() {
                   paddingHorizontal: 10,
                   paddingVertical: 5,
                 }}
-                onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
+                onPress={() => setDisplayMessageModal(!displayMessageModal)}
               >
                 <FontAwesomeIcon
-                  icon={faBars}
+                  icon={faBell}
                   size={24}
-                  color={theme === "dark" ? "#fff" : "#fff"}
+                  color={theme === "dark" ? "#ffffff" : "#5a5a5a"}
                 />
               </Pressable>
-            ),
-          }}
-        >
+              <MessageModal
+                isVisible={displayMessageModal}
+                onClose={() => setDisplayMessageModal(false)}
+              />
+            </View>
+          ),
+        }}
+      >
           <Drawer.Screen
             name="home"
             options={{
               drawerLabel: "Home",
-              drawerIcon: ({ color }) => (
+              drawerIcon: ({ color }: any) => (
                 <FontAwesomeIcon icon={faHome} size={iconSize} color={color} />
               ),
+              headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
             }}
           />
 
@@ -104,18 +120,18 @@ export default function DrawerLayout() {
             name="profile"
             options={{
               drawerLabel: "Profile",
-              drawerIcon: ({ color }) => (
+              drawerIcon: ({ color }: any) => (
                 <FontAwesomeIcon icon={faUser} size={iconSize} color={color} />
               ),
               headerTitle: "Profile",
-              headerTintColor: "#fff",
+              headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
             }}
           />
           <Drawer.Screen
             name="transactions"
             options={{
               drawerLabel: "Transactions",
-              drawerIcon: ({ color }) => (
+              drawerIcon: ({ color }: any) => (
                 <FontAwesomeIcon
                   icon={faMoneyBillTransfer}
                   size={iconSize}
@@ -123,14 +139,14 @@ export default function DrawerLayout() {
                 />
               ),
               headerTitle: "Transactions",
-              headerTintColor: "#fff",
+              headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
             }}
           />
           <Drawer.Screen
             name="about"
             options={{
               drawerLabel: "About",
-              drawerIcon: ({ color }) => (
+              drawerIcon: ({ color }: any) => (
                 <FontAwesomeIcon
                   icon={faInfoCircle}
                   size={iconSize}
@@ -138,14 +154,14 @@ export default function DrawerLayout() {
                 />
               ),
               headerTitle: "About",
-              headerTintColor: "#fff",
+              headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
             }}
           />
           <Drawer.Screen
             name="buses"
             options={{
               drawerLabel: "Buses",
-              drawerIcon: ({ color }) => (
+              drawerIcon: ({ color }: any) => (
                 <FontAwesomeIcon
                   icon={faBusAlt}
                   size={iconSize}
@@ -153,14 +169,14 @@ export default function DrawerLayout() {
                 />
               ),
               headerTitle: "Buses",
-              headerTintColor: "#fff",
+              headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
             }}
           />
           <Drawer.Screen
             name="analytics"
             options={{
               drawerLabel: "Analytics",
-              drawerIcon: ({ color }) => (
+              drawerIcon: ({ color }: any) => (
                 <FontAwesomeIcon
                   icon={faChartLine}
                   size={iconSize}
@@ -168,7 +184,7 @@ export default function DrawerLayout() {
                 />
               ),
               headerTitle: "Analytics",
-              headerTintColor: "#fff",
+              headerTintColor: theme === "dark" ? "#fff" : "#5a5a5a",
             }}
           />
         </Drawer>

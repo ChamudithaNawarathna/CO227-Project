@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Href, router } from "expo-router";
 import {
   ActivityIndicator,
   Alert,
-  Button,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -12,17 +10,22 @@ import {
   View,
 } from "react-native";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { Ticket } from "@/controller/Ticket";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import { AvailableTicketView } from "@/components/UIComponents/AvailableTicketView";
-import StringToDate from "@/components/CommonModules/StringToDateTime";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
-import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
+import { useAppContext } from "../../../context/AppContext";
+import { ThemedText } from "../../../components/CommonModules/ThemedText";
+import { Ticket } from "../../../controller/Ticket";
+import { AvailableTicket } from "../../../components/UIComponents/AvailableTicket";
+import StringToDate from "../../../components/CommonModules/StringToDateTime";
+import ErrorScreen from "../../../components/CommonScreens/ErrorScreen";
+import LoadingScreen from "../../../components/CommonScreens/LoadingScreen";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import { ThemedView } from "../../../components/CommonModules/ThemedView";
+import { TodayTicket } from "../../../components/UIComponents/TodayTicket";
+import { AccountDeatils } from "../../../components/UIComponents/AccountDetails";
 
+/**
+ * Represents the structure of ticket
+ */
 type AvailableTicket = {
   refNo: string;
   date: string;
@@ -43,15 +46,41 @@ type AvailableTicket = {
   cancel: boolean;
 };
 
+/**
+ * Dashboard component for bus passengers.
+ * This component provides an overview of today's tickets, available tickets,
+ * and ticket details for user. It interacts with the backend to fetch available
+ * tickets and their details, and displays them in a user-friendly manner.
+ */
 export default function Dashboard() {
-  const { baseURL, credits, myTickets, setMyTickets, id } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const { baseURL, myTickets, setMyTickets, id } = useAppContext(); // Accessing global context values for baseURL, myTickets, and user ID.
+  const theme = useColorScheme() ?? "light"; // Detecting the current theme (light or dark mode) for UI customization.
+  const today = new Date().toLocaleDateString("en-CA"); // Getting today's date in "YYYY-MM-DD" format for date comparison.
+  const [loading, setLoading] = useState(true); // Loading state for data fetching.
+  const [error, setError] = useState<string>(""); // Error state to handle backend errors.
+  const [todayTickets, setTodayTickets] = useState<
+    Map<string, Ticket> | undefined
+  >(); // State to hold today's tickets.
+
+  //================================================ Functions ===============================================//
+
+  /**
+   * Checks if a given date is today's date.
+   *
+   * @param date - The date to check.
+   * @returns {boolean} - Returns true if the date is today, otherwise false.
+   */
+  function isToday(date: Date | undefined): boolean {
+    return date?.toISOString().split("T")[0] === today;
+  }
 
   //================================================ Backend Calls ===============================================//
 
-  // Fetch available tickets
+  /**
+   * Fetches available tickets for the logged-in user.
+   * Makes a POST request to the backend to retrieve tickets.
+   * If successful, it fetches detailed information for each available ticket.
+   */
   const fetchAvailableTickets = async () => {
     setLoading(true);
     setError("");
@@ -63,7 +92,7 @@ export default function Dashboard() {
       if (response.status === 200) {
         const fetchedTickets: AvailableTicket[] = response.data;
         console.log(fetchedTickets);
-        await fetchTicketDetailsForAll(fetchedTickets); // Fetch details for each available ticket concurrently
+        await fetchTicketDetailsForAll(fetchedTickets);
       } else {
         Alert.alert("Error", "Failed to fetch tickets");
       }
@@ -76,11 +105,15 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch detailed ticket information for all available tickets
+  /**
+   * Fetches detailed ticket information for each available ticket.
+   *
+   * @param tickets - Array of available tickets to fetch details for.
+   */
   const fetchTicketDetailsForAll = async (tickets: AvailableTicket[]) => {
-    const updatedTickets = new Map(myTickets); // Create a copy of myTickets
+    const updatedTickets = new Map(myTickets);
     const fetchPromises = tickets.map(async (availableTicket) => {
-      const { refNo, org, fromT, toT, tracking, cancel } = availableTicket; // Assuming these properties exist
+      const { refNo, org, fromT, toT, tracking, cancel } = availableTicket;
       try {
         const response = await axios.get(`${baseURL}/tickets/tkt2`, {
           params: { refNo },
@@ -124,8 +157,8 @@ export default function Dashboard() {
       }
     });
 
-    await Promise.all(fetchPromises); // Wait for all fetch requests to complete
-    setMyTickets(updatedTickets); // Update the state with the new map after all tickets have been fetched
+    await Promise.all(fetchPromises);
+    setMyTickets(updatedTickets);
   };
 
   //================================================ Use Effects ===============================================//
@@ -134,6 +167,18 @@ export default function Dashboard() {
   useEffect(() => {
     fetchAvailableTickets();
   }, []);
+
+  // Filter tickets for today's date
+  useEffect(() => {
+    if (!loading && myTickets) {
+      const ticketsForToday = new Map(
+        Array.from(myTickets.entries()).filter(([, ticket]) =>
+          isToday(ticket.departure)
+        )
+      );
+      setTodayTickets(ticketsForToday);
+    }
+  }, [myTickets]);
 
   //================================================ UI Control ===============================================//
 
@@ -146,46 +191,52 @@ export default function Dashboard() {
   }
 
   return (
-      <View style={styles.mainBody}>
+    <ThemedView style={styles.mainBody}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: "transparent" }}
+      >
+        <AccountDeatils showRecharge={true} />
+        <ThemedText type={"h4"} style={styles.title}>
+          Today's Tickets
+        </ThemedText>
+        <View style={{ padding: 12 }}>
+          {loading ? (
+            <View style={{ marginTop: 50, alignItems: "center" }}>
+              <ActivityIndicator
+                size={70}
+                color={theme === "dark" ? "#ddd" : "#777"}
+              />
+            </View>
+          ) : todayTickets && todayTickets.size != 0 ? (
+            <ScrollView
+              horizontal={true}
+              showsVerticalScrollIndicator={false}
+              style={{ backgroundColor: "transparent" }}
+            >
+              {Array.from(todayTickets.entries()).map(([ticketNo, ticket]) => (
+                <TodayTicket key={ticketNo} ticket={ticket} />
+              ))}
+            </ScrollView>
+          ) : (
+            <ThemedText
+              type="s5"
+              lightColor={"#777"}
+              style={{ alignSelf: "center", marginVertical: 50 }}
+            >
+              No tickets are scheduled today
+            </ThemedText>
+          )}
+        </View>
+
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            borderRadius: 20,
-            paddingBottom: 3,
-            marginTop: 10,
-            paddingHorizontal: 5,
-            marginHorizontal: "10%",
           }}
         >
-          <ThemedText
-            type={"h4"}
-            style={{ marginLeft: 5 }}
-          >
-            Balance: LKR {credits}
-          </ThemedText>
-          <Pressable
-            style={[
-              styles.rechargeButton,
-              {
-                borderColor: theme === "dark" ? "#ccc" : "#444",
-                borderWidth: 2,
-              },
-            ]}
-            onPress={() => router.replace("/index" as Href<string>)}
-          >
-            <ThemedText type="h6">
-              Recharge
-            </ThemedText>
-          </Pressable>
-        </View>
-
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: 'center' }}>
-          <ThemedText
-            type={"h4"}
-            style={styles.cardHeader}
-          >
+          <ThemedText type={"h4"} style={styles.title}>
             Available Tickets
           </ThemedText>
           <Pressable
@@ -195,7 +246,7 @@ export default function Dashboard() {
               alignItems: "center",
               paddingVertical: 10,
               paddingHorizontal: 10,
-              marginHorizontal: 10,
+              marginHorizontal: 20,
               borderRadius: 50,
               elevation: 5,
             }}
@@ -209,31 +260,30 @@ export default function Dashboard() {
           </Pressable>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={{ padding: 12 }}>
-            {loading ? (
-              <View style={{ marginTop: 200, alignItems: "center" }}>
-                <ActivityIndicator
-                  size={70}
-                  color={theme === "dark" ? "#ddd" : "#777"}
-                />
-              </View>
-            ) : myTickets ? (
-              Array.from(myTickets.entries()).map(([ticketNo, ticket]) => (
-                <AvailableTicketView key={ticketNo} ticket={ticket} />
-              ))
-            ) : (
-              <ThemedText
-                type="s5"
-                lightColor={"#777"}
-                style={{ alignSelf: "center", marginTop: 250 }}
-              >
-                No tickets are available
-              </ThemedText>
-            )}
-          </View>
-        </ScrollView>
-      </View>
+        <View style={{ padding: 12 }}>
+          {loading ? (
+            <View style={{ marginTop: 200, alignItems: "center" }}>
+              <ActivityIndicator
+                size={70}
+                color={theme === "dark" ? "#ddd" : "#777"}
+              />
+            </View>
+          ) : myTickets && myTickets.size != 0 ? (
+            Array.from(myTickets.entries()).map(([ticketNo, ticket]) => (
+              <AvailableTicket key={ticketNo} ticket={ticket} />
+            ))
+          ) : (
+            <ThemedText
+              type="s5"
+              lightColor={"#777"}
+              style={{ alignSelf: "center", marginVertical: 70 }}
+            >
+              No tickets are available
+            </ThemedText>
+          )}
+        </View>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
@@ -241,23 +291,16 @@ const styles = StyleSheet.create({
   mainBody: {
     flex: 1,
   },
-  rechargeButton: {
-    alignItems: "center",
-    backgroundColor: "#fff2",
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    borderRadius: 20,
-  },
   cardBody: {
     borderWidth: 0,
     borderRadius: 10,
     marginHorizontal: 10,
     elevation: 3,
   },
-  cardHeader: {
-    marginTop: 15,
+  title: {
+    marginTop: 10,
     marginBottom: 5,
-    marginHorizontal: 15,
+    marginHorizontal: 20,
     backgroundColor: "transparent",
   },
   drawerHeader: {
@@ -269,5 +312,10 @@ const styles = StyleSheet.create({
     height: 60,
     width: 60,
     borderRadius: 15,
+  },
+  profileImage: {
+    height: 40,
+    width: 40,
+    borderRadius: 60,
   },
 });

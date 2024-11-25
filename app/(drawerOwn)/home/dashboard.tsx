@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRotateBack, faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowRotateBack,
+  faArrowsRotate,
+} from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import {
   Alert,
@@ -13,12 +16,17 @@ import {
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import { EarningsGraph } from "@/components/UIComponents/EarningGraph";
-import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import { Bus, useAppContext } from "../../../context/AppContext";
+import { ThemedText } from "../../../components/CommonModules/ThemedText";
+import { EarningsGraph } from "../../../components/UIComponents/EarningGraph";
+import LoadingScreen from "../../../components/CommonScreens/LoadingScreen";
+import ErrorScreen from "../../../components/CommonScreens/ErrorScreen";
+import { ThemedView } from "../../../components/CommonModules/ThemedView";
+import { AccountDeatils } from "../../../components/UIComponents/AccountDetails";
 
+/**
+ * Represents the structure of income data for statistics.
+ */
 interface IncomeData {
   vehicleRegNo: string;
   weekly: {
@@ -29,24 +37,31 @@ interface IncomeData {
   };
 }
 
+/**
+ * Dashboard component for bus owners.
+ * Provides functionality to monitor bus locations and their earnings,
+ */
 export default function Dashboard() {
-  const { baseURL, id, credits, myBuses, setMyBuses } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#aaa" : "#777";
+  const { baseURL, id, myBuses, setMyBuses } = useAppContext(); // Extracting global context values
+  const theme = useColorScheme() ?? "light"; // Detect current theme (light or dark mode)
   const dropdownOptions = [
     { label: "Earnings", value: "earningData" },
     { label: "Refunds", value: "refundData" },
     { label: "Received", value: "receivedData" },
-  ];
-  const [incomeData, setIncomeData] = useState<IncomeData[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  ];  // Dropdown options for selecting weekly data type (Earnings, Refunds, or Received)
+  const [incomeData, setIncomeData] = useState<IncomeData[]>([]); // Stores income data for the buses
+  const [loading, setLoading] = useState<boolean>(false); // Tracks loading state
+  const [error, setError] = useState<string>(""); // Tracks error messages
   const [selectedWeeklyData, setSelectedWeeklyData] =
-    useState<string>("earningData");
+    useState<string>("earningData"); // Tracks selected data type for weekly graph
 
   //================================================ Functions ===============================================//
 
-  // Transform weekly income data into a graphable form
+   /**
+   * Transforms weekly income data into a graphable format.
+   * @param dataType - The specific data type (e.g., earningData, refundData, receivedData).
+   * @returns An array of objects containing label (day of the week) and value (amount).
+   */
   const getWeeklyData = (dataType: keyof IncomeData["weekly"]) => {
     if (!incomeData || incomeData.length === 0) return []; // Check for array and length
     const earningsData = incomeData[0].weekly[dataType]; // Access the weekly property of the first item
@@ -58,7 +73,9 @@ export default function Dashboard() {
 
   //================================================ Backend Calls ===============================================//
 
-  // Fetch income data of each bus seperately
+   /**
+   * Fetches income data for each bus separately from the backend.
+   */
   const fetchIncomeData = async () => {
     setError("");
     try {
@@ -73,7 +90,9 @@ export default function Dashboard() {
     }
   };
 
-  // Fetch owned buses' details
+  /**
+   * Fetches the details of owned buses from the backend.
+   */
   const fetchBuses = async () => {
     setError("");
     setLoading(true);
@@ -113,86 +132,64 @@ export default function Dashboard() {
   }
 
   return (
-    <View style={styles.mainBody}>
-      <View
+    <ThemedView style={styles.mainBody}>
+      <AccountDeatils showRecharge={false} />
+      <ScrollView
         style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          borderRadius: 20,
-          paddingVertical: 3,
-          paddingHorizontal: 5,
-          marginHorizontal: "10%",
+          paddingHorizontal: 10,
         }}
+        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
       >
-        <ThemedText
-          type={"h4"}
-          lightColor={"#000"}
-          darkColor={"#fff"}
-          style={{ marginLeft: 5 }}
-        >
-          Rs. {credits}
-        </ThemedText>
-        <Pressable
-          style={[
-            styles.rechargeButton,
-            { borderColor: "#000", borderWidth: 2 },
-          ]}
-          onPress={() => router.replace("/index" as Href<string>)}
-        >
-          <ThemedText type="h6" lightColor={"#000"} darkColor={"#fff"}>
-            Recharge
-          </ThemedText>
-        </Pressable>
-      </View>
-      <ScrollView>
-        <View style={{
-            flexDirection: "row",
-            justifyContent: 'space-between',
-            marginHorizontal: 10,
-            marginVertical: 10,
-            alignItems: 'center'
-          }}>
         <View
           style={{
             flexDirection: "row",
-            gap: 10,
-            justifyContent: "flex-start",
+            justifyContent: "space-between",
             marginHorizontal: 10,
+            marginVertical: 10,
+            alignItems: "center",
           }}
         >
-          <ThemedText style={styles.title}>Weekly</ThemedText>
-          <Dropdown
-            style={styles.inputDropdown}
-            placeholderStyle={{ color: "gray" }}
-            data={dropdownOptions}
-            labelField="label"
-            valueField="value"
-            placeholder="Select Data Type"
-            value={selectedWeeklyData}
-            onChange={(item) => {
-              setSelectedWeeklyData(item.value); // Update selected data type for weekly
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 10,
+              justifyContent: "flex-start",
+              marginHorizontal: 10,
             }}
-          />
-        </View>
-        <Pressable
-        style={{
-          backgroundColor: theme === "dark" ? "#555" : "#fff",
-          alignItems: "center",
-          paddingVertical: 10,
-          paddingHorizontal: 10,
-          marginTop: -20,
-          borderRadius: 50,
-          elevation: 5
-        }}
-        onPress={fetchIncomeData}
-      >
-       <FontAwesomeIcon
-                icon={faArrowsRotate}
-                size={20}
-                color={theme === "dark" ? "#ccc" : "#444"}
-              />
-      </Pressable>
+          >
+            <ThemedText style={styles.title}>Weekly</ThemedText>
+            <Dropdown
+              style={styles.inputDropdown}
+              placeholderStyle={{ color: "gray" }}
+              data={dropdownOptions}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Data Type"
+              value={selectedWeeklyData}
+              onChange={(item) => {
+                setSelectedWeeklyData(item.value); // Update selected data type for weekly
+              }}
+            />
+          </View>
+          <Pressable
+            style={{
+              backgroundColor: theme === "dark" ? "#555" : "#fff",
+              alignItems: "center",
+              paddingVertical: 10,
+              paddingHorizontal: 10,
+              marginTop: -20,
+              borderRadius: 50,
+              elevation: 5,
+            }}
+            onPress={fetchIncomeData}
+          >
+            <FontAwesomeIcon
+              icon={faArrowsRotate}
+              size={20}
+              color={theme === "dark" ? "#ccc" : "#444"}
+            />
+          </Pressable>
         </View>
         {incomeData.map((vehicle) => (
           <View
@@ -210,13 +207,12 @@ export default function Dashboard() {
           </View>
         ))}
       </ScrollView>
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   mainBody: {
-    padding: 10,
     flex: 1,
   },
   rechargeButton: {

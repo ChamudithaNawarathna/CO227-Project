@@ -14,21 +14,21 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Href, router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { useAppContext } from "../../context/AppContext";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 import {
   FormDropdown,
   FormInput,
-} from "@/components/FormComponents/FormInputField";
+} from "../../components/FormComponents/FormInputField";
 import {
   validateLicenseNo,
   validateNIC,
   validateNTCNo,
-} from "@/components/FormComponents/FormFunctions";
-import calculateBirthday from "@/components/CommonModules/CalculateBirthday";
+} from "../../components/FormComponents/FormFunctions";
+import calculateBirthday from "../../components/CommonModules/CalculateBirthday";
 import axios from "axios";
 import Modal from "react-native-modal";
-import { ThemedView } from "@/components/CommonModules/ThemedView";
+import { ThemedView } from "../../components/CommonModules/ThemedView";
 
 type Props = {
   isVisible: boolean;
@@ -132,7 +132,7 @@ export default function OpeSignupModal({ isVisible, onClose }: Props) {
         if (!userInfo) {
           console.error("Failed to retrieve user info");
         } else {
-          router.replace("/(drawerOwn)/home/dashboard" as Href<string>);
+          router.replace("/(drawerOwn)/home/dashboard");
           Alert.alert("Success", "User updated successfully!");
         }
       }

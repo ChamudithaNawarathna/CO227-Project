@@ -1,4 +1,3 @@
-import { Ticket } from "@/controller/Ticket";
 import React, {
   createContext,
   useState,
@@ -7,6 +6,9 @@ import React, {
   SetStateAction,
   useContext,
 } from "react";
+import Constants from "expo-constants";
+import { Ticket } from "../controller/Ticket";
+import { useNavigation } from "expo-router";
 
 export type grapData = {
   value: number;
@@ -45,7 +47,10 @@ export type Message = {
 export type accountType = "passenger" | "employee" | "owner";
 
 interface AppContextProps {
+  navigation: any;
   baseURL: string;
+  apiKey: string;
+  stripeKey: string;
   profileImage: string;
   setProfileImage: Dispatch<SetStateAction<string>>;
   id: string;
@@ -103,21 +108,23 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  let BACKEND_URL = process.env.BACKEND_URL;
-  const baseURL = "http://192.168.223.221:20240";
+  const navigation = useNavigation();
+  const baseURL = Constants.expoConfig?.extra?.backend;
+  const apiKey = Constants.expoConfig?.extra?.googlmap;
+  const stripeKey = Constants.expoConfig?.extra?.stripekey;
   const [profileImage, setProfileImage] = useState("");
   const [id, setID] = useState("");
   const [accountType, setAccountType] = useState<accountType>("passenger");
-  const [operatorAcc, setOperatorAcc] = useState(true);
-  const [ownerAcc, setOwnerAcc] = useState(true);
-  const [credits, setCredits] = useState(500);
+  const [operatorAcc, setOperatorAcc] = useState(false);
+  const [ownerAcc, setOwnerAcc] = useState(false);
+  const [credits, setCredits] = useState(0);
   const [fName, setFName] = useState<string>("");
   const [lName, setLName] = useState<string>("");
   const [phoneNo, setPhoneNo] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [nic, setNIC] = useState<string>("");
   const [accountNo, setAccountNo] = useState<string>("");
-  const [accHolderName, setAccHolderName] = useState<string>("");
+  const [accHolderName, setAccHolderName] = useState<string>("f");
   const [bankName, setBankName] = useState<string>("");
   const [branchName, setBranchName] = useState<string>("");
   const [ntcLicenseNo, setNTCLicenseNo] = useState<string>("");
@@ -135,7 +142,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
+        navigation,
         baseURL,
+        apiKey,
+        stripeKey,
         profileImage,
         setProfileImage,
         id,

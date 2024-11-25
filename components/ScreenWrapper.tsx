@@ -8,7 +8,7 @@ interface ScreenWrapperProps {
 const ScreenWrapper: React.FC<ScreenWrapperProps> = ({ children }) => {
   return (
     <ImageBackground
-      source={require("@/assets/images/home_bg.png")}
+      source={require("../assets/images/home_bg.png")}
       style={styles.background}
     >
       <View style={styles.content}>{children}</View>

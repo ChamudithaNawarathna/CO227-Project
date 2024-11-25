@@ -1,14 +1,13 @@
 import React from "react";
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faArrowRotateBack, faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRotateBack } from "@fortawesome/free-solid-svg-icons";
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
   Pressable,
   StyleSheet,
-  Text,
   useColorScheme,
   View,
 } from "react-native";
@@ -17,42 +16,51 @@ import axios from "axios";
 import { LocationObject } from "expo-location";
 import { TabBar, TabView } from "react-native-tab-view";
 
-import { useAppContext, VehicleDetails } from "@/context/AppContext";
-import ScreenWrapper from "@/components/ScreenWrapper";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import OperatorTabScreen from "@/components/UIComponents/OperatorTabScreen";
-import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
+import { useAppContext, VehicleDetails } from "../../../context/AppContext";
+import { ThemedText } from "../../../components/CommonModules/ThemedText";
+import OperatorTabScreen from "../../../components/UIComponents/OperatorTabScreen";
+import LoadingScreen from "../../../components/CommonScreens/LoadingScreen";
+import ErrorScreen from "../../../components/CommonScreens/ErrorScreen";
+import { ThemedView } from "../../../components/CommonModules/ThemedView";
 
+/**
+ * Dashboard component for bus operators.
+ * Provides functionality to manage and monitor buses, including schedule display,
+ * seat availability, and real-time tracking using location updates.
+ */
 export default function Dashboard() {
   const { baseURL, id, setSeatNos, busScheduleDetails, setBusScheduleDetails } =
-    useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const iconColor = theme === "dark" ? "#aaa" : "#777";
-  const initialLayout = { width: Dimensions.get("window").width };
-  const [errorPermission, setErrorPermission] = useState<string | null>(null);
-  const [isTracking, setIsTracking] = useState<boolean>(false);
+    useAppContext(); // Extracting global context values
+  // Extracting global context values
+  const theme = useColorScheme() ?? "light"; // Detect current theme (light or dark mode)
+  const iconColor = theme === "dark" ? "#aaa" : "#777"; // Adjust icon color based on theme
+  const initialLayout = { width: Dimensions.get("window").width }; // Tab layout configuration
+  const [errorPermission, setErrorPermission] = useState<string | null>(null); // Tracks location permission errors
+  const [isTracking, setIsTracking] = useState<boolean>(false); // Tracks whether location updates are active
   const [updateInterval, setUpdateInterval] = useState<{
     label: string;
     value: number;
-  }>({ label: "2 seconds", value: 2000 });
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [index, setIndex] = useState(0);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  }>({ label: "2 seconds", value: 2000 }); // Interval for tracking location updates
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null); // Reference to the tracking interval
+  const [index, setIndex] = useState(0); // Index for the current active tab
+  const [loading, setLoading] = useState<boolean>(false); // Loading state for data fetching
+  const [error, setError] = useState<string>(""); // Error state for fetching data
   const [routes, setRoutes] = useState(
     busScheduleDetails.map((vehicleDetail, index) => ({
       key: `tab${index}`,
       title: `${vehicleDetail.vehicleRegNo}|${vehicleDetail.departureTime}`,
     }))
-  );
+  ); // Dynamic tab routes based on fetched bus schedules
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
-  );
+  ); // Default date (today) for schedule filtering
 
   //================================================ Functions ===============================================//
 
-  // Request location permissions
+  /**
+   * Requests location permissions from the user.
+   * If denied, stops tracking and updates the error state.
+   */
   const requestPermissions = async (): Promise<void> => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== "granted") {
@@ -63,7 +71,10 @@ export default function Dashboard() {
     setErrorPermission(null); // Clear error if permissions are granted
   };
 
-  // Get your current location
+  /**
+   * Fetches the current device location.
+   * @returns {Promise<LocationObject | null>} The current location object or null if an error occurs.
+   */
   const getLocation = async (): Promise<LocationObject | null> => {
     try {
       let location = await Location.getCurrentPositionAsync({
@@ -77,10 +88,13 @@ export default function Dashboard() {
     }
   };
 
-  // Start updating location of the bus in the database
+  /**
+   * Starts periodic location updates for the bus, sending data to the backend.
+   * Ensures no multiple intervals are started simultaneously.
+   */
   const startTracking = async () => {
-    await requestPermissions(); // Ensure permissions are requested
-    if (intervalRef.current) return; // Prevent starting multiple intervals
+    await requestPermissions();
+    if (intervalRef.current) return;
 
     intervalRef.current = setInterval(async () => {
       const loc = await getLocation();
@@ -102,7 +116,10 @@ export default function Dashboard() {
     setIsTracking(true);
   };
 
-  // Stop updating location of the bus in the database
+  /**
+   * Stops periodic location updates.
+   * Clears the tracking interval and updates the tracking state.
+   */
   const stopTracking = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -111,7 +128,10 @@ export default function Dashboard() {
     }
   };
 
-  // Update "seatNos" according to the selected tab
+  /**
+   * Updates the `seatNos` in the AppContext based on the currently selected tab.
+   * @param {object} route - The current route object containing tab details.
+   */
   function updateSeats(route: { key: string; title: string }) {
     if (route) {
       let vehicleDetail = busScheduleDetails[index];
@@ -124,25 +144,27 @@ export default function Dashboard() {
 
   //================================================ Backend Calls ===============================================//
 
-  // Fetch scheduled bus details for the operator
+  /**
+   * Fetches scheduled bus details for the selected operator and date.
+   * Updates the state with fetched data and dynamically configures tabs.
+   */
   const fetchBusDetails = async () => {
     setLoading(true);
     setError("");
     try {
       const response = await axios.post(`${baseURL}/schedule/sdl2`, {
         id,
-        date: selectedDate, // Send the selected date to the backend
+        date: selectedDate,
       });
 
       if (response.status === 200 && response.data.length > 0) {
         setBusScheduleDetails(response.data);
-        console.log("Fetched vehicle details:", response.data); // Log response data
+        console.log("Fetched vehicle details:", response.data);
 
-        // Update the routes based on the fetched data
         const newRoutes = response.data.map(
           (vehicleDetail: VehicleDetails, index: number) => ({
             key: `tab${index}`,
-            title: `${vehicleDetail.vehicleRegNo}|${vehicleDetail.departureTime}`, // Include both regNo and time
+            title: `${vehicleDetail.vehicleRegNo}|${vehicleDetail.departureTime}`,
           })
         );
 
@@ -159,7 +181,13 @@ export default function Dashboard() {
     }
   };
 
-  // Update bus location in the database
+  /**
+   * Updates the current bus location in the backend database.
+   * @param {string} regNo - The bus registration number.
+   * @param {number} lat - The latitude of the current location.
+   * @param {number} lng - The longitude of the current location.
+   * @param {number | null} speed - The current speed of the bus.
+   */
   const updateBusLocation = async (
     regNo: string,
     lat: number,
@@ -189,19 +217,26 @@ export default function Dashboard() {
 
   //================================================ Use Effects ===============================================//
 
-  // Fetch bus details on component mount
+  /**
+   * Fetch bus details on the component mount
+   */
   useEffect(() => {
     fetchBusDetails();
   }, []);
 
-  // Clean up interval on component mount
+  /**
+   * Clean up the location tracking interval when the component is unmounted.
+   */
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
 
-  // Restart trackinng when tracking time interval updates
+  /**
+   * Restart location tracking if the tracking interval changes.
+   * Stops the current tracking process and restarts with the updated interval.
+   */
   useEffect(() => {
     if (isTracking) {
       stopTracking();
@@ -209,19 +244,26 @@ export default function Dashboard() {
     }
   }, [updateInterval]);
 
-  // Update "seatNos" in AppContext when tab routes updates
+  /**
+   * Updates the `seatNos` array in the AppContext when the tab routes are updated.
+   */
   useEffect(() => {
     updateSeats(routes[0]);
   }, [routes]);
 
-  // Update "seatNos" in AppContext when tab updates
+  /**
+   * Updates the `seatNos` array in the AppContext when the active tab index changes.
+   */
   useEffect(() => {
     updateSeats(routes[index]);
   }, [index]);
 
   //================================================ UI Control ===============================================//
 
-  // Render tab screens containing bus seats and tracking options
+  /**
+   * Renders the scene for each tab based on the selected bus schedule details.
+   * Displays either the bus schedule information or a fallback message if no data is available.
+   */
   const renderScene = ({ route }: { route: any }) => {
     const [regNo, time] = route.title.split("|");
     const vehicleDetail = busScheduleDetails.find(
@@ -252,28 +294,6 @@ export default function Dashboard() {
     );
   };
 
-  // Render tab labels for tab screens
-  const renderLabel = ({
-    route,
-    focused,
-  }: {
-    route: any;
-    focused: boolean;
-  }) => {
-    return (
-      <View
-        style={[styles.tab, focused ? styles.activeTab : styles.inactiveTab]}
-      >
-        <ThemedText type="h6" style={{ color: focused ? "white" : "black" }}>
-          {route.title.split("|")[0]}
-        </ThemedText>
-        <ThemedText type="s7" style={{ color: focused ? "white" : "black" }}>
-          {route.title.split("|")[1]}
-        </ThemedText>
-      </View>
-    );
-  };
-
   if (loading) {
     return <LoadingScreen />;
   }
@@ -283,68 +303,100 @@ export default function Dashboard() {
   }
 
   return (
-    <ScreenWrapper>
-      <View style={{ flex: 1 }}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : busScheduleDetails && busScheduleDetails.length > 0 ? (
-          <TabView
-            navigationState={{ index, routes }}
-            renderScene={renderScene}
-            onIndexChange={(newIndex) => {
-              setIndex(newIndex);
-            }}
-            initialLayout={initialLayout}
-            renderTabBar={(props) => (
-              <TabBar
-                {...props}
-                activeColor="#d1f"
-                indicatorStyle={{ backgroundColor: "transparent" }}
-                style={{
-                  backgroundColor: "white",
-                  marginHorizontal: 15,
-                  marginTop: 10,
-                  borderRadius: 30,
-                }}
-                renderLabel={renderLabel}
-              />
-            )}
-          />
-        ) : (
-          <View style={{ alignItems: "center", marginTop: 200 }}>
-            <ThemedText type="h5" lightColor="#666" darkColor="#ccc">
-              No bus schedules are available today
-            </ThemedText>
-            <Pressable
+    <ThemedView style={styles.mainBody}>
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : busScheduleDetails && busScheduleDetails.length > 0 ? (
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={(newIndex) => {
+            setIndex(newIndex);
+          }}
+          initialLayout={initialLayout}
+          renderTabBar={(props) => (
+            <TabBar
+              {...props}
+              indicatorStyle={{ backgroundColor: "transparent" }}
               style={{
+                alignItems: "center",
+                height: 45,
+                backgroundColor: "#8BE7FF",
+                marginHorizontal: 15,
+                paddingVertical: 5,
                 marginTop: 10,
-                flexDirection: "row",
-                gap: 5,
+                borderRadius: 30,
               }}
-              onPress={fetchBusDetails}
-            >
-              <FontAwesomeIcon
-                icon={faArrowRotateBack}
-                size={18}
-                color={iconColor}
-                style={{ alignSelf: "center" }}
-              />
-              <ThemedText
-                type="s5"
-                lightColor={iconColor}
-                darkColor={iconColor}
-              >
-                Refresh
-              </ThemedText>
-            </Pressable>
-          </View>
-        )}
-      </View>
-    </ScreenWrapper>
+              renderTabBarItem={({ route, onPress, onLongPress, style }) => (
+                <Pressable
+                  onPress={onPress}
+                  onLongPress={onLongPress}
+                  style={
+                    props.navigationState.index === routes.indexOf(route)
+                      ? styles.activeTab
+                      : styles.inactiveTab
+                  }
+                >
+                  <ThemedText
+                    type="h6"
+                    style={{
+                      color:
+                        props.navigationState.index === routes.indexOf(route)
+                          ? "white"
+                          : "black",
+                    }}
+                  >
+                    {route.title.split("|")[0]}
+                  </ThemedText>
+                  <ThemedText
+                    type="s7"
+                    style={{
+                      color:
+                        props.navigationState.index === routes.indexOf(route)
+                          ? "white"
+                          : "black",
+                    }}
+                  >
+                    {route.title.split("|")[1]}
+                  </ThemedText>
+                </Pressable>
+              )}
+            />
+          )}
+        />
+      ) : (
+        <View style={{ alignItems: "center", marginTop: 200 }}>
+          <ThemedText type="h5" lightColor="#666" darkColor="#ccc">
+            No bus schedules are available today
+          </ThemedText>
+          <Pressable
+            style={{
+              marginTop: 10,
+              flexDirection: "row",
+              gap: 5,
+            }}
+            onPress={fetchBusDetails}
+          >
+            <FontAwesomeIcon
+              icon={faArrowRotateBack}
+              size={18}
+              color={iconColor}
+              style={{ alignSelf: "center" }}
+            />
+            <ThemedText type="s5" lightColor={iconColor} darkColor={iconColor}>
+              Refresh
+            </ThemedText>
+          </Pressable>
+        </View>
+      )}
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  mainBody: {
+    flex: 1,
+  },
   scene: {
     flex: 1,
     justifyContent: "center",
@@ -356,11 +408,15 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     alignItems: "center",
-    backgroundColor: "blue",
+    backgroundColor: "#0F6F87",
+    borderRadius: 20,
+    paddingHorizontal: 20,
   },
   inactiveTab: {
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "transparent",
+    borderRadius: 20,
+    paddingHorizontal: 20,
   },
   container: {
     flex: 1,
@@ -397,10 +453,6 @@ const styles = StyleSheet.create({
     height: 50,
     width: 200,
     marginBottom: 20,
-  },
-  mainBody: {
-    padding: 10,
-    flex: 1,
   },
   flatList: {
     margin: 10,

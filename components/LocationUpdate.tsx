@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Button, Text, Platform } from 'react-native';
 import * as Location from 'expo-location';
-import * as TaskManager from 'expo-task-manager';
 
 const LOCATION_TASK_NAME = 'background-location-task';
 

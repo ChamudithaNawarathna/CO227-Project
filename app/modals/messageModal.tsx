@@ -11,8 +11,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
+import { useAppContext } from "../../context/AppContext";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
 import axios from "axios";
 import Modal from "react-native-modal";
 
@@ -71,7 +71,7 @@ export default function MessageModal({ isVisible, onClose }: Props) {
       }}
     >
       <Pressable style={styles.cancelIcon} onPress={onClose}>
-        <FontAwesomeIcon icon={faXmark} size={32} color={"#ccc"} />
+        <FontAwesomeIcon icon={faXmark} size={32} color={"#ffffff"} />
       </Pressable>
       <View
         style={{
@@ -82,7 +82,7 @@ export default function MessageModal({ isVisible, onClose }: Props) {
           elevation: 5
         }}
       >
-        {messages ? (
+        {messages.length != 0 ? (
           messages.map((message, index) => (
             <View
               key={index}

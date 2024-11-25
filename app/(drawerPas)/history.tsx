@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import axios from "axios";
 
-import { useAppContext } from "@/context/AppContext";
-import { ThemedText } from "@/components/CommonModules/ThemedText";
-import ErrorScreen from "@/components/CommonScreens/ErrorScreen";
-import LoadingScreen from "@/components/CommonScreens/LoadingScreen";
+import { useAppContext } from "../../context/AppContext";
+import { ThemedText } from "../../components/CommonModules/ThemedText";
+import ErrorScreen from "../../components/CommonScreens/ErrorScreen";
+import LoadingScreen from "../../components/CommonScreens/LoadingScreen";
 import {
   faTrash,
   faMapLocationDot,
@@ -25,7 +25,12 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import RatingModal from "../modals/ratingModal";
 import ReportModal from "../modals/reportModal";
+import { ThemedView } from "../../components/CommonModules/ThemedView";
+import { HistoryTicket } from "../../components/UIComponents/HistoryTicket";
 
+/**
+ * Represents the structure of ticket data
+ */
 type Ticket = {
   id: string;
   date: string;
@@ -35,22 +40,25 @@ type Ticket = {
   amount: string;
 };
 
-const TicketDetailsComponent: React.FC = () => {
-  const { baseURL, id } = useAppContext();
-  const theme = useColorScheme() ?? "light";
-  const iconSize = 20;
-  const iconTitleSize = 10;
-  const iconColor = theme === "dark" ? "#ccc" : "#777";
-  const disabledIconColor = theme === "dark" ? "#666" : "#ccc";
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [displayRatingModal, setDisplayRatingModal] = useState(false);
-  const [displayReportModdal, setDisplayReportModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+/**
+ * History component that displays a user's ticket history.
+ * It fetches ticket data from the backend and displays it in a scrollable list.
+ * Users can also refresh the ticket data by pressing a refresh button.
+ */
+export default function History() {
+  const { baseURL, id } = useAppContext(); // Extracting global context values (baseURL and user ID)
+  const theme = useColorScheme() ?? "light"; // Detects the current theme (light or dark mode)
+  const [tickets, setTickets] = useState<Ticket[]>([]); // State to store the fetched tickets
+  const [loading, setLoading] = useState(true); // State to track loading status
+  const [error, setError] = useState<string>(""); // State to store error messages
 
   //================================================ Backend Calls ===============================================//
 
-  // Fetch ticket history
+  /**
+   * Fetches the ticket history for the user from the backend.
+   * This function makes a POST request to the backend to retrieve ticket data.
+   * On success, it updates the tickets state with the fetched data. On failure, it sets an error message.
+   */
   const fetchTicketHistory = async () => {
     setLoading(true);
     setError("");
@@ -71,7 +79,10 @@ const TicketDetailsComponent: React.FC = () => {
 
   //================================================ Use Effects ===============================================//
 
-  // Fetch ticket history on component mount
+  /**
+   * Effect that runs when the component mounts.
+   * It triggers the fetchTicketHistory function to retrieve the user's ticket data.
+   */
   useEffect(() => {
     fetchTicketHistory();
   }, []);
@@ -87,208 +98,45 @@ const TicketDetailsComponent: React.FC = () => {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Pressable
+    <ThemedView>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         style={{
-          backgroundColor: theme === "dark" ? "#555" : "#fff",
-          alignSelf: 'flex-end',
-          alignItems: "center",
-          paddingVertical: 10,
-          paddingHorizontal: 10,
-          marginBottom: 10,
-          borderRadius: 50,
-          elevation: 5
+          backgroundColor: "transparent",
         }}
-        onPress={fetchTicketHistory}
       >
-       <FontAwesomeIcon
-                icon={faArrowsRotate}
-                size={20}
-                color={theme === "dark" ? "#ccc" : "#444"}
-              />
-      </Pressable>
-      {tickets.length > 0 ? (
-        tickets.map((ticket) => (
-          <View
-            key={ticket.id}
-            style={{
-              marginBottom: 15,
-              borderRadius: 10,
-              backgroundColor: theme === "dark" ? "#555" : "#fff",
-              elevation: 5,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: theme === "dark" ? "#f91" : "#f91",
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
-                paddingVertical: 5,
-                paddingHorizontal: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <View
-                style={{
-                  paddingHorizontal: 10,
-                  paddingVertical: 10,
-                  borderRadius: 20,
-                  backgroundColor: "#0003",
-                }}
-              >
-                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                  {ticket.status}
-                </ThemedText>
-              </View>
-
-              <View>
-                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                  Reference No: {ticket.id}
-                </ThemedText>
-                <ThemedText type="h6" lightColor="#fff" darkColor="#fff">
-                  Booked on: {ticket.date}
-                </ThemedText>
-              </View>
-            </View>
-
-            <View
-              style={{
-                paddingHorizontal: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginVertical: 10,
-              }}
-            >
-              <View>
-                <ThemedText type="h6">Origin</ThemedText>
-
-                <ThemedText type="h4">
-                  {ticket.from?.split(",")[0]?.trim()}
-                </ThemedText>
-              </View>
-              <View>
-                <ThemedText type="h6">Destination</ThemedText>
-
-                <ThemedText type="h4">
-                  {ticket.to?.split(",")[0]?.trim()}
-                </ThemedText>
-              </View>
-            </View>
-            <View
-              style={{
-                paddingHorizontal: 10,
-                marginBottom: 10,
-              }}
-            >
-              <ThemedText type="h4">Price: LKR {ticket.amount}</ThemedText>
-            </View>
-
-            <View
-              style={{
-                borderBottomLeftRadius: 10,
-                borderBottomRightRadius: 10,
-                flexDirection: "row",
-                justifyContent: "space-evenly",
-                backgroundColor: theme === "dark" ? "#444" : "#eee",
-              }}
-            >
-              <Pressable
-                style={{
-                  padding: 5,
-                  alignItems: "center",
-                }}
-                onPress={() => setDisplayRatingModal(true)}
-              >
-                <FontAwesomeIcon
-                  icon={faThumbsUp}
-                  size={iconSize}
-                  color={iconColor}
-                />
-                <Text
-                  style={{
-                    fontSize: iconTitleSize,
-                    color: iconColor,
-                  }}
-                >
-                  Feedback
-                </Text>
-              </Pressable>
-
-              <Pressable
-                style={{
-                  padding: 5,
-                  alignItems: "center",
-                }}
-                onPress={() => setDisplayReportModal(true)}
-              >
-                <FontAwesomeIcon
-                  icon={faExclamationCircle}
-                  size={iconSize}
-                  color={iconColor}
-                />
-                <Text style={{ fontSize: iconTitleSize, color: iconColor }}>
-                  Report
-                </Text>
-              </Pressable>
-            </View>
-            <RatingModal
-              isVisible={displayRatingModal}
-              onClose={() => setDisplayRatingModal(false)}
-              refNo={ticket.id}
-            />
-            <ReportModal
-              isVisible={displayReportModdal}
-              onClose={() => setDisplayReportModal(false)}
-              refNo={ticket.id}
-            />
+        <Pressable
+          style={{
+            backgroundColor: theme === "dark" ? "#555" : "#fff",
+            alignSelf: "flex-end",
+            alignItems: "center",
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+            marginHorizontal: 20,
+            marginBottom: 10,
+            borderRadius: 50,
+            elevation: 5,
+          }}
+          onPress={fetchTicketHistory}
+        >
+          <FontAwesomeIcon
+            icon={faArrowsRotate}
+            size={20}
+            color={theme === "dark" ? "#ccc" : "#444"}
+          />
+        </Pressable>
+        {tickets.length > 0 ? (
+          tickets.map((ticket) => (
+            <HistoryTicket key={ticket.id} ticket={ticket} />
+          ))
+        ) : (
+          <View style={{ flex: 1, alignItems: "center", marginTop: 250 }}>
+            <ThemedText type="h5" lightColor="#777" darkColor="#ddd">
+              No tickets found
+            </ThemedText>
           </View>
-        ))
-      ) : (
-        <View style={{ flex: 1, alignItems: "center", marginTop: 250 }}>
-          <ThemedText type="h5" lightColor="#777" darkColor="#ddd">
-            No tickets found
-          </ThemedText>
-        </View>
-      )}
-    </ScrollView>
+        )}
+      </ScrollView>
+    </ThemedView>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 18,
-  },
-  ticketBody: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-});
-
-export default TicketDetailsComponent;
+}
